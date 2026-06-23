@@ -329,6 +329,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button onclick="showModule('financeiro')">Financeiro</button>
   <button onclick="showModule('ideias')">Ideias</button>
   <button onclick="showModule('metas')">Metas</button>
+  <button onclick="showModule('ferramentas')">Ferramentas</button>
   <button onclick="showModule('playbook')">Playbook</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
 </nav>
@@ -515,6 +516,80 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <h3 style="color:#4f9;margin-bottom:12px;">📅 Metas do Mês</h3>
     <div id="metas-mes-container"></div>
     <button class="btn-sm btn-primary" onclick="addMetaMes()" style="margin-top:12px;">+ Adicionar meta</button>
+  </div>
+</div>
+
+<!-- MODULE: FERRAMENTAS -->
+<div id="mod-ferramentas" class="module">
+  <h2>🛠 Ferramentas</h2>
+
+  <!-- RELATÓRIO MENSAL -->
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin:0 0 12px;">📊 Relatório Mensal</h3>
+    <p style="color:#888;font-size:12px;margin-bottom:12px;">Gera um resumo do mês pra revisar ou mandar pro cliente.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <select id="relatorio-client" style="width:auto;"><option value="all">Todos os clientes</option></select>
+      <button class="btn-primary btn-sm" onclick="gerarRelatorio()">Gerar relatório</button>
+    </div>
+    <div id="relatorio-resultado" style="display:none;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;padding:16px;"></div>
+  </div>
+
+  <!-- CONTROLE DE HORAS -->
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin:0 0 12px;">⏱ Controle de Horas</h3>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
+      <select id="timer-client" style="width:auto;"><option value="">Selecione o cliente</option></select>
+      <select id="timer-atividade" style="width:auto;">
+        <option value="gravacao">Gravação</option>
+        <option value="edicao">Edição</option>
+        <option value="roteiro">Roteiro</option>
+        <option value="reuniao">Reunião</option>
+        <option value="planejamento">Planejamento</option>
+      </select>
+      <button class="btn-primary btn-sm" id="timer-btn" onclick="toggleTimer()">▶ Iniciar</button>
+    </div>
+    <div id="timer-display" style="font-size:32px;font-weight:700;color:#4f9;text-align:center;padding:12px 0;font-family:monospace;">00:00:00</div>
+    <div id="timer-historico"></div>
+  </div>
+
+  <!-- TEMPLATES DE ROTEIRO -->
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin:0 0 12px;">📝 Templates de Roteiro</h3>
+    <p style="color:#888;font-size:12px;margin-bottom:12px;">Modelos prontos por tipo de conteúdo. Clique pra copiar.</p>
+    <div id="templates-container"></div>
+  </div>
+
+  <!-- CALCULADORA DE PROPOSTA -->
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin:0 0 12px;">💰 Calculadora de Proposta</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Vídeos por semana</label>
+        <input type="number" id="calc-videos" value="3" oninput="calcularProposta()">
+      </div>
+      <div class="form-group">
+        <label>Horas por vídeo (média)</label>
+        <input type="number" id="calc-horas-video" value="2" step="0.5" oninput="calcularProposta()">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Seu valor/hora desejado (R$)</label>
+        <input type="number" id="calc-valor-hora" value="50" oninput="calcularProposta()">
+      </div>
+      <div class="form-group">
+        <label>Custos extras do cliente (R$)</label>
+        <input type="number" id="calc-custos" value="100" oninput="calcularProposta()">
+      </div>
+    </div>
+    <div id="calc-resultado" style="margin-top:12px;padding:16px;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;"></div>
+  </div>
+
+  <!-- CHECKLIST DE ENTREGA -->
+  <div class="card">
+    <h3 style="color:#4f9;margin:0 0 12px;">✅ Checklist de Entrega</h3>
+    <p style="color:#888;font-size:12px;margin-bottom:12px;">Antes de postar, confira tudo.</p>
+    <div id="checklist-container"></div>
   </div>
 </div>
 
@@ -740,7 +815,7 @@ function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringi
 let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
 function populateClientSelects() {
-  ['filter-client', 'v-client', 'hist-client', 'ideia-filter-client'].forEach(id => {
+  ['filter-client', 'v-client', 'hist-client', 'ideia-filter-client', 'relatorio-client', 'timer-client'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const val = sel.value;
@@ -1925,6 +2000,185 @@ function renderProcessos() {
   `).join('');
 }
 
+// ============ FERRAMENTAS ============
+
+// -- Relatório Mensal --
+function gerarRelatorio() {
+  const fc = document.getElementById('relatorio-client').value;
+  const videos = load('videos') || [];
+  const now = new Date().toISOString().slice(0, 7);
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [y, m] = now.split('-');
+  const mesNome = `${meses[parseInt(m)-1]} ${y}`;
+
+  const mesVideos = videos.filter(v => v.date && v.date.startsWith(now) && (fc === 'all' || v.client === fc));
+  const postados = mesVideos.filter(v => v.status === 'postado').length;
+  const total = mesVideos.length;
+
+  const porPilar = {};
+  mesVideos.forEach(v => { porPilar[v.pillar] = (porPilar[v.pillar] || 0) + 1; });
+
+  const allFin = load('finance') || {};
+  const finData = allFin[now];
+  const receita = finData ? finData.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0) : 0;
+
+  const clienteNome = fc === 'all' ? 'Todos os clientes' : (CLIENTS[fc]?.name || fc);
+
+  const el = document.getElementById('relatorio-resultado');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <h3 style="color:#4f9;margin:0 0 12px;">📊 ${mesNome} — ${clienteNome}</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="text-align:center;padding:12px;background:#252530;border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4f9;">${postados}</div><div style="font-size:11px;color:#888;">Postados</div></div>
+      <div style="text-align:center;padding:12px;background:#252530;border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#fc6;">${total - postados}</div><div style="font-size:11px;color:#888;">Em produção</div></div>
+    </div>
+    <div style="margin-bottom:12px;">
+      <strong style="color:#ccc;font-size:12px;">Por pilar:</strong>
+      ${Object.entries(porPilar).map(([p, c]) => `<span style="display:inline-block;margin:4px 4px 0 0;padding:3px 10px;background:#252530;border-radius:8px;font-size:11px;color:#aaa;">${p}: ${c}</span>`).join('')}
+    </div>
+    ${fc === 'all' ? `<div style="font-size:13px;color:#888;">Receita do mês: <strong style="color:#4f9;">R$ ${receita.toFixed(0)}</strong></div>` : ''}
+    <button class="btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('relatorio-resultado').innerText).then(() => alert('Copiado!'))" style="margin-top:12px;">📋 Copiar texto</button>
+  `;
+}
+
+// -- Timer --
+let timerInterval = null;
+let timerSeconds = 0;
+let timerRunning = false;
+
+function toggleTimer() {
+  if (timerRunning) {
+    clearInterval(timerInterval);
+    timerRunning = false;
+    document.getElementById('timer-btn').textContent = '▶ Continuar';
+    const client = document.getElementById('timer-client').value;
+    const atividade = document.getElementById('timer-atividade').value;
+    if (client && timerSeconds > 60) {
+      const hist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
+      hist.unshift({ client, atividade, segundos: timerSeconds, data: new Date().toISOString().slice(0, 10) });
+      localStorage.setItem('smm_timer_hist', JSON.stringify(hist.slice(0, 50)));
+      renderTimerHist();
+    }
+  } else {
+    if (!document.getElementById('timer-client').value) { alert('Selecione o cliente'); return; }
+    timerRunning = true;
+    document.getElementById('timer-btn').textContent = '⏸ Pausar e salvar';
+    timerInterval = setInterval(() => {
+      timerSeconds++;
+      const h = Math.floor(timerSeconds / 3600);
+      const m = Math.floor((timerSeconds % 3600) / 60);
+      const s = timerSeconds % 60;
+      document.getElementById('timer-display').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }, 1000);
+  }
+}
+
+function renderTimerHist() {
+  const hist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
+  const el = document.getElementById('timer-historico');
+  if (hist.length === 0) { el.innerHTML = '<p style="color:#555;font-size:12px;">Nenhum registro ainda.</p>'; return; }
+  const porCliente = {};
+  hist.forEach(h => {
+    if (!porCliente[h.client]) porCliente[h.client] = 0;
+    porCliente[h.client] += h.segundos;
+  });
+  el.innerHTML = `
+    <div style="margin-top:12px;">
+      <strong style="color:#888;font-size:11px;">Horas por cliente:</strong>
+      ${Object.entries(porCliente).map(([k, s]) => {
+        const nome = CLIENTS[k]?.name || k;
+        const horas = (s / 3600).toFixed(1);
+        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1f1f2f;font-size:12px;"><span style="color:#aaa;">${nome}</span><span style="color:#4f9;">${horas}h</span></div>`;
+      }).join('')}
+    </div>
+    <details style="margin-top:8px;"><summary style="font-size:11px;color:#555;cursor:pointer;">Ver últimos registros</summary>
+      ${hist.slice(0, 10).map(h => {
+        const nome = CLIENTS[h.client]?.name || h.client;
+        const min = Math.round(h.segundos / 60);
+        return `<div style="font-size:11px;color:#666;padding:2px 0;">${h.data} — ${nome} — ${h.atividade} — ${min}min</div>`;
+      }).join('')}
+    </details>`;
+}
+
+// -- Templates de Roteiro --
+function renderTemplates() {
+  const templates = [
+    { nome: '🔥 Gancho + Desenvolvimento + CTA', tipo: 'Padrão', conteudo: 'GANCHO (0-3s):\n[Frase forte que prende a atenção]\n\nDESENVOLVIMENTO (3-25s):\n[Desenvolve o tema, mostra o processo/resultado]\n\nCTA (25-30s):\n[Chamada pra ação: seguir, comentar, salvar]' },
+    { nome: '🎭 POV / Trend', tipo: 'Trend', conteudo: 'SETUP:\nPOV: [situação engraçada/relatable]\n\nAÇÃO:\n[O que acontece — timing com a música/áudio]\n\nREVELAÇÃO:\n[Plot twist ou momento de humor]' },
+    { nome: '📚 Educativo / Análise', tipo: 'Autoridade', conteudo: 'GANCHO:\n"Você sabia que [fato surpreendente]?"\n\nPONTO 1:\n[Explica o problema]\n\nPONTO 2:\n[Mostra a solução/análise]\n\nPONTO 3:\n[Resultado/benefício]\n\nCTA:\n"Salva pra não esquecer"' },
+    { nome: '🛒 Produto / Conversão', tipo: 'Venda', conteudo: 'GANCHO:\n[Problema que o produto resolve]\n\nPRODUTO:\n[Mostra o produto em uso — close, detalhes]\n\nBENEFÍCIO:\n[O que muda na vida de quem compra]\n\nPREÇO + CTA:\n[Valor + onde comprar/link na bio]' },
+    { nome: '🏗 Antes e Depois', tipo: 'Bastidores', conteudo: 'ANTES:\n[Mostra o estado inicial — problema visível]\n\nPROCESSO:\n[Timelapse ou cortes do trabalho sendo feito]\n\nDEPOIS:\n[Resultado final — impactante]\n\nCTA:\n"Quer ver mais transformações? Segue!"' },
+  ];
+  const el = document.getElementById('templates-container');
+  el.innerHTML = templates.map(t => `
+    <div style="margin-bottom:8px;padding:12px;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;cursor:pointer;" onclick="this.querySelector('.tpl-body').style.display = this.querySelector('.tpl-body').style.display === 'none' ? 'block' : 'none'">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <strong style="color:#ccc;font-size:13px;">${t.nome}</strong>
+        <span style="font-size:10px;color:#555;background:#252530;padding:2px 8px;border-radius:6px;">${t.tipo}</span>
+      </div>
+      <div class="tpl-body" style="display:none;margin-top:10px;">
+        <pre style="white-space:pre-wrap;font-size:12px;color:#aaa;line-height:1.6;font-family:inherit;">${t.conteudo}</pre>
+        <button class="btn-sm btn-primary" onclick="event.stopPropagation(); navigator.clipboard.writeText(\`${t.conteudo.replace(/`/g, '\\`')}\`).then(() => alert('Template copiado!'))" style="margin-top:8px;">📋 Copiar</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// -- Calculadora de Proposta --
+function calcularProposta() {
+  const videos = parseInt(document.getElementById('calc-videos').value) || 3;
+  const horasVideo = parseFloat(document.getElementById('calc-horas-video').value) || 2;
+  const valorHora = parseFloat(document.getElementById('calc-valor-hora').value) || 50;
+  const custos = parseFloat(document.getElementById('calc-custos').value) || 0;
+
+  const horasMes = videos * 4 * horasVideo;
+  const valorBase = horasMes * valorHora;
+  const valorTotal = valorBase + custos;
+  const valorArredondado = Math.ceil(valorTotal / 50) * 50;
+
+  document.getElementById('calc-resultado').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+      <div style="text-align:center;padding:10px;background:#252530;border-radius:8px;"><div style="font-size:11px;color:#888;">Horas/mês</div><div style="font-size:18px;font-weight:700;color:#6cf;">${horasMes}h</div></div>
+      <div style="text-align:center;padding:10px;background:#252530;border-radius:8px;"><div style="font-size:11px;color:#888;">Vídeos/mês</div><div style="font-size:18px;font-weight:700;color:#fc6;">${videos * 4}</div></div>
+    </div>
+    <div style="text-align:center;padding:16px;background:#1a3a2a;border:1px solid #4f9;border-radius:10px;">
+      <div style="font-size:12px;color:#888;">Valor sugerido</div>
+      <div style="font-size:28px;font-weight:700;color:#4f9;">R$ ${valorArredondado.toLocaleString('pt-BR')}/mês</div>
+      <div style="font-size:11px;color:#666;margin-top:4px;">Base: R$ ${valorBase.toFixed(0)} + custos R$ ${custos.toFixed(0)}</div>
+    </div>
+  `;
+}
+
+// -- Checklist de Entrega --
+function renderChecklist() {
+  const items = [
+    { id: 'chk-roteiro', label: 'Roteiro aprovado pelo cliente' },
+    { id: 'chk-gravacao', label: 'Vídeo gravado (vertical 9:16)' },
+    { id: 'chk-edicao', label: 'Edição finalizada (cortes, ritmo)' },
+    { id: 'chk-legenda', label: 'Legendas adicionadas' },
+    { id: 'chk-musica', label: 'Música/áudio selecionado' },
+    { id: 'chk-capa', label: 'Capa/thumbnail definida' },
+    { id: 'chk-copy', label: 'Copy da legenda pronta (hashtags, CTA)' },
+    { id: 'chk-preview', label: 'Preview enviado pro cliente' },
+    { id: 'chk-aprovado', label: 'Cliente aprovou' },
+    { id: 'chk-postado', label: 'Postado na plataforma' },
+  ];
+  const saved = JSON.parse(localStorage.getItem('smm_checklist') || '{}');
+  document.getElementById('checklist-container').innerHTML = items.map(item => `
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1f1f2f;">
+      <input type="checkbox" ${saved[item.id] ? 'checked' : ''} style="width:auto;flex:0;" onchange="const s=JSON.parse(localStorage.getItem('smm_checklist')||'{}'); s['${item.id}']=this.checked; localStorage.setItem('smm_checklist',JSON.stringify(s));">
+      <span style="font-size:13px;color:${saved[item.id] ? '#555' : '#ccc'};text-decoration:${saved[item.id] ? 'line-through' : 'none'};">${item.label}</span>
+    </div>
+  `).join('') + `<button class="btn-sm" onclick="localStorage.setItem('smm_checklist','{}'); renderChecklist();" style="margin-top:12px;">🔄 Resetar checklist</button>`;
+}
+
+function renderFerramentas() {
+  renderTemplates();
+  renderTimerHist();
+  renderChecklist();
+  calcularProposta();
+}
+
 // ============ BANCO DE IDEIAS ============
 function loadIdeias() { try { return JSON.parse(localStorage.getItem('smm_ideias')) || []; } catch { return []; } }
 function saveIdeias(d) { localStorage.setItem('smm_ideias', JSON.stringify(d)); }
@@ -2187,6 +2441,7 @@ function renderAll() {
   renderPlaybook();
   renderIdeias();
   renderMetas();
+  renderFerramentas();
   seedPipelineClients();
   renderPipeline();
 }
