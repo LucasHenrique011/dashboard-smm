@@ -250,9 +250,9 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
   .ws-group + .ws-group { border-left: none; border-top: 2px solid #333; }
   .ws-item .ws-val { font-size: 15px; }
 
-  /* Calendário — 3 colunas pra caber na tela, scrollável */
-  .calendar-week { grid-template-columns: repeat(3, 1fr); gap: 4px; }
-  .cal-day { padding: 6px; min-height: 60px; }
+  /* Calendário — scroll horizontal */
+  .calendar-week { display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 4px; }
+  .cal-day { min-width: 110px; flex-shrink: 0; padding: 6px; min-height: 80px; }
   .cal-day-label { font-size: 10px; }
   .cal-item { font-size: 10px; padding: 3px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
