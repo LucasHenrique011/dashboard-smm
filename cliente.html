@@ -98,6 +98,15 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
 .roteiro-option h4 { color: #fff; font-size: 13px; margin-bottom: 6px; }
 .roteiro-option pre { font-size: 11px; color: #aaa; white-space: pre-wrap; font-family: inherit; line-height: 1.5; }
 
+/* Teleprompter */
+.teleprompter-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: #000; flex-direction: column; }
+.teleprompter-overlay.open { display: flex; }
+.tp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #111; }
+.tp-header span { color: #4f9; font-weight: 700; font-size: 14px; }
+.tp-controls { display: flex; gap: 12px; justify-content: center; align-items: center; padding: 8px 16px; background: #111; border-bottom: 1px solid #333; }
+.tp-scroll { flex: 1; overflow-y: auto; padding: 40px 20px; }
+.tp-text { color: #fff; font-size: 28px; line-height: 1.8; white-space: pre-wrap; text-align: center; padding-bottom: 80vh; }
+
 @media (max-width: 768px) {
   .container { padding: 12px; }
   .info-grid { grid-template-columns: 1fr; }
@@ -119,6 +128,21 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
 <div id="app-error" class="loading" style="display:none;">
   <h2 class="error">Acesso negado</h2>
   <p>Link inválido ou expirado. Solicite um novo link ao seu social media.</p>
+</div>
+
+<div class="teleprompter-overlay" id="teleprompter">
+  <div class="tp-header">
+    <span id="tp-title"></span>
+    <button class="btn" style="padding:6px 14px;font-size:12px;background:#222;color:#fff;" onclick="closeTeleprompter()">✕ Fechar</button>
+  </div>
+  <div class="tp-controls">
+    <button class="btn" style="padding:6px 12px;font-size:12px;background:#222;color:#fff;" onclick="tpSpeed(-1)">🐢 Lento</button>
+    <button class="btn" id="tp-play-btn" style="padding:8px 18px;font-size:13px;background:#1a5a3a;color:#fff;" onclick="tpToggle()">▶ Iniciar</button>
+    <button class="btn" style="padding:6px 12px;font-size:12px;background:#222;color:#fff;" onclick="tpSpeed(1)">🐇 Rápido</button>
+  </div>
+  <div class="tp-scroll" id="tp-scroll">
+    <div class="tp-text" id="tp-text"></div>
+  </div>
 </div>
 
 <div id="app" style="display:none;">
@@ -242,7 +266,7 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
 </div>
 
 <script>
-const WHATSAPP_NUMBER = '5511961184582';
+const WHATSAPP_NUMBER = '5511973836281';
 
 let clientData = null;
 let clientKey = null;
@@ -331,6 +355,7 @@ function renderVideos() {
     (fm === 'all' || (v.date && v.date.startsWith(fm)))
   );
   filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  lastFilteredVideos = filtered;
 
   const el = document.getElementById('videos-list');
   if (filtered.length === 0) {
@@ -351,7 +376,10 @@ function renderVideos() {
         <span class="pill" style="font-size:10px;">${v.pillar}</span>
       </div>
       ${v.roteiro ? `
-        <button class="video-roteiro-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.nextElementSibling.style.display === 'none' ? '▶ Ver roteiro' : '▼ Ocultar roteiro'">▶ Ver roteiro</button>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="video-roteiro-toggle" onclick="this.parentElement.nextElementSibling.style.display = this.parentElement.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.parentElement.nextElementSibling.style.display === 'none' ? '▶ Ver roteiro' : '▼ Ocultar roteiro'">▶ Ver roteiro</button>
+          <button class="video-roteiro-toggle" style="color:#fc6;" onclick="openTeleprompterByIndex(${filtered.indexOf(v)})">▶ Teleprompter</button>
+        </div>
         <div class="video-roteiro" style="display:none;">${v.roteiro}</div>
       ` : ''}
     </div>`;
@@ -463,6 +491,49 @@ function loadSugestoes() {
       </div>
     `).join('')}
   `;
+}
+
+// Teleprompter
+let tpInterval = null;
+let tpSpeedVal = 1;
+let lastFilteredVideos = [];
+
+function openTeleprompterByIndex(idx) {
+  const v = lastFilteredVideos[idx];
+  if (!v || !v.roteiro) return;
+  openTeleprompter(v.title, v.roteiro);
+}
+
+function openTeleprompter(title, roteiro) {
+  document.getElementById('tp-title').textContent = title;
+  document.getElementById('tp-text').textContent = roteiro;
+  document.getElementById('tp-scroll').scrollTop = 0;
+  document.getElementById('teleprompter').classList.add('open');
+  document.getElementById('tp-play-btn').textContent = '▶ Iniciar';
+  tpSpeedVal = 1;
+  if (tpInterval) { clearInterval(tpInterval); tpInterval = null; }
+}
+
+function closeTeleprompter() {
+  document.getElementById('teleprompter').classList.remove('open');
+  if (tpInterval) { clearInterval(tpInterval); tpInterval = null; }
+}
+
+function tpToggle() {
+  if (tpInterval) {
+    clearInterval(tpInterval);
+    tpInterval = null;
+    document.getElementById('tp-play-btn').textContent = '▶ Continuar';
+  } else {
+    tpInterval = setInterval(() => {
+      document.getElementById('tp-scroll').scrollTop += tpSpeedVal;
+    }, 30);
+    document.getElementById('tp-play-btn').textContent = '⏸ Pausar';
+  }
+}
+
+function tpSpeed(dir) {
+  tpSpeedVal = Math.max(0.5, Math.min(5, tpSpeedVal + dir * 0.5));
 }
 
 // Tabs
