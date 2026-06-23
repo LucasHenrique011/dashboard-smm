@@ -858,7 +858,7 @@ function editVideo(id) {
   document.getElementById('v-title').value = v.title;
   document.getElementById('v-date').value = v.date || '';
   document.getElementById('v-status').value = v.status;
-  document.getElementById('v-roteiro').value = v.roteiro || v.gancho ? [v.gancho, v.dev, v.cta].filter(Boolean).join('\n\n') : '';
+  document.getElementById('v-roteiro').value = v.roteiro || (v.gancho ? [v.gancho, v.dev, v.cta].filter(Boolean).join('\n\n') : '');
   clearErrors();
   updatePillarOptions();
   document.getElementById('v-pillar').value = v.pillar;
