@@ -299,9 +299,15 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   details p { font-size: 13px; line-height: 1.5; }
   .card-header { flex-wrap: wrap; gap: 6px; }
 
-  /* Pipeline */
-  .bowtie-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .kanban { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Pipeline — esconde bowtie no celular, kanban vertical */
+  .bowtie-container { display: none !important; }
+  .pipeline-metrics { display: none !important; }
+  #bowtie-svg { display: none !important; }
+  .stage-details { display: none !important; }
+  #stage-info-panel { display: none !important; }
+  .kanban { display: flex; flex-direction: column; gap: 12px; overflow-x: visible; }
+  .kanban-col { min-width: 100%; }
+  .kanban-col-body { min-height: 40px; }
 
   /* Filtros */
   .filter-bar { flex-wrap: wrap; }
@@ -2549,6 +2555,10 @@ function seedNotionVideos() {
     { id:'notion-p23', client:'pallefort', title:'Quando recebo elogio do cliente', pillar:'AUTORIDADE', status:'postado', date:'2026-06-18', link:'' },
     { id:'notion-p24', client:'pallefort', title:'GRAVE: Anúncio urgente (Copa do Brasil)', pillar:'TREND', status:'postado', date:'2026-06-19', link:'' },
     { id:'notion-p25', client:'pallefort', title:'Façam os estudos valerem a pena! Com 20 anos já sou operador de máquinas', pillar:'TREND', status:'postado', date:'2026-06-22', link:'' },
+    // PALLEFORT — planejamento semana 23/06
+    { id:'plan-p01', client:'pallefort', title:'Sua paleteira não desce? Testa isso antes de chamar manutenção', pillar:'ANÁLISE', status:'pendente', date:'2026-06-24', roteiro:'[0:00–0:03] HOOK — câmera no pistão da paleteira travada\n🎙️ "Sua paleteira não está descendo? Antes de ligar pra manutenção, faz esse teste aqui."\n📹 Câmera bem próxima do pistão/êmbolo, paleteira com garfos travados\n\n[0:03–0:15] PROBLEMA\n🎙️ "O problema mais comum é esse: o pistão hidráulico fica travado porque o óleo está sujo ou com nível baixo. Isso faz a válvula de retorno não funcionar direito."\n📹 Mostrar reservatório de óleo, abrir tampa\n📝 "Óleo baixo ou sujo = pistão travado"\n\n[0:15–0:35] DIAGNÓSTICO\n🎙️ "Primeira coisa: abre o reservatório e olha o nível. Se estiver abaixo da marca, esse é o seu problema. Segunda: olha a cor — se estiver escuro ou com espuma, tá contaminado."\n📹 Mão apontando para marca de nível → close no óleo escuro → comparação com óleo limpo\n📝 "1. Nível baixo → completa" / "2. Óleo escuro → troca"\n\n[0:35–0:48] SOLUÇÃO\n🎙️ "Se for nível baixo: completa com óleo hidráulico ISO 46. Se for contaminado: drena tudo e troca. Na maioria dos casos, volta a funcionar na hora."\n📹 Mão colocando óleo novo → fechar tampa → acionar alavanca → garfos descendo\n📝 "Óleo ISO 46 · resolve em 15 minutos"\n\n[0:48–0:55] CTA\n🎙️ "Testou e não resolveu? Aí é hora de chamar a Pallefort. Link na bio."\n📹 Logo Pallefort + contato' },
+    { id:'plan-p02', client:'pallefort', title:'Recebemos assim. Entregamos assim.', pillar:'AUTORIDADE', status:'pendente', date:'2026-06-25', roteiro:'[0:00–0:03] HOOK — câmera na paleteira destruída (corte direto, sem intro)\n📹 Paleteira enferrujada, garfos tortos, pistão vazando — câmera andando em volta\n🎵 Som ambiente do galpão\n📝 "Recebemos assim 👇"\n\n[0:03–0:12] PROCESSO — cortes rápidos (sem narração, só música)\n📹 Cortes de 2-3s cada:\n• Desmontando o pistão\n• Peças enferrujadas saindo\n• Limpeza com produto\n• Peças novas sendo encaixadas\n• Soldagem/ajuste dos garfos\n📝 "Durante..."\n🎵 Música trending (batida suave)\n\n[0:12–0:22] REVEAL — paleteira restaurada\n📹 Câmera revela paleteira pintada, limpa, funcionando — operador testando\n📝 "Entregamos assim ✅"\n\n[0:22–0:28] CTA\n📹 Logo Pallefort\n🎙️ "Seu equipamento parado custa caro. A Pallefort resolve."\n📝 "Orçamento → link na bio"' },
+    { id:'plan-p03', client:'pallefort', title:'Cada quantos meses trocar o óleo da paleteira? A maioria erra.', pillar:'AUTORIDADE', status:'pendente', date:'2026-06-26', roteiro:'[0:00–0:03] HOOK\n🎙️ "Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?"\n📹 Câmera no reservatório de óleo, mão apontando\n📝 "Você sabe a resposta?"\n\n[0:03–0:10] ERRO COMUM\n🎙️ "A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais."\n📹 Close no óleo escuro e com espuma\n📝 "Nunca trocar = pistão travado + vedações destruídas"\n\n[0:10–0:30] RESPOSTA\n🎙️ "A frequência correta depende do uso:\n• Uso leve/moderado — troca a cada 12 meses\n• Uso intenso, turno duplo — a cada 6 meses\n• Óleo escuro ou com espuma — troca imediata"\n📹 Tabela escrita à mão ou impressa\n📝 Mesmos dados em texto sobreposto\n\n[0:30–0:38] DICA BÔNUS\n🎙️ "Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações."\n📹 Close na embalagem ISO 46\n📝 "⚠️ Só ISO 46 — nunca óleo de motor"\n\n[0:38–0:44] CTA\n🎙️ "Salva esse vídeo pra mandar pro responsável pela manutenção."\n📹 Ícone de salvar + logo Pallefort\n📝 "Salva e manda pro responsável 👆"' },
   ];
   const existingIds = new Set(videos.map(v => v.id));
   const newVideos = notionVideos.filter(v => !existingIds.has(v.id));
