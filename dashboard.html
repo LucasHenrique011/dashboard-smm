@@ -1798,7 +1798,7 @@ function deleteProspect(id) {
 // Seed current clients into pipeline if empty
 function seedPipelineClients() {
   const existing = getProspects();
-  if (existing.some(p => p.id === 'p50')) return;
+  // força seed dos 50 prospects
   const seed = [
     { id: 'seed1', name: 'Cube Educacional', segment: 'Educação', value: 1400, stage: 'entregando', notes: 'R$1.250 + R$150 VT. Pilares: Projeto, Liderança, Rotina/Trend.', createdAt: '2026-01-01' },
     { id: 'seed2', name: 'Pallefort', segment: 'Indústria / Manutenção', value: 700, stage: 'entregando', notes: 'Roteiro obrigatório: gancho + desenvolvimento + CTA. Pilares: Autoridade, Análise, Trend.', createdAt: '2026-01-01' },
