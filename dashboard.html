@@ -317,6 +317,8 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
 <nav>
   <button class="active" onclick="showModule('clientes')">Clientes</button>
   <button onclick="showModule('financeiro')">Financeiro</button>
+  <button onclick="showModule('ideias')">Ideias</button>
+  <button onclick="showModule('metas')">Metas</button>
   <button onclick="showModule('playbook')">Playbook</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
 </nav>
@@ -414,6 +416,81 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
   <div class="fin-chart">
     <h3 style="margin:0 0 12px;color:#4f9;">Evolução Mensal</h3>
     <svg id="fin-chart-svg" viewBox="0 0 700 200" style="width:100%;height:200px;"></svg>
+  </div>
+</div>
+
+<!-- MODULE: BANCO DE IDEIAS -->
+<div id="mod-ideias" class="module">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h2>💡 Banco de Ideias</h2>
+    <button class="btn-primary btn-sm" onclick="addIdeia()">+ Nova ideia</button>
+  </div>
+  <p style="color:#888;font-size:13px;margin-bottom:16px;">Anote ideias de conteúdo pra nunca travar na produção. Filtre por cliente e arraste pra produção quando quiser.</p>
+  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+    <select id="ideia-filter-client" onchange="renderIdeias()" style="width:auto;">
+      <option value="all">Todos os clientes</option>
+    </select>
+    <select id="ideia-filter-status" onchange="renderIdeias()" style="width:auto;">
+      <option value="all">Todas</option>
+      <option value="nova">💡 Novas</option>
+      <option value="aprovada">✅ Aprovadas</option>
+      <option value="usada">🎬 Usadas</option>
+    </select>
+  </div>
+  <div id="ideias-container"></div>
+</div>
+
+<!-- MODULE: METAS -->
+<div id="mod-metas" class="module">
+  <h2>🎯 Metas & Capacidade</h2>
+
+  <div class="fin-grid" style="margin-bottom:24px;">
+    <div class="fin-box">
+      <div class="lbl">Clientes ativos</div>
+      <div class="val green" id="meta-clientes">0</div>
+    </div>
+    <div class="fin-box">
+      <div class="lbl">Capacidade solo</div>
+      <div class="val blue" id="meta-capacidade">0 / 0</div>
+    </div>
+    <div class="fin-box">
+      <div class="lbl">Receita atual</div>
+      <div class="val green" id="meta-receita">R$ 0</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin-bottom:12px;">⏱ Capacidade Solo</h3>
+    <div class="form-group">
+      <label>Horas disponíveis por semana</label>
+      <input type="number" id="meta-horas-semana" value="40" onchange="saveMetas(); renderMetas();">
+    </div>
+    <div class="form-group">
+      <label>Horas por cliente por semana (média)</label>
+      <input type="number" id="meta-horas-cliente" value="8" onchange="saveMetas(); renderMetas();">
+    </div>
+    <p style="margin-top:8px;font-size:13px;color:#888;" id="meta-capacidade-texto"></p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin-bottom:12px;">💰 Metas Financeiras</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label>Meta de receita mensal</label>
+        <input type="number" id="meta-receita-alvo" value="5000" onchange="saveMetas(); renderMetas();">
+      </div>
+      <div class="form-group">
+        <label>Meta de clientes</label>
+        <input type="number" id="meta-clientes-alvo" value="5" onchange="saveMetas(); renderMetas();">
+      </div>
+    </div>
+    <div id="meta-progresso" style="margin-top:12px;"></div>
+  </div>
+
+  <div class="card">
+    <h3 style="color:#4f9;margin-bottom:12px;">📅 Metas do Mês</h3>
+    <div id="metas-mes-container"></div>
+    <button class="btn-sm btn-primary" onclick="addMetaMes()" style="margin-top:12px;">+ Adicionar meta</button>
   </div>
 </div>
 
@@ -639,7 +716,7 @@ function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringi
 let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
 function populateClientSelects() {
-  ['filter-client', 'v-client', 'hist-client'].forEach(id => {
+  ['filter-client', 'v-client', 'hist-client', 'ideia-filter-client'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const val = sel.value;
@@ -1754,6 +1831,174 @@ document.addEventListener('keydown', function(e) {
   if (e.key === '4') showModule('pipeline');
 });
 
+// ============ BANCO DE IDEIAS ============
+function loadIdeias() { try { return JSON.parse(localStorage.getItem('smm_ideias')) || []; } catch { return []; } }
+function saveIdeias(d) { localStorage.setItem('smm_ideias', JSON.stringify(d)); }
+
+function addIdeia() {
+  const ideias = loadIdeias();
+  ideias.unshift({
+    id: Date.now().toString(36),
+    client: 'all',
+    titulo: '',
+    descricao: '',
+    pilar: '',
+    status: 'nova',
+    createdAt: new Date().toISOString().slice(0, 10)
+  });
+  saveIdeias(ideias);
+  renderIdeias();
+}
+
+function updateIdeia(id, field, value) {
+  const ideias = loadIdeias();
+  const i = ideias.find(x => x.id === id);
+  if (i) { i[field] = value; saveIdeias(ideias); renderIdeias(); }
+}
+
+function deleteIdeia(id) {
+  if (!confirm('Remover essa ideia?')) return;
+  saveIdeias(loadIdeias().filter(x => x.id !== id));
+  renderIdeias();
+}
+
+function renderIdeias() {
+  const ideias = loadIdeias();
+  const fc = document.getElementById('ideia-filter-client').value;
+  const fs = document.getElementById('ideia-filter-status').value;
+  const filtered = ideias.filter(i => (fc === 'all' || i.client === fc) && (fs === 'all' || i.status === fs));
+
+  const container = document.getElementById('ideias-container');
+  if (filtered.length === 0) {
+    container.innerHTML = '<p style="color:#555;text-align:center;padding:24px;">Nenhuma ideia ainda. Clique em "+ Nova ideia" pra começar!</p>';
+    return;
+  }
+
+  const statusEmoji = { nova: '💡', aprovada: '✅', usada: '🎬' };
+  container.innerHTML = filtered.map(i => {
+    const cl = CLIENTS[i.client];
+    return `<div class="card" style="margin-bottom:10px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <input value="${(i.titulo || '').replace(/"/g, '&quot;')}" placeholder="Título da ideia..." style="font-weight:700;font-size:14px;margin-bottom:6px;" onchange="updateIdeia('${i.id}','titulo',this.value)">
+          <textarea placeholder="Descreva a ideia, referência, gancho..." style="min-height:50px;font-size:12px;" onchange="updateIdeia('${i.id}','descricao',this.value)">${i.descricao || ''}</textarea>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:4px;min-width:130px;">
+          <select style="width:auto;font-size:11px;" onchange="updateIdeia('${i.id}','client',this.value)">
+            <option value="all" ${i.client==='all'?'selected':''}>Sem cliente</option>
+            ${Object.entries(CLIENTS).map(([k,c]) => `<option value="${k}" ${i.client===k?'selected':''}>${c.name}</option>`).join('')}
+          </select>
+          <select style="width:auto;font-size:11px;" onchange="updateIdeia('${i.id}','status',this.value)">
+            <option value="nova" ${i.status==='nova'?'selected':''}>💡 Nova</option>
+            <option value="aprovada" ${i.status==='aprovada'?'selected':''}>✅ Aprovada</option>
+            <option value="usada" ${i.status==='usada'?'selected':''}>🎬 Usada</option>
+          </select>
+          <input placeholder="Pilar" value="${i.pilar || ''}" style="font-size:11px;" onchange="updateIdeia('${i.id}','pilar',this.value)">
+          <button class="btn-sm btn-danger" onclick="deleteIdeia('${i.id}')">✕ Remover</button>
+        </div>
+      </div>
+      <div style="font-size:10px;color:#555;margin-top:6px;">${i.createdAt}</div>
+    </div>`;
+  }).join('');
+}
+
+// ============ METAS & CAPACIDADE ============
+function loadMetas() { try { return JSON.parse(localStorage.getItem('smm_metas')) || {}; } catch { return {}; } }
+function saveMetas() {
+  const m = {
+    horasSemana: parseFloat(document.getElementById('meta-horas-semana').value) || 40,
+    horasCliente: parseFloat(document.getElementById('meta-horas-cliente').value) || 8,
+    receitaAlvo: parseFloat(document.getElementById('meta-receita-alvo').value) || 5000,
+    clientesAlvo: parseInt(document.getElementById('meta-clientes-alvo').value) || 5,
+    metasMes: loadMetas().metasMes || []
+  };
+  localStorage.setItem('smm_metas', JSON.stringify(m));
+}
+
+function addMetaMes() {
+  const m = loadMetas();
+  if (!m.metasMes) m.metasMes = [];
+  m.metasMes.push({ id: Date.now().toString(36), texto: '', done: false });
+  localStorage.setItem('smm_metas', JSON.stringify(m));
+  renderMetas();
+}
+
+function updateMetaMes(id, field, value) {
+  const m = loadMetas();
+  const item = (m.metasMes || []).find(x => x.id === id);
+  if (item) { item[field] = value; localStorage.setItem('smm_metas', JSON.stringify(m)); renderMetas(); }
+}
+
+function deleteMetaMes(id) {
+  const m = loadMetas();
+  m.metasMes = (m.metasMes || []).filter(x => x.id !== id);
+  localStorage.setItem('smm_metas', JSON.stringify(m));
+  renderMetas();
+}
+
+function renderMetas() {
+  const m = loadMetas();
+  const horasSemana = m.horasSemana || 40;
+  const horasCliente = m.horasCliente || 8;
+  const receitaAlvo = m.receitaAlvo || 5000;
+  const clientesAlvo = m.clientesAlvo || 5;
+
+  document.getElementById('meta-horas-semana').value = horasSemana;
+  document.getElementById('meta-horas-cliente').value = horasCliente;
+  document.getElementById('meta-receita-alvo').value = receitaAlvo;
+  document.getElementById('meta-clientes-alvo').value = clientesAlvo;
+
+  const maxClientes = Math.floor(horasSemana / horasCliente);
+  const clientesAtivos = Object.keys(CLIENTS).filter(k => k !== 'lucas').length;
+  const receitaAtual = (() => {
+    const allFin = load('finance') || {};
+    const now = new Date().toISOString().slice(0, 7);
+    const d = allFin[now];
+    return d ? d.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0) : 0;
+  })();
+
+  document.getElementById('meta-clientes').textContent = clientesAtivos;
+  document.getElementById('meta-capacidade').textContent = `${clientesAtivos} / ${maxClientes}`;
+  document.getElementById('meta-receita').textContent = `R$ ${receitaAtual.toFixed(0)}`;
+
+  const ocupacao = Math.round((clientesAtivos / maxClientes) * 100);
+  const corOcupacao = ocupacao >= 90 ? '#f66' : ocupacao >= 60 ? '#fc6' : '#4f9';
+  document.getElementById('meta-capacidade-texto').innerHTML =
+    `Você consegue atender <strong style="color:${corOcupacao};">${maxClientes} clientes</strong> solo. ` +
+    `Hoje está com <strong>${clientesAtivos}</strong> (${ocupacao}% da capacidade). ` +
+    (ocupacao >= 80 ? '<br><strong style="color:#fc6;">⚠ Quase no limite — hora de pensar em contratar!</strong>' : `Ainda cabe mais <strong style="color:#4f9;">${maxClientes - clientesAtivos}</strong> cliente${maxClientes - clientesAtivos > 1 ? 's' : ''}.`);
+
+  const pctReceita = Math.min(100, Math.round((receitaAtual / receitaAlvo) * 100));
+  const pctClientes = Math.min(100, Math.round((clientesAtivos / clientesAlvo) * 100));
+  document.getElementById('meta-progresso').innerHTML = `
+    <div style="margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px;">
+        <span>Receita: R$ ${receitaAtual.toFixed(0)} / R$ ${receitaAlvo}</span><span>${pctReceita}%</span>
+      </div>
+      <div style="background:#252530;border-radius:6px;height:10px;overflow:hidden;">
+        <div style="height:100%;width:${pctReceita}%;background:linear-gradient(90deg,#1a5a3a,#4f9);border-radius:6px;transition:width .5s;"></div>
+      </div>
+    </div>
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#888;margin-bottom:4px;">
+        <span>Clientes: ${clientesAtivos} / ${clientesAlvo}</span><span>${pctClientes}%</span>
+      </div>
+      <div style="background:#252530;border-radius:6px;height:10px;overflow:hidden;">
+        <div style="height:100%;width:${pctClientes}%;background:linear-gradient(90deg,#1a3a5a,#6cf);border-radius:6px;transition:width .5s;"></div>
+      </div>
+    </div>`;
+
+  const metasMes = m.metasMes || [];
+  document.getElementById('metas-mes-container').innerHTML = metasMes.length === 0
+    ? '<p style="color:#555;font-size:13px;">Nenhuma meta definida. Adicione suas metas do mês!</p>'
+    : metasMes.map(item => `
+      <div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid #1f1f2f;">
+        <input type="checkbox" ${item.done ? 'checked' : ''} onchange="updateMetaMes('${item.id}','done',this.checked)" style="width:auto;flex:0;">
+        <input value="${(item.texto || '').replace(/"/g, '&quot;')}" placeholder="Descreva a meta..." style="flex:1;text-decoration:${item.done ? 'line-through' : 'none'};opacity:${item.done ? '0.5' : '1'};" onchange="updateMetaMes('${item.id}','texto',this.value)">
+        <button class="btn-sm btn-danger" onclick="deleteMetaMes('${item.id}')">✕</button>
+      </div>`).join('');
+}
+
 // ============ SEED NOTION VIDEOS ============
 function seedNotionVideos() {
   const videos = load('videos') || [];
@@ -1843,6 +2088,8 @@ function renderAll() {
   renderFinance();
   renderFinChart();
   renderPlaybook();
+  renderIdeias();
+  renderMetas();
   seedPipelineClients();
   renderPipeline();
 }
