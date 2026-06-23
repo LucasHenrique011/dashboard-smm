@@ -338,6 +338,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button onclick="showModule('financeiro')">Financeiro</button>
   <button onclick="showModule('ideias')">Ideias</button>
   <button onclick="showModule('metas')">Metas</button>
+  <button onclick="showModule('metricas')">Métricas</button>
   <button onclick="showModule('ferramentas')">Ferramentas</button>
   <button onclick="showModule('playbook')">Playbook</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
@@ -526,6 +527,47 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <div id="metas-mes-container"></div>
     <button class="btn-sm btn-primary" onclick="addMetaMes()" style="margin-top:12px;">+ Adicionar meta</button>
   </div>
+</div>
+
+<!-- MODULE: MÉTRICAS -->
+<div id="mod-metricas" class="module">
+  <h2>📈 Métricas Mensais</h2>
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
+    <select id="met-client" onchange="renderMetricas()" style="width:auto;"></select>
+    <div class="week-nav" style="margin:0;">
+      <button class="btn-sm" onclick="changeMetMonth(-1)">← Anterior</button>
+      <span id="met-month-label" style="font-size:14px;font-weight:600;"></span>
+      <button class="btn-sm" onclick="changeMetMonth(1)">Próximo →</button>
+    </div>
+  </div>
+
+  <div class="fin-grid" id="met-evolution"></div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin:0 0 12px;">Preencher Métricas</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Seguidores</label><input type="number" id="met-seguidores" placeholder="Ex: 2500" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Alcance total</label><input type="number" id="met-alcance" placeholder="Ex: 15000" onchange="saveMetricas()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Impressões</label><input type="number" id="met-impressoes" placeholder="Ex: 30000" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Engajamento (%)</label><input type="number" id="met-engajamento" step="0.1" placeholder="Ex: 4.5" onchange="saveMetricas()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Visualizações de reels</label><input type="number" id="met-views" placeholder="Ex: 50000" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Novos seguidores</label><input type="number" id="met-novos" placeholder="Ex: 120" onchange="saveMetricas()"></div>
+    </div>
+    <div class="form-group"><label>Melhor vídeo do mês</label><input id="met-melhor" placeholder="Título do vídeo com melhor performance" onchange="saveMetricas()"></div>
+    <div class="form-group"><label>Observações</label><textarea id="met-obs" placeholder="Destaques, insights, próximos passos..." style="min-height:60px;" onchange="saveMetricas()"></textarea></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <h3 style="color:#4f9;margin:0 0 12px;">📊 Evolução</h3>
+    <svg id="met-chart-svg" viewBox="0 0 700 200" style="width:100%;height:200px;"></svg>
+  </div>
+
+  <button class="btn-primary" onclick="gerarRelatorioMensal()" style="width:100%;">📄 Gerar Relatório do Mês</button>
+  <div id="met-relatorio" style="margin-top:16px;display:none;"></div>
 </div>
 
 <!-- MODULE: FERRAMENTAS -->
@@ -2052,6 +2094,7 @@ function buildPortalData() {
   const portalData = {
     clients: {},
     videos: videos.map(v => ({ client: v.client, title: v.title, pillar: v.pillar, date: v.date, status: v.status, ref: v.ref || '', roteiro: v.roteiro || '' })),
+    metricas: loadAllMetricas(),
     tokens: tokens,
     updatedAt: new Date().toISOString()
   };
@@ -2143,6 +2186,202 @@ function publicarPortalLinks() {
   overlay.className = 'modal-overlay open';
   overlay.innerHTML = `<div class="modal"><h3 style="margin-bottom:16px;">📋 Links dos Clientes</h3>${html}<div class="modal-actions" style="margin-top:16px;"><button onclick="this.closest('.modal-overlay').remove()">Fechar</button></div></div>`;
   document.body.appendChild(overlay);
+}
+
+// ============ MÉTRICAS ============
+let metMonth = new Date().toISOString().slice(0, 7);
+
+function changeMetMonth(dir) {
+  const [y, m] = metMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  metMonth = d.toISOString().slice(0, 7);
+  renderMetricas();
+}
+
+function loadAllMetricas() { return JSON.parse(localStorage.getItem('smm_metricas') || '{}'); }
+
+function getMetricas(client, month) {
+  const all = loadAllMetricas();
+  return (all[client] && all[client][month]) || {};
+}
+
+function saveMetricas() {
+  const client = document.getElementById('met-client').value;
+  if (!client) return;
+  const all = loadAllMetricas();
+  if (!all[client]) all[client] = {};
+  all[client][metMonth] = {
+    seguidores: parseFloat(document.getElementById('met-seguidores').value) || 0,
+    alcance: parseFloat(document.getElementById('met-alcance').value) || 0,
+    impressoes: parseFloat(document.getElementById('met-impressoes').value) || 0,
+    engajamento: parseFloat(document.getElementById('met-engajamento').value) || 0,
+    views: parseFloat(document.getElementById('met-views').value) || 0,
+    novos: parseFloat(document.getElementById('met-novos').value) || 0,
+    melhor: document.getElementById('met-melhor').value.trim(),
+    obs: document.getElementById('met-obs').value.trim()
+  };
+  localStorage.setItem('smm_metricas', JSON.stringify(all));
+  scheduleAutoBackup();
+  scheduleAutoPublish();
+  renderMetricas();
+}
+
+function renderMetricas() {
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [y, m] = metMonth.split('-');
+  document.getElementById('met-month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
+
+  const sel = document.getElementById('met-client');
+  if (!sel.options.length || sel.options[0].value === '') {
+    sel.innerHTML = Object.entries(CLIENTS).map(([k, c]) => `<option value="${k}">${c.name}</option>`).join('');
+  }
+  const client = sel.value;
+  const met = getMetricas(client, metMonth);
+
+  document.getElementById('met-seguidores').value = met.seguidores || '';
+  document.getElementById('met-alcance').value = met.alcance || '';
+  document.getElementById('met-impressoes').value = met.impressoes || '';
+  document.getElementById('met-engajamento').value = met.engajamento || '';
+  document.getElementById('met-views').value = met.views || '';
+  document.getElementById('met-novos').value = met.novos || '';
+  document.getElementById('met-melhor').value = met.melhor || '';
+  document.getElementById('met-obs').value = met.obs || '';
+
+  // Evolution vs previous month
+  const [py, pm] = [parseInt(y), parseInt(m) - 1];
+  const prevMonth = pm < 1 ? `${py - 1}-12` : `${py}-${String(pm).padStart(2, '0')}`;
+  const prev = getMetricas(client, prevMonth);
+
+  function evol(curr, prevVal, label, suffix) {
+    if (!curr && !prevVal) return `<div class="fin-box"><div class="lbl">${label}</div><div class="val" style="color:#555;">—</div></div>`;
+    const diff = prevVal ? curr - prevVal : 0;
+    const pct = prevVal ? Math.round((diff / prevVal) * 100) : 0;
+    const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '=';
+    const color = diff > 0 ? '#4f9' : diff < 0 ? '#f66' : '#6cf';
+    const diffLabel = prevVal ? `<div style="font-size:11px;color:${color};">${arrow} ${diff > 0 ? '+' : ''}${label === 'Engajamento' ? diff.toFixed(1) + '%' : diff.toLocaleString('pt-BR')} (${pct > 0 ? '+' : ''}${pct}%)</div>` : '';
+    return `<div class="fin-box"><div class="lbl">${label}</div><div class="val green">${label === 'Engajamento' ? (curr || 0).toFixed(1) + '%' : (curr || 0).toLocaleString('pt-BR')}${suffix || ''}</div>${diffLabel}</div>`;
+  }
+
+  document.getElementById('met-evolution').innerHTML =
+    evol(met.seguidores, prev.seguidores, 'Seguidores') +
+    evol(met.alcance, prev.alcance, 'Alcance') +
+    evol(met.views, prev.views, 'Views Reels') +
+    evol(met.engajamento, prev.engajamento, 'Engajamento') +
+    evol(met.novos, prev.novos, 'Novos Seg.') +
+    evol(met.impressoes, prev.impressoes, 'Impressões');
+
+  renderMetChart(client);
+}
+
+function renderMetChart(client) {
+  const all = loadAllMetricas();
+  const clientData = all[client] || {};
+  const months = Object.keys(clientData).sort().slice(-6);
+  const svg = document.getElementById('met-chart-svg');
+
+  if (months.length < 2) {
+    svg.innerHTML = '<text x="350" y="100" text-anchor="middle" fill="#555" font-size="12" font-family="sans-serif">Preencha 2+ meses pra ver o gráfico</text>';
+    return;
+  }
+
+  const data = months.map(m => ({ month: m, seg: clientData[m].seguidores || 0, alc: clientData[m].alcance || 0 }));
+  const maxVal = Math.max(...data.map(d => Math.max(d.seg, d.alc)), 1);
+  const w = 700, h = 180, pad = 40;
+  const stepX = (w - pad * 2) / (data.length - 1);
+  function yPos(val) { return h - pad - (val / maxVal) * (h - pad * 2); }
+
+  const segLine = data.map((d, i) => `${pad + i * stepX},${yPos(d.seg)}`).join(' ');
+  const alcLine = data.map((d, i) => `${pad + i * stepX},${yPos(d.alc)}`).join(' ');
+
+  let s = `<polyline points="${segLine}" fill="none" stroke="#4f9" stroke-width="2"/>`;
+  s += `<polyline points="${alcLine}" fill="none" stroke="#6cf" stroke-width="2"/>`;
+  data.forEach((d, i) => {
+    const x = pad + i * stepX;
+    s += `<circle cx="${x}" cy="${yPos(d.seg)}" r="3" fill="#4f9"/>`;
+    s += `<circle cx="${x}" cy="${yPos(d.alc)}" r="3" fill="#6cf"/>`;
+    s += `<text x="${x}" y="${h - 5}" text-anchor="middle" fill="#888" font-size="10" font-family="sans-serif">${d.month.split('-')[1]}/${d.month.split('-')[0].slice(2)}</text>`;
+  });
+  s += `<text x="${w - 10}" y="20" text-anchor="end" fill="#4f9" font-size="10" font-family="sans-serif">● Seguidores</text>`;
+  s += `<text x="${w - 10}" y="34" text-anchor="end" fill="#6cf" font-size="10" font-family="sans-serif">● Alcance</text>`;
+  svg.innerHTML = s;
+}
+
+function gerarRelatorioMensal() {
+  const client = document.getElementById('met-client').value;
+  const cl = CLIENTS[client];
+  const met = getMetricas(client, metMonth);
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [y, m] = metMonth.split('-');
+  const mesNome = `${meses[parseInt(m)-1]} ${y}`;
+
+  const [py, pm] = [parseInt(y), parseInt(m) - 1];
+  const prevMonth = pm < 1 ? `${py - 1}-12` : `${py}-${String(pm).padStart(2, '0')}`;
+  const prev = getMetricas(client, prevMonth);
+
+  const videos = load('videos') || [];
+  const mesVids = videos.filter(v => v.client === client && v.date && v.date.startsWith(metMonth));
+  const postados = mesVids.filter(v => v.status === 'postado');
+
+  function diff(curr, prevVal) {
+    if (!prevVal) return '';
+    const d = curr - prevVal;
+    const pct = Math.round((d / prevVal) * 100);
+    const color = d > 0 ? '#4f9' : d < 0 ? '#f66' : '#888';
+    return `<span style="color:${color};font-size:11px;"> ${d > 0 ? '↑+' : '↓'}${typeof curr === 'number' && curr % 1 !== 0 ? d.toFixed(1) : d} (${pct > 0 ? '+' : ''}${pct}%)</span>`;
+  }
+
+  const el = document.getElementById('met-relatorio');
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div class="card" id="relatorio-pdf" style="background:#0f0f14;padding:24px;">
+      <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #2a2a3a;">
+        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;">Relatório Mensal</div>
+        <h2 style="color:#4f9;margin:6px 0;font-size:22px;">${cl.name}</h2>
+        <div style="font-size:14px;color:#aaa;">${mesNome}</div>
+        <div style="font-size:11px;color:#555;margin-top:4px;">Gerenciado por Lucas SM</div>
+      </div>
+
+      <div class="fin-grid" style="margin-bottom:20px;">
+        <div class="fin-box"><div class="lbl">Seguidores</div><div class="val green">${(met.seguidores || 0).toLocaleString('pt-BR')}</div>${diff(met.seguidores, prev.seguidores)}</div>
+        <div class="fin-box"><div class="lbl">Alcance</div><div class="val green">${(met.alcance || 0).toLocaleString('pt-BR')}</div>${diff(met.alcance, prev.alcance)}</div>
+        <div class="fin-box"><div class="lbl">Views Reels</div><div class="val green">${(met.views || 0).toLocaleString('pt-BR')}</div>${diff(met.views, prev.views)}</div>
+      </div>
+
+      <div class="fin-grid" style="margin-bottom:20px;">
+        <div class="fin-box"><div class="lbl">Engajamento</div><div class="val" style="color:#fc6;">${(met.engajamento || 0).toFixed(1)}%</div>${diff(met.engajamento, prev.engajamento)}</div>
+        <div class="fin-box"><div class="lbl">Novos Seguidores</div><div class="val green">${(met.novos || 0).toLocaleString('pt-BR')}</div>${diff(met.novos, prev.novos)}</div>
+        <div class="fin-box"><div class="lbl">Impressões</div><div class="val green">${(met.impressoes || 0).toLocaleString('pt-BR')}</div>${diff(met.impressoes, prev.impressoes)}</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
+        <div class="fin-box"><div class="lbl">Vídeos Postados</div><div class="val green">${postados.length}</div></div>
+        <div class="fin-box"><div class="lbl">Total Planejado</div><div class="val" style="color:#6cf;">${mesVids.length}</div></div>
+      </div>
+
+      ${met.melhor ? `<div style="margin-bottom:16px;padding:12px;background:#1a2a1a;border:1px solid #2a4a3a;border-radius:10px;">
+        <div style="font-size:11px;color:#888;">🏆 Melhor vídeo do mês</div>
+        <div style="font-size:14px;color:#4f9;font-weight:600;margin-top:4px;">${met.melhor}</div>
+      </div>` : ''}
+
+      ${postados.length > 0 ? `<div style="margin-bottom:16px;">
+        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Vídeos Entregues</div>
+        ${postados.sort((a,b) => a.date.localeCompare(b.date)).map(v => `
+          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f1f2f;font-size:12px;">
+            <span style="color:#ccc;">${v.title}</span>
+            <span style="color:#555;">${v.date.split('-').reverse().slice(0,2).join('/')}</span>
+          </div>`).join('')}
+      </div>` : ''}
+
+      ${met.obs ? `<div style="padding:12px;background:#1a1a24;border:1px solid #2a2a3a;border-radius:10px;">
+        <div style="font-size:11px;color:#888;">📝 Observações</div>
+        <p style="font-size:13px;color:#ccc;margin-top:6px;line-height:1.5;">${met.obs}</p>
+      </div>` : ''}
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('relatorio-pdf').innerText).then(()=>alert('Texto copiado!'))">📋 Copiar texto</button>
+      <button class="btn-sm" onclick="window.print()">🖨 Imprimir / PDF</button>
+    </div>`;
 }
 
 // ============ THEME ============
@@ -2800,6 +3039,7 @@ function renderAll() {
   renderIdeias();
   renderMetas();
   renderFerramentas();
+  renderMetricas();
   seedPipelineClients();
   renderPipeline();
 }
