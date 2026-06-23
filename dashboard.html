@@ -330,6 +330,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button onclick="showModule('ideias')">Ideias</button>
   <button onclick="showModule('metas')">Metas</button>
   <button onclick="showModule('playbook')">Playbook</button>
+  <button onclick="showModule('processos')">Processos</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
 </nav>
 
@@ -401,10 +402,22 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <button class="btn-sm" onclick="changeMonth(1)">Próximo →</button>
     <button class="btn-sm" onclick="changeMonth(0)">Hoje</button>
   </div>
-  <div class="fin-grid">
+  <div class="fin-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
     <div class="fin-box"><div class="lbl">Receita Total</div><div class="val green" id="fin-receita">R$ 0</div></div>
-    <div class="fin-box"><div class="lbl">Custos Totais</div><div class="val red" id="fin-custos">R$ 0</div></div>
-    <div class="fin-box"><div class="lbl">Margem / Sobra</div><div class="val blue" id="fin-margem">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Custos Negócio</div><div class="val red" id="fin-custos-pj">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Caixa PJ</div><div class="val" style="color:#4fd;" id="fin-caixa-pj">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Custos Pessoais</div><div class="val red" id="fin-custos-pessoal">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Sobra Final</div><div class="val blue" id="fin-margem">R$ 0</div></div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;padding:12px 16px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:12px;color:#888;">Faturamento MEI no ano</span>
+      <span style="font-size:12px;color:#888;" id="fin-mei-label">R$ 0 / R$ 81.000</span>
+    </div>
+    <div style="background:#252530;border-radius:6px;height:8px;overflow:hidden;margin-top:6px;">
+      <div id="fin-mei-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#1a5a3a,#4f9);border-radius:6px;transition:width .5s;"></div>
+    </div>
   </div>
 
   <div class="fin-table">
@@ -417,7 +430,15 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 
   <div class="fin-table">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="margin:0;color:#f66;">Custos Fixos</h3>
+      <h3 style="margin:0;color:#f66;">💼 Custos do Negócio</h3>
+      <button class="btn-sm btn-primary" onclick="addFinRow('custosPJ')">+ Adicionar</button>
+    </div>
+    <div id="fin-custos-pj-list"></div>
+  </div>
+
+  <div class="fin-table">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;color:#fc6;">👤 Custos Pessoais</h3>
       <button class="btn-sm btn-primary" onclick="addFinRow('custos')">+ Adicionar</button>
     </div>
     <div id="fin-custos-list"></div>
@@ -513,6 +534,16 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <h2>Playbook — Consulta Rápida</h2>
   <p style="color:#888;font-size:13px;margin-bottom:16px;">Clique em cada seção para expandir e editar suas anotações. Tudo salva automaticamente.</p>
   <div id="playbook-sections"></div>
+</div>
+
+<!-- MODULE: PROCESSOS -->
+<div id="mod-processos" class="module">
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h2>📋 Processos</h2>
+    <button class="btn-primary btn-sm" onclick="addProcesso()">+ Novo processo</button>
+  </div>
+  <p style="color:#888;font-size:13px;margin-bottom:16px;">Documente seus processos pra quando contratar alguém, já ter tudo pronto.</p>
+  <div id="processos-container"></div>
 </div>
 
 <!-- MODULE 4: PIPELINE -->
@@ -1131,12 +1162,14 @@ function getDefaultFinance() {
       { name: 'Pallefort', value: 700 },
       { name: 'Mania da Web', value: 900 },
     ],
-    custos: [
-      { name: 'MacBook (12x)', value: 666 },
+    custosPJ: [
       { name: 'Transporte', value: 600 },
-      { name: 'Mentoria (2x 12x)', value: 204 },
       { name: 'Claude AI', value: 109 },
       { name: 'MEI', value: 86 },
+    ],
+    custos: [
+      { name: 'MacBook (12x)', value: 666 },
+      { name: 'Mentoria (2x 12x)', value: 204 },
       { name: 'Faculdade', value: 100 },
       { name: 'Corte de cabelo', value: 90 },
       { name: 'Cursos', value: 72 },
@@ -1215,16 +1248,32 @@ function renderFinance() {
   document.getElementById('month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
 
   const data = getFinanceForMonth();
+  if (!data.custosPJ) data.custosPJ = [];
   const totalRec = data.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0);
-  const totalCus = data.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
-  const margem = totalRec - totalCus;
+  const totalPJ = data.custosPJ.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
+  const totalPessoal = data.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
+  const caixaPJ = totalRec - totalPJ;
+  const margem = totalRec - totalPJ - totalPessoal;
 
   document.getElementById('fin-receita').textContent = `R$ ${totalRec.toFixed(2)}`;
-  document.getElementById('fin-custos').textContent = `R$ ${totalCus.toFixed(2)}`;
+  document.getElementById('fin-custos-pj').textContent = `R$ ${totalPJ.toFixed(2)}`;
+  document.getElementById('fin-caixa-pj').textContent = `R$ ${caixaPJ.toFixed(2)}`;
+  document.getElementById('fin-custos-pessoal').textContent = `R$ ${totalPessoal.toFixed(2)}`;
   document.getElementById('fin-margem').textContent = `R$ ${margem.toFixed(2)}`;
   document.getElementById('fin-margem').className = `val ${margem >= 0 ? 'blue' : 'red'}`;
 
+  const allFin = load('finance') || {};
+  const ano = currentMonth.split('-')[0];
+  const fatAnual = Object.entries(allFin)
+    .filter(([k]) => k.startsWith(ano))
+    .reduce((s, [, d]) => s + (d.receitas || []).reduce((ss, r) => ss + (parseFloat(r.value) || 0), 0), 0);
+  const pctMei = Math.min(100, Math.round((fatAnual / 81000) * 100));
+  document.getElementById('fin-mei-label').textContent = `R$ ${fatAnual.toFixed(0)} / R$ 81.000 (${pctMei}%)`;
+  document.getElementById('fin-mei-bar').style.width = pctMei + '%';
+  document.getElementById('fin-mei-bar').style.background = pctMei >= 80 ? 'linear-gradient(90deg,#a33,#f66)' : 'linear-gradient(90deg,#1a5a3a,#4f9)';
+
   renderFinRows('receitas', data.receitas, 'fin-receitas');
+  renderFinRows('custosPJ', data.custosPJ, 'fin-custos-pj-list');
   renderFinRows('custos', data.custos, 'fin-custos-list');
 }
 
@@ -1853,6 +1902,56 @@ document.addEventListener('keydown', function(e) {
   if (e.key === '4') showModule('pipeline');
 });
 
+// ============ PROCESSOS ============
+const DEFAULT_PROCESSOS = [
+  { id: 'onboarding', titulo: '🤝 Onboarding de Cliente Novo', conteudo: `1. Reunião inicial — entender o negócio, público e objetivo\n2. Pedir acesso ao Instagram/TikTok\n3. Definir pilares de conteúdo (3 pilares)\n4. Definir cadência (3 reels/semana)\n5. Criar pasta do cliente no Notion\n6. Primeiro lote de conteúdo (3-5 ideias)\n7. Aprovar com o cliente\n8. Começar produção` },
+  { id: 'producao', titulo: '🎬 Produção Semanal', conteudo: `SEGUNDA\n• Revisar ideias aprovadas da semana\n• Preparar roteiros\n\nTERÇA-QUARTA\n• Gravar conteúdos\n• Editar vídeos\n\nQUINTA\n• Revisar edições\n• Enviar pra aprovação do cliente\n\nSEXTA\n• Postar conteúdos aprovados\n• Planejar próxima semana` },
+  { id: 'entrega', titulo: '📦 Entrega de Vídeo', conteudo: `1. Roteiro pronto → enviar pro cliente aprovar\n2. Gravar seguindo o roteiro\n3. Editar (cortes, legenda, música)\n4. Exportar no formato certo (9:16, 1080x1920)\n5. Enviar preview pro cliente\n6. Ajustes se necessário\n7. Postar na plataforma\n8. Marcar como postado no dashboard` },
+  { id: 'reuniao', titulo: '📞 Reunião Mensal com Cliente', conteudo: `1. Preparar relatório do mês (vídeos postados, alcance)\n2. Mostrar evolução (mês anterior vs atual)\n3. Discutir o que funcionou e o que não\n4. Apresentar ideias pro próximo mês\n5. Alinhar expectativas e metas\n6. Registrar feedback no dashboard` },
+];
+
+function loadProcessos() { try { return JSON.parse(localStorage.getItem('smm_processos')) || null; } catch { return null; } }
+function saveProcessos(d) { localStorage.setItem('smm_processos', JSON.stringify(d)); }
+
+function addProcesso() {
+  const procs = loadProcessos() || [];
+  procs.push({ id: Date.now().toString(36), titulo: 'Novo Processo', conteudo: '' });
+  saveProcessos(procs);
+  renderProcessos();
+}
+
+function updateProcesso(id, field, value) {
+  const procs = loadProcessos() || [];
+  const p = procs.find(x => x.id === id);
+  if (p) { p[field] = value; saveProcessos(procs); }
+}
+
+function deleteProcesso(id) {
+  if (!confirm('Remover esse processo?')) return;
+  saveProcessos((loadProcessos() || []).filter(x => x.id !== id));
+  renderProcessos();
+}
+
+function renderProcessos() {
+  let procs = loadProcessos();
+  if (!procs) { procs = JSON.parse(JSON.stringify(DEFAULT_PROCESSOS)); saveProcessos(procs); }
+  const container = document.getElementById('processos-container');
+  container.innerHTML = procs.map(p => `
+    <div class="playbook-section">
+      <div class="playbook-header" onclick="document.getElementById('proc-${p.id}').classList.toggle('open'); document.getElementById('arrow-proc-${p.id}').classList.toggle('open');">
+        <h3>${p.titulo}</h3>
+        <span class="arrow" id="arrow-proc-${p.id}">▶</span>
+      </div>
+      <div class="playbook-body" id="proc-${p.id}">
+        <button class="btn-close-fullscreen btn-sm" onclick="document.getElementById('proc-${p.id}').classList.remove('open')">✕ Fechar</button>
+        <input value="${(p.titulo || '').replace(/"/g, '&quot;')}" style="font-weight:700;margin-bottom:8px;" onchange="updateProcesso('${p.id}','titulo',this.value); renderProcessos();">
+        <textarea onchange="updateProcesso('${p.id}','conteudo',this.value)">${p.conteudo || ''}</textarea>
+        <button class="btn-sm btn-danger" onclick="deleteProcesso('${p.id}')" style="margin-top:8px;">✕ Remover processo</button>
+      </div>
+    </div>
+  `).join('');
+}
+
 // ============ BANCO DE IDEIAS ============
 function loadIdeias() { try { return JSON.parse(localStorage.getItem('smm_ideias')) || []; } catch { return []; } }
 function saveIdeias(d) { localStorage.setItem('smm_ideias', JSON.stringify(d)); }
@@ -2114,6 +2213,7 @@ function renderAll() {
   renderPlaybook();
   renderIdeias();
   renderMetas();
+  renderProcessos();
   seedPipelineClients();
   renderPipeline();
 }
