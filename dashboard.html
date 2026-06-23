@@ -107,6 +107,7 @@ label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
 .playbook-body { padding: 0 16px 16px; display: none; }
 .playbook-body.open { display: block; }
 .playbook-body textarea { min-height: 120px; width: 100%; }
+.btn-close-fullscreen { display: none; }
 
 /* Week nav */
 .week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
@@ -249,22 +250,20 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
   .cal-day-label { font-size: 10px; }
   .cal-item { font-size: 10px; padding: 3px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-  /* Tabelas — viram lista vertical no celular */
-  table { width: 100%; }
-  table thead { display: none; }
-  table tbody tr { display: flex; flex-direction: column; padding: 10px; margin-bottom: 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; }
-  table tbody td { display: flex; justify-content: space-between; padding: 4px 0; border: none; font-size: 13px; }
-  table tbody td::before { font-weight: 600; color: #888; margin-right: 8px; }
+  /* Tabelas — scroll horizontal */
+  table { font-size: 11px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  th, td { padding: 5px 4px; white-space: nowrap; }
 
   /* Financeiro */
   .fin-row { flex-wrap: wrap; gap: 4px; }
   .fin-row .fin-name input { width: 100%; }
   .fin-row input { width: 100px; }
 
-  /* Playbook — textarea ocupa tela toda */
-  .playbook-body textarea { min-height: 300px; font-size: 14px; line-height: 1.7; padding: 14px; width: 100%; }
+  /* Playbook — abre em tela cheia */
+  .playbook-body.open { position: fixed; inset: 0; z-index: 200; background: #0f0f0f; display: flex; flex-direction: column; padding: 16px; margin: 0; }
+  .playbook-body textarea { flex: 1; font-size: 15px; line-height: 1.7; padding: 14px; width: 100%; border-radius: 8px; }
   .playbook-header h3 { font-size: 15px; }
-  .playbook-body { padding: 0 8px 12px; }
+  .playbook-body .btn-close-fullscreen { display: block; margin-bottom: 10px; text-align: right; }
 
   /* Modal — quase tela cheia */
   .modal-overlay { align-items: flex-end; }
@@ -1214,6 +1213,7 @@ function renderPlaybook() {
         <span class="arrow" id="arrow-${s.id}">▶</span>
       </div>
       <div class="playbook-body" id="pb-${s.id}">
+        <button class="btn-sm btn-close-fullscreen" onclick="togglePlaybook('${s.id}')">✕ Fechar</button>
         <textarea
           placeholder="Escreva suas anotações sobre ${s.title} aqui..."
           onchange="savePlaybookSection('${s.id}', this.value)"
