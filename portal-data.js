@@ -695,8 +695,8 @@ const PORTAL_DATA = {
     "mania": {
       "2026-06": {
         "seguidores": 561,
-        "alcance": 0,
-        "impressoes": 0,
+        "alcance": 1.612,
+        "impressoes": 2.612,
         "engajamento": 0,
         "views": 0,
         "novos": 0,
@@ -711,5 +711,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-23T21:52:39.229Z"
+  "updatedAt": "2026-06-23T21:53:01.987Z"
 };
