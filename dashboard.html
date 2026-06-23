@@ -1858,7 +1858,9 @@ function seedPipelineClients() {
   const existingMap = {};
   existing.forEach(p => { existingMap[p.id] = p; });
   seed.forEach(p => { existingMap[p.id] = p; });
-  saveProspects(Object.values(existingMap));
+  const all = Object.values(existingMap);
+  save('prospects', all);
+  console.log('Prospects salvos:', all.length);
 }
 
 // ============ WEEKLY SUMMARY ============
