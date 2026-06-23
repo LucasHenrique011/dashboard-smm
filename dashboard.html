@@ -557,6 +557,18 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
       <div class="form-group"><label>Visualizações de reels</label><input type="number" id="met-views" placeholder="Ex: 50000" onchange="saveMetricas()"></div>
       <div class="form-group"><label>Novos seguidores</label><input type="number" id="met-novos" placeholder="Ex: 120" onchange="saveMetricas()"></div>
     </div>
+    <div class="form-row">
+      <div class="form-group"><label>Visitas ao perfil</label><input type="number" id="met-visitas" placeholder="Ex: 800" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Toques no link da bio</label><input type="number" id="met-linkbio" placeholder="Ex: 45" onchange="saveMetricas()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Compartilhamentos</label><input type="number" id="met-compartilhamentos" placeholder="Ex: 230" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Salvamentos</label><input type="number" id="met-salvamentos" placeholder="Ex: 180" onchange="saveMetricas()"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label>Comentários</label><input type="number" id="met-comentarios" placeholder="Ex: 95" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Curtidas</label><input type="number" id="met-curtidas" placeholder="Ex: 1200" onchange="saveMetricas()"></div>
+    </div>
     <div class="form-group"><label>Melhor vídeo do mês</label><input id="met-melhor" placeholder="Título do vídeo com melhor performance" onchange="saveMetricas()"></div>
     <div class="form-group"><label>Observações</label><textarea id="met-obs" placeholder="Destaques, insights, próximos passos..." style="min-height:60px;" onchange="saveMetricas()"></textarea></div>
   </div>
@@ -2217,6 +2229,12 @@ function saveMetricas() {
     engajamento: parseFloat(document.getElementById('met-engajamento').value) || 0,
     views: parseFloat(document.getElementById('met-views').value) || 0,
     novos: parseFloat(document.getElementById('met-novos').value) || 0,
+    visitas: parseFloat(document.getElementById('met-visitas').value) || 0,
+    linkbio: parseFloat(document.getElementById('met-linkbio').value) || 0,
+    compartilhamentos: parseFloat(document.getElementById('met-compartilhamentos').value) || 0,
+    salvamentos: parseFloat(document.getElementById('met-salvamentos').value) || 0,
+    comentarios: parseFloat(document.getElementById('met-comentarios').value) || 0,
+    curtidas: parseFloat(document.getElementById('met-curtidas').value) || 0,
     melhor: document.getElementById('met-melhor').value.trim(),
     obs: document.getElementById('met-obs').value.trim()
   };
@@ -2244,6 +2262,12 @@ function renderMetricas() {
   document.getElementById('met-engajamento').value = met.engajamento || '';
   document.getElementById('met-views').value = met.views || '';
   document.getElementById('met-novos').value = met.novos || '';
+  document.getElementById('met-visitas').value = met.visitas || '';
+  document.getElementById('met-linkbio').value = met.linkbio || '';
+  document.getElementById('met-compartilhamentos').value = met.compartilhamentos || '';
+  document.getElementById('met-salvamentos').value = met.salvamentos || '';
+  document.getElementById('met-comentarios').value = met.comentarios || '';
+  document.getElementById('met-curtidas').value = met.curtidas || '';
   document.getElementById('met-melhor').value = met.melhor || '';
   document.getElementById('met-obs').value = met.obs || '';
 
@@ -2268,7 +2292,13 @@ function renderMetricas() {
     evol(met.views, prev.views, 'Views Reels') +
     evol(met.engajamento, prev.engajamento, 'Engajamento') +
     evol(met.novos, prev.novos, 'Novos Seg.') +
-    evol(met.impressoes, prev.impressoes, 'Impressões');
+    evol(met.impressoes, prev.impressoes, 'Impressões') +
+    evol(met.visitas, prev.visitas, 'Visitas Perfil') +
+    evol(met.linkbio, prev.linkbio, 'Link da Bio') +
+    evol(met.curtidas, prev.curtidas, 'Curtidas') +
+    evol(met.comentarios, prev.comentarios, 'Comentários') +
+    evol(met.compartilhamentos, prev.compartilhamentos, 'Compartilham.') +
+    evol(met.salvamentos, prev.salvamentos, 'Salvamentos');
 
   renderMetChart(client);
 }
@@ -2351,6 +2381,18 @@ function gerarRelatorioMensal() {
         <div class="fin-box"><div class="lbl">Engajamento</div><div class="val" style="color:#fc6;">${(met.engajamento || 0).toFixed(1)}%</div>${diff(met.engajamento, prev.engajamento)}</div>
         <div class="fin-box"><div class="lbl">Novos Seguidores</div><div class="val green">${(met.novos || 0).toLocaleString('pt-BR')}</div>${diff(met.novos, prev.novos)}</div>
         <div class="fin-box"><div class="lbl">Impressões</div><div class="val green">${(met.impressoes || 0).toLocaleString('pt-BR')}</div>${diff(met.impressoes, prev.impressoes)}</div>
+      </div>
+
+      <div class="fin-grid" style="margin-bottom:20px;">
+        <div class="fin-box"><div class="lbl">Visitas ao Perfil</div><div class="val green">${(met.visitas || 0).toLocaleString('pt-BR')}</div>${diff(met.visitas, prev.visitas)}</div>
+        <div class="fin-box"><div class="lbl">Toques no Link da Bio</div><div class="val" style="color:#fc6;">${(met.linkbio || 0).toLocaleString('pt-BR')}</div>${diff(met.linkbio, prev.linkbio)}</div>
+        <div class="fin-box"><div class="lbl">Curtidas</div><div class="val green">${(met.curtidas || 0).toLocaleString('pt-BR')}</div>${diff(met.curtidas, prev.curtidas)}</div>
+      </div>
+
+      <div class="fin-grid" style="margin-bottom:20px;">
+        <div class="fin-box"><div class="lbl">Comentários</div><div class="val green">${(met.comentarios || 0).toLocaleString('pt-BR')}</div>${diff(met.comentarios, prev.comentarios)}</div>
+        <div class="fin-box"><div class="lbl">Compartilhamentos</div><div class="val green">${(met.compartilhamentos || 0).toLocaleString('pt-BR')}</div>${diff(met.compartilhamentos, prev.compartilhamentos)}</div>
+        <div class="fin-box"><div class="lbl">Salvamentos</div><div class="val green">${(met.salvamentos || 0).toLocaleString('pt-BR')}</div>${diff(met.salvamentos, prev.salvamentos)}</div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
