@@ -8,163 +8,138 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111118; color: #e0e0e0; min-height: 100vh; }
 
 .loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 16px; }
 .loading h2 { color: #4f9; }
 .loading p { color: #888; }
 .error { color: #f66; }
 
-header { background: linear-gradient(135deg, #0f1a14, #111118); border-bottom: 1px solid #1a3a2a; padding: 24px 20px; text-align: center; }
-header h1 { font-size: 22px; color: #fff; margin-bottom: 4px; }
+header { background: linear-gradient(135deg, #0f1a14, #111118); border-bottom: 1px solid #1a3a2a; padding: 20px; text-align: center; }
+header h1 { font-size: 20px; color: #fff; margin-bottom: 2px; }
 header .subtitle { font-size: 13px; color: #4f9; }
-header .brand { font-size: 11px; color: #555; margin-top: 8px; }
+header .brand { font-size: 11px; color: #555; margin-top: 6px; }
 
-.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
-nav { display: flex; gap: 0; background: #111118; border-bottom: 1px solid #2a2a3a; position: sticky; top: 0; z-index: 10; }
+nav { display: flex; gap: 0; background: #1a1a24; border-bottom: 1px solid #2a2a3a; position: sticky; top: 0; z-index: 10; }
 nav button { flex: 1; padding: 14px 8px; background: none; border: none; color: #666; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; }
-nav button.active { color: #fff; border-bottom-color: #4f9; }
+nav button.active { color: #fff; border-bottom-color: #4f9; background: linear-gradient(180deg, transparent 60%, #4f910a 200%); }
+nav button:hover { color: #ccc; }
 
-.section { display: none; }
-.section.active { display: block; }
+.tab { display: none; }
+.tab.active { display: block; }
 
-h2 { font-size: 17px; color: #4f9; margin-bottom: 16px; }
-h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
+h2 { font-size: 18px; margin-bottom: 16px; color: #4f9; }
 
-.card { background: linear-gradient(145deg, #1a1a24, #14141c); border: 1px solid #2a2a3a; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
-.card-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
-.card-value { font-size: 16px; font-weight: 600; color: #fff; }
-.card-value.green { color: #4f9; }
-
+/* Cards — same as dashboard */
+.card { background: linear-gradient(145deg, #1a1a24, #16161e); border: 1px solid #2a2a3a; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
 .pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
-.pill { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #1a3a2a; color: #4f9; border: 1px solid #2a5a3a; }
+.pill { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #1a3a2a; color: #4f9; border: 1px solid #2a5a3a; }
 
-.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+/* Week summary — same as dashboard */
+.week-summary { display: flex; gap: 0; margin-bottom: 20px; background: linear-gradient(145deg, #1a1a24, #16161e); border: 1px solid #2a2a3a; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.ws-group { display: flex; gap: 0; flex: 1; padding: 12px 8px; }
+.ws-group + .ws-group { border-left: 2px solid #333; }
+.ws-group-label { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px; text-align: center; padding: 4px 8px 0; }
+.ws-item { text-align: center; flex: 1; }
+.ws-item .ws-val { font-size: 18px; font-weight: 700; }
+.ws-item .ws-lbl { font-size: 10px; color: #888; }
 
-/* Video list */
-.video-item { background: #14141c; border: 1px solid #2a2a3a; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-.video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-.video-title { font-size: 14px; font-weight: 600; color: #fff; }
-.video-date { font-size: 11px; color: #888; }
-.video-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.status-badge { padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+/* Week nav */
+.week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.week-nav span { font-size: 14px; font-weight: 600; }
+
+/* Calendar */
+.calendar-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 24px; }
+.cal-day { background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 10px; padding: 8px; min-height: 100px; }
+.cal-day-label { font-size: 11px; color: #888; margin-bottom: 6px; font-weight: 600; }
+.cal-item { font-size: 11px; padding: 3px 6px; margin: 2px 0; border-radius: 4px; background: #1a3a2a; color: #6fc; border-left: 2px solid #4f9; cursor: default; }
+.cal-item.empty { background: transparent; border: 1px dashed #333; color: #555; text-align: center; }
+.cal-status { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
+.cal-status-pendente { background: #f66; }
+.cal-status-gravado { background: #fc6; }
+.cal-status-editado { background: #6cf; }
+.cal-status-postado { background: #6f6; }
+
+/* Tracker table — same as dashboard */
+table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+th { text-align: left; padding: 8px 10px; font-size: 12px; color: #888; border-bottom: 1px solid #333; }
+td { padding: 8px 10px; font-size: 13px; border-bottom: 1px solid #1f1f1f; }
+.status-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; display: inline-block; }
 .status-badge.pendente { background: #2a1a1a; color: #f66; }
 .status-badge.gravado { background: #2a2a1a; color: #fc6; }
 .status-badge.editado { background: #1a2a3a; color: #6cf; }
 .status-badge.postado { background: #1a3a1a; color: #6f6; }
-.video-roteiro { background: #0f0f14; border: 1px solid #222; border-radius: 8px; padding: 12px; font-size: 12px; color: #aaa; line-height: 1.7; white-space: pre-wrap; margin-top: 8px; max-height: 200px; overflow-y: auto; }
-.video-roteiro-toggle { font-size: 12px; color: #4f9; cursor: pointer; background: none; border: none; padding: 4px 0; }
 
-/* Calendar */
-.cal-month { margin-bottom: 24px; }
-.cal-month-header { font-size: 14px; font-weight: 700; color: #4f9; margin-bottom: 8px; padding: 8px 12px; background: #1a1a24; border-radius: 8px; }
-.cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 3px; }
-.cal-day-header { font-size: 10px; color: #555; text-align: center; padding: 4px; font-weight: 600; }
-.cal-day { background: #14141c; border: 1px solid #1f1f2f; border-radius: 6px; min-height: 60px; padding: 4px; }
-.cal-day.empty { background: transparent; border-color: transparent; }
-.cal-day.today { border-color: #4f9; }
-.cal-day-num { font-size: 10px; color: #666; margin-bottom: 2px; }
-.cal-event { font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; background: #1a3a2a; color: #4f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
-.cal-event.pendente { border-left: 2px solid #f66; }
-.cal-event.gravado { border-left: 2px solid #fc6; }
-.cal-event.editado { border-left: 2px solid #6cf; }
-.cal-event.postado { border-left: 2px solid #6f6; }
+/* Buttons */
+button, .btn { padding: 10px 18px; border-radius: 10px; border: none; background: #252530; color: #e0e0e0; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .2s; }
+button:hover { background: #32323f; }
+.btn-primary { background: linear-gradient(135deg, #1a5a3a, #2a7a4a); color: #fff; }
+.btn-sm { padding: 6px 12px; font-size: 11px; border-radius: 8px; }
 
-/* Suggestions */
-.suggestion-form textarea { width: 100%; background: #14141c; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 12px; border-radius: 10px; font-size: 14px; font-family: inherit; min-height: 120px; resize: vertical; }
-.suggestion-form textarea:focus { outline: none; border-color: #4f9; box-shadow: 0 0 0 3px rgba(68,255,153,.1); }
-.suggestion-form select { width: 100%; background: #14141c; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 12px; }
-.suggestion-form input { width: 100%; background: #14141c; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 12px; }
+/* Ref link */
+.ref-link { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; color: #6cf; text-decoration: none; background: #1a2a3a; padding: 3px 8px; border-radius: 6px; }
+.ref-link:hover { background: #2a3a4a; }
 
-.btn { padding: 12px 24px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
-.btn-primary { background: linear-gradient(135deg, #1a5a3a, #2a7a4a); color: #fff; box-shadow: 0 2px 8px rgba(68,255,153,.15); width: 100%; }
-.btn-primary:hover { background: linear-gradient(135deg, #2a7a4a, #3a9a5a); }
-.btn-whatsapp { background: #25D366; color: #fff; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
-
-.suggestion-sent { text-align: center; padding: 24px; }
-.suggestion-sent h3 { color: #4f9; margin-bottom: 8px; }
-
-/* Stats */
-.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-.stat-box { background: linear-gradient(145deg, #1a1a24, #14141c); border: 1px solid #2a2a3a; border-radius: 14px; padding: 16px; text-align: center; }
-.stat-val { font-size: 24px; font-weight: 700; color: #4f9; }
-.stat-label { font-size: 11px; color: #888; margin-top: 4px; }
-
-/* Roteiro options */
-.roteiro-option { background: #14141c; border: 2px solid #2a2a3a; border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s; }
-.roteiro-option:hover { border-color: #4f9; }
-.roteiro-option.selected { border-color: #4f9; background: #0f1f15; }
-.roteiro-option h4 { color: #fff; font-size: 13px; margin-bottom: 6px; }
-.roteiro-option pre { font-size: 11px; color: #aaa; white-space: pre-wrap; font-family: inherit; line-height: 1.5; }
+/* Roteiro inline */
+.roteiro-box { background: #0f0f14; border: 1px solid #222; border-radius: 8px; padding: 12px; font-size: 12px; color: #aaa; line-height: 1.7; white-space: pre-wrap; margin-top: 6px; max-height: 200px; overflow-y: auto; }
+.roteiro-toggle { font-size: 11px; color: #4f9; cursor: pointer; background: none; border: none; padding: 2px 0; }
+.tp-toggle { font-size: 11px; color: #fc6; cursor: pointer; background: none; border: none; padding: 2px 0; }
 
 /* Teleprompter */
 .teleprompter-overlay { display: none; position: fixed; inset: 0; z-index: 300; background: #000; flex-direction: column; }
 .teleprompter-overlay.open { display: flex; }
-.tp-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #111; }
-.tp-header span { color: #4f9; font-weight: 700; font-size: 14px; }
-.tp-controls { display: flex; gap: 12px; justify-content: center; align-items: center; padding: 8px 16px; background: #111; border-bottom: 1px solid #333; }
 .tp-scroll { flex: 1; overflow-y: auto; padding: 40px 20px; }
 .tp-text { color: #fff; font-size: 28px; line-height: 1.8; white-space: pre-wrap; text-align: center; padding-bottom: 80vh; }
 
-/* Planejamento */
-.plan-card { background: linear-gradient(145deg, #14141c, #111118); border: 1px solid #2a2a3a; border-radius: 14px; padding: 18px; margin-bottom: 14px; position: relative; overflow: hidden; }
-.plan-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
-.plan-card.s-pendente::before { background: #f66; }
-.plan-card.s-gravado::before { background: #fc6; }
-.plan-card.s-editado::before { background: #6cf; }
-.plan-card.s-postado::before { background: #6f6; }
-.plan-date { font-size: 12px; color: #4f9; font-weight: 700; margin-bottom: 4px; }
-.plan-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-.plan-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
-.plan-ref { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #6cf; text-decoration: none; background: #1a2a3a; padding: 4px 10px; border-radius: 6px; margin-top: 6px; }
-.plan-ref:hover { background: #2a3a4a; }
-.plan-roteiro { background: #0a0a10; border: 1px solid #1f1f2f; border-radius: 8px; padding: 14px; margin-top: 10px; font-size: 13px; color: #bbb; line-height: 1.7; white-space: pre-wrap; }
-.plan-week { margin-bottom: 24px; }
-.plan-week-header { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; padding: 8px 0; border-bottom: 1px solid #1f1f2f; margin-bottom: 12px; }
-.plan-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
-.plan-summary-box { background: #14141c; border: 1px solid #2a2a3a; border-radius: 10px; padding: 12px; text-align: center; }
-.plan-summary-val { font-size: 20px; font-weight: 700; }
-.plan-summary-lbl { font-size: 10px; color: #888; margin-top: 2px; }
-.plan-actions { display: flex; gap: 6px; margin-top: 8px; }
+/* Suggestion form */
+.sug-form textarea, .sug-form select, .sug-form input { width: 100%; background: #16161e; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 12px; }
+.sug-form textarea { min-height: 120px; resize: vertical; }
+.sug-form textarea:focus, .sug-form input:focus { outline: none; border-color: #4f9; box-shadow: 0 0 0 3px rgba(68,255,153,.1); }
+.btn-whatsapp { background: #25D366; color: #fff; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 14px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+/* Info grid */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.info-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.info-value { font-size: 15px; font-weight: 600; color: #fff; }
+.info-value.green { color: #4f9; }
+
+/* History months */
+.month-header { cursor: pointer; display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #1a1a24; border: 1px solid #2a2a3a; border-radius: 8px; margin-bottom: 4px; }
+.month-header span:first-child { color: #4f9; font-weight: 700; }
+.month-header span:last-child { color: #555; font-size: 12px; }
 
 @media (max-width: 768px) {
-  .plan-summary { grid-template-columns: repeat(2, 1fr); }
-  .container { padding: 12px; }
+  .container { padding: 12px 8px; }
+  nav button { padding: 10px 4px; font-size: 11px; }
   .info-grid { grid-template-columns: 1fr; }
-  .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-  .stat-val { font-size: 18px; }
-  nav button { font-size: 11px; padding: 12px 4px; }
-  .cal-day { min-height: 50px; }
-  .cal-event { font-size: 8px; }
+  .week-summary { flex-direction: column; }
+  .ws-group + .ws-group { border-left: none; border-top: 2px solid #333; }
+  .calendar-week { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 4px; }
+  .cal-day { min-width: 120px; flex: 0 0 120px; padding: 6px; min-height: 80px; }
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table thead, table tbody { display: table; width: 100%; }
+  th, td { padding: 5px 4px; white-space: nowrap; font-size: 11px; }
 }
 </style>
 </head>
 <body>
 
-<div id="app-loading" class="loading">
-  <h2>Carregando...</h2>
-  <p>Verificando acesso ao portal</p>
-</div>
-
-<div id="app-error" class="loading" style="display:none;">
-  <h2 class="error">Acesso negado</h2>
-  <p>Link inválido ou expirado. Solicite um novo link ao seu social media.</p>
-</div>
+<div id="app-loading" class="loading"><h2>Carregando...</h2><p>Verificando acesso</p></div>
+<div id="app-error" class="loading" style="display:none;"><h2 class="error">Acesso negado</h2><p>Link inválido ou expirado. Solicite um novo link ao seu social media.</p></div>
 
 <div class="teleprompter-overlay" id="teleprompter">
-  <div class="tp-header">
-    <span id="tp-title"></span>
-    <button class="btn" style="padding:6px 14px;font-size:12px;background:#222;color:#fff;" onclick="closeTeleprompter()">✕ Fechar</button>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#111;">
+    <span id="tp-title" style="color:#4f9;font-weight:700;font-size:14px;"></span>
+    <button class="btn-sm" onclick="closeTeleprompter()">✕ Fechar</button>
   </div>
-  <div class="tp-controls">
-    <button class="btn" style="padding:6px 12px;font-size:12px;background:#222;color:#fff;" onclick="tpSpeed(-1)">🐢 Lento</button>
-    <button class="btn" id="tp-play-btn" style="padding:8px 18px;font-size:13px;background:#1a5a3a;color:#fff;" onclick="tpToggle()">▶ Iniciar</button>
-    <button class="btn" style="padding:6px 12px;font-size:12px;background:#222;color:#fff;" onclick="tpSpeed(1)">🐇 Rápido</button>
+  <div style="display:flex;gap:12px;justify-content:center;align-items:center;padding:8px 16px;background:#111;border-bottom:1px solid #333;">
+    <button class="btn-sm" onclick="tpSpeed(-1)">🐢 Mais lento</button>
+    <button class="btn-sm btn-primary" id="tp-play-btn" onclick="tpToggle()">▶ Iniciar</button>
+    <button class="btn-sm" onclick="tpSpeed(1)">🐇 Mais rápido</button>
   </div>
-  <div class="tp-scroll" id="tp-scroll">
-    <div class="tp-text" id="tp-text"></div>
-  </div>
+  <div class="tp-scroll" id="tp-scroll"><div class="tp-text" id="tp-text"></div></div>
 </div>
 
 <div id="app" style="display:none;">
@@ -175,128 +150,86 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
   </header>
 
   <nav>
-    <button class="active" onclick="showTab('visao')">Visão Geral</button>
-    <button onclick="showTab('planejamento')">Planejamento</button>
-    <button onclick="showTab('videos')">Vídeos</button>
-    <button onclick="showTab('calendario')">Calendário</button>
-    <button onclick="showTab('ideias')">Sugestões</button>
+    <button class="active" onclick="showTab('dashboard')">Dashboard</button>
+    <button onclick="showTab('historico')">Histórico</button>
+    <button onclick="showTab('contrato')">Contrato</button>
+    <button onclick="showTab('sugestoes')">Sugestões</button>
   </nav>
 
   <div class="container">
 
-    <!-- VISÃO GERAL -->
-    <div id="tab-visao" class="section active">
-      <div class="stats-grid" id="stats-grid"></div>
+    <!-- DASHBOARD (equal to Lucas's view) -->
+    <div id="tab-dashboard" class="tab active">
+      <h2>Resumo da Semana</h2>
+      <div id="week-summary"></div>
 
+      <h2>Calendário Semanal</h2>
+      <div class="week-nav">
+        <button class="btn-sm" onclick="changeWeek(-1)">← Anterior</button>
+        <span id="week-label"></span>
+        <button class="btn-sm" onclick="changeWeek(1)">Próxima →</button>
+        <button class="btn-sm" onclick="changeWeek(0)">Hoje</button>
+      </div>
+      <div class="calendar-week" id="calendar"></div>
+
+      <h2>Tracker da Semana</h2>
+      <table>
+        <thead><tr><th>Título</th><th>Pilar</th><th>Status</th><th>Data</th><th>Ref</th><th>Roteiro</th></tr></thead>
+        <tbody id="tracker-body"></tbody>
+      </table>
+    </div>
+
+    <!-- HISTÓRICO -->
+    <div id="tab-historico" class="tab">
+      <h2>Vídeos por Mês</h2>
+      <div id="history-container"></div>
+    </div>
+
+    <!-- CONTRATO -->
+    <div id="tab-contrato" class="tab">
+      <h2>Informações do Contrato</h2>
       <div class="card">
-        <div class="card-label">Contrato</div>
         <div class="info-grid">
-          <div><div class="card-label">Valor</div><div class="card-value green" id="info-valor"></div></div>
-          <div><div class="card-label">Cadência</div><div class="card-value" id="info-cadencia"></div></div>
+          <div><div class="info-label">Valor</div><div class="info-value green" id="info-valor"></div></div>
+          <div><div class="info-label">Cadência</div><div class="info-value" id="info-cadencia"></div></div>
         </div>
       </div>
-
       <div class="card">
-        <div class="card-label">Pilares de Conteúdo</div>
+        <div class="info-label">Pilares de Conteúdo</div>
         <div class="pills" id="info-pillars"></div>
-        <p style="font-size:12px;color:#888;margin-top:8px;">Cada vídeo segue um desses pilares estratégicos.</p>
       </div>
-
       <div class="card">
-        <div class="card-label">Objetivo</div>
-        <p style="font-size:13px;color:#ccc;line-height:1.6;" id="info-objetivo"></p>
+        <div class="info-label">Objetivo</div>
+        <p style="font-size:13px;color:#ccc;line-height:1.6;margin-top:6px;" id="info-objetivo"></p>
       </div>
-
       <div class="card">
-        <div class="card-label">ICP — Público-alvo</div>
-        <p style="font-size:13px;color:#ccc;line-height:1.6;" id="info-icp"></p>
-      </div>
-    </div>
-
-    <!-- PLANEJAMENTO -->
-    <div id="tab-planejamento" class="section">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-        <h2 style="margin:0;">Planejamento do Mês</h2>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changePlanMonth(-1)">← Anterior</button>
-          <span id="plan-month-label" style="font-size:14px;font-weight:600;color:#fff;"></span>
-          <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changePlanMonth(1)">Próximo →</button>
-        </div>
-      </div>
-      <p style="color:#888;font-size:13px;margin:8px 0 16px;">Tudo que está planejado, em produção e já postado neste mês.</p>
-      <div id="plan-summary"></div>
-      <div id="plan-content"></div>
-    </div>
-
-    <!-- VÍDEOS -->
-    <div id="tab-videos" class="section">
-      <h2>Vídeos</h2>
-      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-        <select id="vid-filter-status" onchange="renderVideos()" style="background:#14141c;border:1px solid #2a2a3a;color:#e0e0e0;padding:8px 12px;border-radius:8px;font-size:13px;">
-          <option value="all">Todos os status</option>
-          <option value="pendente">Pendente</option>
-          <option value="gravado">Gravado</option>
-          <option value="editado">Editado</option>
-          <option value="postado">Postado</option>
-        </select>
-        <select id="vid-filter-month" onchange="renderVideos()" style="background:#14141c;border:1px solid #2a2a3a;color:#e0e0e0;padding:8px 12px;border-radius:8px;font-size:13px;">
-          <option value="all">Todos os meses</option>
-        </select>
-      </div>
-      <div id="videos-list"></div>
-    </div>
-
-    <!-- CALENDÁRIO -->
-    <div id="tab-calendario" class="section">
-      <h2>Calendário de Conteúdo</h2>
-      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
-        <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changeCalMonth(-1)">← Anterior</button>
-        <span id="cal-month-label" style="font-size:14px;font-weight:600;color:#fff;flex:1;text-align:center;"></span>
-        <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changeCalMonth(1)">Próximo →</button>
-      </div>
-      <div id="calendar-view"></div>
-
-      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
-        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#f66;"></span> Pendente</span>
-        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#fc6;"></span> Gravado</span>
-        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#6cf;"></span> Editado</span>
-        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#6f6;"></span> Postado</span>
+        <div class="info-label">ICP — Público-alvo</div>
+        <p style="font-size:13px;color:#ccc;line-height:1.6;margin-top:6px;" id="info-icp"></p>
       </div>
     </div>
 
     <!-- SUGESTÕES -->
-    <div id="tab-ideias" class="section">
+    <div id="tab-sugestoes" class="tab">
       <h2>Enviar Sugestão</h2>
-      <p style="color:#888;font-size:13px;margin-bottom:16px;">Tem uma ideia de conteúdo, quer mostrar algo ou tem uma referência? Manda aqui que eu recebo direto.</p>
-
-      <div class="card suggestion-form">
-        <div style="margin-bottom:12px;">
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Tipo</label>
-          <select id="sug-tipo">
-            <option value="ideia">💡 Ideia de conteúdo</option>
-            <option value="mostrar">📸 Quero mostrar/gravar algo</option>
-            <option value="referencia">🔗 Referência (vi um vídeo legal)</option>
-            <option value="feedback">💬 Feedback sobre um vídeo</option>
-            <option value="outro">📝 Outro</option>
-          </select>
-        </div>
-
-        <div style="margin-bottom:12px;">
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Sua sugestão</label>
-          <textarea id="sug-texto" placeholder="Descreva sua ideia, o que quer mostrar, cole um link de referência..."></textarea>
-        </div>
-
-        <div style="margin-bottom:16px;">
-          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Link de referência (opcional)</label>
-          <input id="sug-link" type="url" placeholder="https://instagram.com/reel/...">
-        </div>
-
-        <button class="btn btn-whatsapp" onclick="enviarSugestao()">
+      <p style="color:#888;font-size:13px;margin-bottom:16px;">Tem uma ideia de conteúdo, quer mostrar algo ou tem uma referência? Manda aqui.</p>
+      <div class="card sug-form">
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Tipo</label>
+        <select id="sug-tipo">
+          <option value="ideia">💡 Ideia de conteúdo</option>
+          <option value="mostrar">📸 Quero mostrar/gravar algo</option>
+          <option value="referencia">🔗 Referência (vi um vídeo legal)</option>
+          <option value="feedback">💬 Feedback sobre um vídeo</option>
+          <option value="outro">📝 Outro</option>
+        </select>
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Sua sugestão</label>
+        <textarea id="sug-texto" placeholder="Descreva sua ideia, o que quer mostrar, cole um link de referência..."></textarea>
+        <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Link de referência (opcional)</label>
+        <input id="sug-link" type="url" placeholder="https://instagram.com/reel/...">
+        <button class="btn-whatsapp" onclick="enviarSugestao()">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
           Enviar via WhatsApp
         </button>
       </div>
-
       <div id="sugestoes-anteriores" style="margin-top:24px;"></div>
     </div>
 
@@ -305,41 +238,28 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
 
 <script>
 const WHATSAPP_NUMBER = '5511973836281';
-
 let clientData = null;
 let clientKey = null;
 let allVideos = [];
-let calMonth = new Date().toISOString().slice(0, 7);
+let currentWeekStart = getMonday(new Date());
 
+// ============ INIT ============
 function init() {
   const params = new URLSearchParams(window.location.search);
   clientKey = params.get('c');
   const token = params.get('k');
-
-  if (!clientKey || !token) {
-    showError();
-    return;
-  }
+  if (!clientKey || !token) { showError(); return; }
 
   const script = document.createElement('script');
   script.src = 'portal-data.js?t=' + Date.now();
   script.onload = function() {
-    if (typeof PORTAL_DATA === 'undefined' || !PORTAL_DATA.clients[clientKey]) {
-      showError();
-      return;
-    }
-    const stored = PORTAL_DATA.tokens[clientKey];
-    if (stored !== token) {
-      showError();
-      return;
-    }
+    if (typeof PORTAL_DATA === 'undefined' || !PORTAL_DATA.clients[clientKey]) { showError(); return; }
+    if (PORTAL_DATA.tokens[clientKey] !== token) { showError(); return; }
     clientData = PORTAL_DATA.clients[clientKey];
     allVideos = PORTAL_DATA.videos.filter(v => v.client === clientKey);
     showApp();
   };
-  script.onerror = function() {
-    showError();
-  };
+  script.onerror = function() { showError(); };
   document.head.appendChild(script);
 }
 
@@ -351,293 +271,182 @@ function showError() {
 function showApp() {
   document.getElementById('app-loading').style.display = 'none';
   document.getElementById('app').style.display = 'block';
-
   document.getElementById('client-name').textContent = clientData.name;
   document.title = clientData.name + ' — Portal do Cliente';
 
   document.getElementById('info-valor').textContent = clientData.valor;
   document.getElementById('info-cadencia').textContent = clientData.cadencia;
-  document.getElementById('info-objetivo').textContent = clientData.objetivo || 'A definir';
-  document.getElementById('info-icp').textContent = clientData.icp || 'A definir';
+  document.getElementById('info-objetivo').textContent = clientData.objetivo || '—';
+  document.getElementById('info-icp').textContent = clientData.icp || '—';
+  document.getElementById('info-pillars').innerHTML = clientData.pillars.map(p => `<span class="pill">${p}</span>`).join('');
 
-  const pillsEl = document.getElementById('info-pillars');
-  pillsEl.innerHTML = clientData.pillars.map(p => `<span class="pill">${p}</span>`).join('');
-
-  renderStats();
-  renderPlan();
-  renderVideos();
-  populateMonthFilter();
+  renderWeeklySummary();
   renderCalendar();
+  renderTracker();
+  renderHistory();
   loadSugestoes();
 }
 
-function renderStats() {
-  const now = new Date().toISOString().slice(0, 7);
-  const mesVideos = allVideos.filter(v => v.date && v.date.startsWith(now));
-  const postados = mesVideos.filter(v => v.status === 'postado').length;
-  const emProducao = mesVideos.filter(v => v.status !== 'postado').length;
-  const total = allVideos.length;
-
-  document.getElementById('stats-grid').innerHTML = `
-    <div class="stat-box"><div class="stat-val">${postados}</div><div class="stat-label">Postados este mês</div></div>
-    <div class="stat-box"><div class="stat-val" style="color:#fc6;">${emProducao}</div><div class="stat-label">Em produção</div></div>
-    <div class="stat-box"><div class="stat-val" style="color:#6cf;">${total}</div><div class="stat-label">Total de vídeos</div></div>
-  `;
+// ============ WEEK NAVIGATION ============
+function getMonday(d) {
+  const dt = new Date(d);
+  const day = dt.getDay();
+  dt.setDate(dt.getDate() - day + (day === 0 ? -6 : 1));
+  dt.setHours(0,0,0,0);
+  return dt;
 }
 
-function renderVideos() {
-  const fs = document.getElementById('vid-filter-status').value;
-  const fm = document.getElementById('vid-filter-month').value;
+function changeWeek(dir) {
+  if (dir === 0) currentWeekStart = getMonday(new Date());
+  else currentWeekStart.setDate(currentWeekStart.getDate() + dir * 7);
+  renderWeeklySummary();
+  renderCalendar();
+  renderTracker();
+}
 
-  let filtered = allVideos.filter(v =>
-    (fs === 'all' || v.status === fs) &&
-    (fm === 'all' || (v.date && v.date.startsWith(fm)))
-  );
-  filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-  lastFilteredVideos = filtered;
+function dateStr(d) { return d.toISOString().split('T')[0]; }
+function fmt(d) { return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`; }
 
-  const el = document.getElementById('videos-list');
-  if (filtered.length === 0) {
-    el.innerHTML = '<div class="card" style="text-align:center;color:#555;">Nenhum vídeo encontrado</div>';
+// ============ WEEKLY SUMMARY ============
+function renderWeeklySummary() {
+  const weekEnd = new Date(currentWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const ws = dateStr(currentWeekStart), we = dateStr(weekEnd);
+  const weekVideos = allVideos.filter(v => v.date >= ws && v.date <= we);
+  const counts = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
+  weekVideos.forEach(v => counts[v.status]++);
+
+  document.getElementById('week-summary').innerHTML = `
+    <div class="week-summary">
+      <div class="ws-group" style="flex-direction:column;">
+        <div class="ws-group-label">Status</div>
+        <div style="display:flex;flex:1;">
+          <div class="ws-item"><div class="ws-val" style="color:#fff;">${weekVideos.length}</div><div class="ws-lbl">Total</div></div>
+          <div class="ws-item"><div class="ws-val" style="color:#f66;">${counts.pendente}</div><div class="ws-lbl">Pendente</div></div>
+          <div class="ws-item"><div class="ws-val" style="color:#fc6;">${counts.gravado}</div><div class="ws-lbl">Gravado</div></div>
+          <div class="ws-item"><div class="ws-val" style="color:#6cf;">${counts.editado}</div><div class="ws-lbl">Editado</div></div>
+          <div class="ws-item"><div class="ws-val" style="color:#6f6;">${counts.postado}</div><div class="ws-lbl">Postado</div></div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============ CALENDAR ============
+function renderCalendar() {
+  const days = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const end = new Date(currentWeekStart);
+  end.setDate(end.getDate() + 6);
+  document.getElementById('week-label').textContent = `${fmt(currentWeekStart)} — ${fmt(end)}`;
+
+  let html = '';
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(currentWeekStart);
+    dt.setDate(dt.getDate() + i);
+    const ds = dateStr(dt);
+    const dayVids = allVideos.filter(v => v.date === ds);
+    let items = dayVids.map(v =>
+      `<div class="cal-item"><span class="cal-status cal-status-${v.status}"></span>${v.title.substring(0,20)}</div>`
+    ).join('');
+    html += `<div class="cal-day"><div class="cal-day-label">${days[i]} ${dt.getDate()}/${dt.getMonth()+1}</div>${items}</div>`;
+  }
+  document.getElementById('calendar').innerHTML = html;
+}
+
+// ============ TRACKER ============
+function renderTracker() {
+  const weekEnd = new Date(currentWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const ws = dateStr(currentWeekStart), we = dateStr(weekEnd);
+  const weekVideos = allVideos.filter(v => v.date >= ws && v.date <= we);
+  weekVideos.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+  const tbody = document.getElementById('tracker-body');
+  if (weekVideos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#555;padding:24px;">Nenhum vídeo nesta semana</td></tr>';
     return;
   }
 
-  el.innerHTML = filtered.map(v => {
+  tbody.innerHTML = weekVideos.map((v, i) => {
     const statusLabel = v.status.charAt(0).toUpperCase() + v.status.slice(1);
-    const dateLabel = v.date ? v.date.split('-').reverse().join('/') : '—';
-    return `<div class="video-item">
-      <div class="video-header">
-        <span class="video-title">${v.title}</span>
-        <span class="video-date">${dateLabel}</span>
+    const dateLabel = v.date ? v.date.split('-').reverse().slice(0,2).join('/') : '—';
+    const refHtml = v.ref ? `<a href="${v.ref}" target="_blank" class="ref-link">🔗 Ver</a>` : '<span style="color:#555;font-size:11px;">—</span>';
+    let roteiroHtml = '<span style="color:#555;font-size:11px;">—</span>';
+    if (v.roteiro) {
+      const uid = 'rot-' + ws.replace(/-/g,'') + '-' + i;
+      roteiroHtml = `
+        <button class="roteiro-toggle" onclick="document.getElementById('${uid}').style.display = document.getElementById('${uid}').style.display === 'none' ? 'table-row' : 'none'">▶ Roteiro</button>
+        <button class="tp-toggle" onclick="openTeleprompter('${v.title.replace(/'/g,"\\'")}', ${i})">▶ TP</button>`;
+    }
+    const roteiroRow = v.roteiro ? `<tr id="rot-${ws.replace(/-/g,'')}-${i}" style="display:none;"><td colspan="6"><div class="roteiro-box">${v.roteiro}</div></td></tr>` : '';
+
+    return `<tr>
+      <td style="font-weight:600;color:#fff;">${v.title}</td>
+      <td><span class="pill">${v.pillar}</span></td>
+      <td><span class="status-badge ${v.status}">${statusLabel}</span></td>
+      <td>${dateLabel}</td>
+      <td>${refHtml}</td>
+      <td>${roteiroHtml}</td>
+    </tr>${roteiroRow}`;
+  }).join('');
+
+  window._weekVideos = weekVideos;
+}
+
+// ============ HISTORY ============
+function renderHistory() {
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const sorted = [...allVideos].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  const grouped = {};
+  sorted.forEach(v => {
+    const key = v.date ? v.date.slice(0, 7) : 'sem-data';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(v);
+  });
+
+  const months = Object.keys(grouped).sort().reverse();
+  if (months.length === 0) {
+    document.getElementById('history-container').innerHTML = '<p style="color:#555;text-align:center;padding:24px;">Nenhum vídeo encontrado</p>';
+    return;
+  }
+
+  document.getElementById('history-container').innerHTML = months.map(m => {
+    const [y, mo] = m.split('-');
+    const label = m === 'sem-data' ? 'Sem data' : `${meses[parseInt(mo)-1]} ${y}`;
+    const vids = grouped[m];
+    const mid = 'hist-' + m;
+    return `
+      <div class="month-header" onclick="document.getElementById('${mid}').style.display = document.getElementById('${mid}').style.display === 'none' ? 'block' : 'none'">
+        <span>${label}</span>
+        <span>${vids.length} vídeo${vids.length > 1 ? 's' : ''}</span>
       </div>
-      <div class="video-meta">
-        <span class="status-badge ${v.status}">${statusLabel}</span>
-        <span class="pill" style="font-size:10px;">${v.pillar}</span>
-      </div>
-      ${v.roteiro ? `
-        <div style="display:flex;gap:8px;align-items:center;">
-          <button class="video-roteiro-toggle" onclick="this.parentElement.nextElementSibling.style.display = this.parentElement.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.parentElement.nextElementSibling.style.display === 'none' ? '▶ Ver roteiro' : '▼ Ocultar roteiro'">▶ Ver roteiro</button>
-          <button class="video-roteiro-toggle" style="color:#fc6;" onclick="openTeleprompterByIndex(${filtered.indexOf(v)})">▶ Teleprompter</button>
-        </div>
-        <div class="video-roteiro" style="display:none;">${v.roteiro}</div>
-      ` : ''}
-    </div>`;
+      <div id="${mid}" style="display:none;padding:8px 0;">
+        <table>
+          <thead><tr><th>Título</th><th>Pilar</th><th>Status</th><th>Data</th><th>Ref</th></tr></thead>
+          <tbody>${vids.map(v => {
+            const statusLabel = v.status.charAt(0).toUpperCase() + v.status.slice(1);
+            const dateLabel = v.date ? v.date.split('-').reverse().join('/') : '—';
+            const refHtml = v.ref ? `<a href="${v.ref}" target="_blank" class="ref-link">🔗</a>` : '—';
+            return `<tr>
+              <td style="color:#fff;">${v.title}</td>
+              <td><span class="pill">${v.pillar}</span></td>
+              <td><span class="status-badge ${v.status}">${statusLabel}</span></td>
+              <td>${dateLabel}</td>
+              <td>${refHtml}</td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>
+      </div>`;
   }).join('');
 }
 
-function populateMonthFilter() {
-  const months = [...new Set(allVideos.filter(v => v.date).map(v => v.date.slice(0, 7)))].sort().reverse();
-  const sel = document.getElementById('vid-filter-month');
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  months.forEach(m => {
-    const [y, mo] = m.split('-');
-    sel.innerHTML += `<option value="${m}">${meses[parseInt(mo)-1]} ${y}</option>`;
-  });
-}
-
-// Calendar
-function changeCalMonth(dir) {
-  const [y, m] = calMonth.split('-').map(Number);
-  const d = new Date(y, m - 1 + dir, 1);
-  calMonth = d.toISOString().slice(0, 7);
-  renderCalendar();
-}
-
-function renderCalendar() {
-  const [year, month] = calMonth.split('-').map(Number);
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('cal-month-label').textContent = `${meses[month-1]} ${year}`;
-
-  const firstDay = new Date(year, month - 1, 1);
-  const lastDay = new Date(year, month, 0);
-  const startDow = (firstDay.getDay() + 6) % 7;
-  const totalDays = lastDay.getDate();
-  const today = new Date().toISOString().slice(0, 10);
-
-  const monthVideos = allVideos.filter(v => v.date && v.date.startsWith(calMonth));
-
-  let html = '<div class="cal-week">';
-  ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d => {
-    html += `<div class="cal-day-header">${d}</div>`;
-  });
-  html += '</div><div class="cal-week">';
-
-  for (let i = 0; i < startDow; i++) html += '<div class="cal-day empty"></div>';
-
-  for (let d = 1; d <= totalDays; d++) {
-    const ds = `${calMonth}-${String(d).padStart(2, '0')}`;
-    const isToday = ds === today;
-    const dayVids = monthVideos.filter(v => v.date === ds);
-
-    html += `<div class="cal-day${isToday ? ' today' : ''}">`;
-    html += `<div class="cal-day-num">${d}</div>`;
-    dayVids.forEach(v => {
-      html += `<div class="cal-event ${v.status}" title="${v.title}">${v.title.substring(0, 15)}</div>`;
-    });
-    html += '</div>';
-
-    if ((startDow + d) % 7 === 0 && d < totalDays) html += '</div><div class="cal-week">';
-  }
-
-  const remaining = (7 - (startDow + totalDays) % 7) % 7;
-  for (let i = 0; i < remaining; i++) html += '<div class="cal-day empty"></div>';
-  html += '</div>';
-
-  document.getElementById('calendar-view').innerHTML = html;
-}
-
-// Suggestions
-function enviarSugestao() {
-  const tipo = document.getElementById('sug-tipo');
-  const texto = document.getElementById('sug-texto').value.trim();
-  const link = document.getElementById('sug-link').value.trim();
-
-  if (!texto) { alert('Escreva sua sugestão antes de enviar.'); return; }
-
-  const tipoLabel = tipo.options[tipo.selectedIndex].text;
-  let msg = `*Portal do Cliente — ${clientData.name}*\n\n`;
-  msg += `*Tipo:* ${tipoLabel}\n\n`;
-  msg += `*Sugestão:*\n${texto}`;
-  if (link) msg += `\n\n*Referência:* ${link}`;
-
-  // Save locally
-  const sugestoes = JSON.parse(localStorage.getItem('portal_sugestoes_' + clientKey) || '[]');
-  sugestoes.unshift({ tipo: tipoLabel, texto, link, data: new Date().toISOString().slice(0, 10) });
-  localStorage.setItem('portal_sugestoes_' + clientKey, JSON.stringify(sugestoes.slice(0, 20)));
-
-  const encoded = encodeURIComponent(msg);
-  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
-
-  document.getElementById('sug-texto').value = '';
-  document.getElementById('sug-link').value = '';
-  loadSugestoes();
-}
-
-function loadSugestoes() {
-  const sugestoes = JSON.parse(localStorage.getItem('portal_sugestoes_' + clientKey) || '[]');
-  const el = document.getElementById('sugestoes-anteriores');
-  if (sugestoes.length === 0) { el.innerHTML = ''; return; }
-
-  el.innerHTML = `
-    <h3 style="color:#4f9;">Sugestões enviadas</h3>
-    ${sugestoes.map(s => `
-      <div class="card" style="padding:12px;">
-        <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;">
-          <span>${s.tipo}</span><span>${s.data}</span>
-        </div>
-        <p style="font-size:13px;color:#ccc;">${s.texto}</p>
-        ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:11px;color:#4f9;">Ver referência</a>` : ''}
-      </div>
-    `).join('')}
-  `;
-}
-
-// Planejamento
-let planMonth = new Date().toISOString().slice(0, 7);
-
-function changePlanMonth(dir) {
-  const [y, m] = planMonth.split('-').map(Number);
-  const d = new Date(y, m - 1 + dir, 1);
-  planMonth = d.toISOString().slice(0, 7);
-  renderPlan();
-}
-
-function renderPlan() {
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const [year, month] = planMonth.split('-').map(Number);
-  document.getElementById('plan-month-label').textContent = `${meses[month-1]} ${year}`;
-
-  const monthVids = allVideos.filter(v => v.date && v.date.startsWith(planMonth));
-  monthVids.sort((a, b) => a.date.localeCompare(b.date));
-
-  const counts = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
-  monthVids.forEach(v => counts[v.status]++);
-
-  document.getElementById('plan-summary').innerHTML = `
-    <div class="plan-summary">
-      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#fff;">${monthVids.length}</div><div class="plan-summary-lbl">Total</div></div>
-      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#f66;">${counts.pendente}</div><div class="plan-summary-lbl">Pendente</div></div>
-      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#fc6;">${counts.gravado + counts.editado}</div><div class="plan-summary-lbl">Em produção</div></div>
-      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#6f6;">${counts.postado}</div><div class="plan-summary-lbl">Postado</div></div>
-    </div>
-  `;
-
-  if (monthVids.length === 0) {
-    document.getElementById('plan-content').innerHTML = '<div class="card" style="text-align:center;color:#555;padding:32px;">Nenhum vídeo planejado para este mês</div>';
-    return;
-  }
-
-  // Group by week
-  const weeks = {};
-  const dias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
-  monthVids.forEach(v => {
-    const d = new Date(v.date + 'T12:00:00');
-    const weekStart = new Date(d);
-    const day = weekStart.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    weekStart.setDate(weekStart.getDate() + diff);
-    const wk = weekStart.toISOString().slice(0, 10);
-    if (!weeks[wk]) weeks[wk] = [];
-    weeks[wk].push(v);
-  });
-
-  let html = '';
-  const planVidsAll = [];
-  Object.keys(weeks).sort().forEach(wk => {
-    const wkDate = new Date(wk + 'T12:00:00');
-    const wkEnd = new Date(wkDate); wkEnd.setDate(wkEnd.getDate() + 6);
-    const label = `Semana ${wkDate.getDate()}/${month} — ${wkEnd.getDate()}/${month}`;
-    html += `<div class="plan-week"><div class="plan-week-header">${label}</div>`;
-
-    weeks[wk].forEach(v => {
-      const idx = planVidsAll.length;
-      planVidsAll.push(v);
-      const d = new Date(v.date + 'T12:00:00');
-      const dayName = dias[d.getDay()];
-      const dateLabel = `${dayName}, ${d.getDate()}/${month}`;
-      const statusLabel = v.status.charAt(0).toUpperCase() + v.status.slice(1);
-
-      html += `<div class="plan-card s-${v.status}">
-        <div class="plan-date">${dateLabel}</div>
-        <div class="plan-title">${v.title}</div>
-        <div class="plan-meta">
-          <span class="status-badge ${v.status}">${statusLabel}</span>
-          <span class="pill" style="font-size:10px;">${v.pillar}</span>
-        </div>
-        ${v.ref ? `<a href="${v.ref}" target="_blank" class="plan-ref">🔗 Referência</a>` : ''}
-        ${v.roteiro ? `
-          <div class="plan-actions">
-            <button class="video-roteiro-toggle" onclick="this.parentElement.nextElementSibling.style.display = this.parentElement.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.parentElement.nextElementSibling.style.display === 'none' ? '▶ Ver roteiro' : '▼ Ocultar roteiro'">▶ Ver roteiro</button>
-            <button class="video-roteiro-toggle" style="color:#fc6;" onclick="openPlanTeleprompter(${idx})">▶ Teleprompter</button>
-          </div>
-          <div class="plan-roteiro" style="display:none;">${v.roteiro}</div>
-        ` : '<div style="font-size:12px;color:#555;margin-top:6px;font-style:italic;">Roteiro em desenvolvimento</div>'}
-      </div>`;
-    });
-    html += '</div>';
-  });
-
-  document.getElementById('plan-content').innerHTML = html;
-  window._planVids = planVidsAll;
-}
-
-function openPlanTeleprompter(idx) {
-  const v = window._planVids[idx];
-  if (v && v.roteiro) openTeleprompter(v.title, v.roteiro);
-}
-
-// Teleprompter
+// ============ TELEPROMPTER ============
 let tpInterval = null;
 let tpSpeedVal = 1;
-let lastFilteredVideos = [];
 
-function openTeleprompterByIndex(idx) {
-  const v = lastFilteredVideos[idx];
-  if (!v || !v.roteiro) return;
-  openTeleprompter(v.title, v.roteiro);
-}
-
-function openTeleprompter(title, roteiro) {
+function openTeleprompter(title, weekIdx) {
+  const v = window._weekVideos ? window._weekVideos[weekIdx] : null;
+  const roteiro = v ? v.roteiro : '';
+  if (!roteiro) return;
   document.getElementById('tp-title').textContent = title;
   document.getElementById('tp-text').textContent = roteiro;
   document.getElementById('tp-scroll').scrollTop = 0;
@@ -654,24 +463,52 @@ function closeTeleprompter() {
 
 function tpToggle() {
   if (tpInterval) {
-    clearInterval(tpInterval);
-    tpInterval = null;
+    clearInterval(tpInterval); tpInterval = null;
     document.getElementById('tp-play-btn').textContent = '▶ Continuar';
   } else {
-    tpInterval = setInterval(() => {
-      document.getElementById('tp-scroll').scrollTop += tpSpeedVal;
-    }, 30);
+    tpInterval = setInterval(() => { document.getElementById('tp-scroll').scrollTop += tpSpeedVal; }, 30);
     document.getElementById('tp-play-btn').textContent = '⏸ Pausar';
   }
 }
 
-function tpSpeed(dir) {
-  tpSpeedVal = Math.max(0.5, Math.min(5, tpSpeedVal + dir * 0.5));
+function tpSpeed(dir) { tpSpeedVal = Math.max(0.5, Math.min(5, tpSpeedVal + dir * 0.5)); }
+
+// ============ SUGGESTIONS ============
+function enviarSugestao() {
+  const tipo = document.getElementById('sug-tipo');
+  const texto = document.getElementById('sug-texto').value.trim();
+  const link = document.getElementById('sug-link').value.trim();
+  if (!texto) { alert('Escreva sua sugestão antes de enviar.'); return; }
+
+  const tipoLabel = tipo.options[tipo.selectedIndex].text;
+  let msg = `*Portal do Cliente — ${clientData.name}*\n\n*Tipo:* ${tipoLabel}\n\n*Sugestão:*\n${texto}`;
+  if (link) msg += `\n\n*Referência:* ${link}`;
+
+  const sugestoes = JSON.parse(localStorage.getItem('portal_sugestoes_' + clientKey) || '[]');
+  sugestoes.unshift({ tipo: tipoLabel, texto, link, data: new Date().toISOString().slice(0, 10) });
+  localStorage.setItem('portal_sugestoes_' + clientKey, JSON.stringify(sugestoes.slice(0, 20)));
+
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+  document.getElementById('sug-texto').value = '';
+  document.getElementById('sug-link').value = '';
+  loadSugestoes();
 }
 
-// Tabs
+function loadSugestoes() {
+  const sugestoes = JSON.parse(localStorage.getItem('portal_sugestoes_' + clientKey) || '[]');
+  const el = document.getElementById('sugestoes-anteriores');
+  if (sugestoes.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML = `<h3 style="color:#4f9;font-size:14px;margin-bottom:12px;">Sugestões enviadas</h3>` +
+    sugestoes.map(s => `<div class="card" style="padding:12px;">
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;"><span>${s.tipo}</span><span>${s.data}</span></div>
+      <p style="font-size:13px;color:#ccc;">${s.texto}</p>
+      ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:11px;color:#4f9;">Ver referência</a>` : ''}
+    </div>`).join('');
+}
+
+// ============ TABS ============
 function showTab(id) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
   document.querySelector(`nav button[onclick="showTab('${id}')"]`).classList.add('active');
