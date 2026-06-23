@@ -53,146 +53,11 @@ const PORTAL_DATA = {
   "videos": [
     {
       "client": "cube",
-      "title": "Dia das Mulheres",
-      "pillar": "PROJETO",
-      "date": "2026-03-08",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "What's the Song?",
-      "pillar": "DAILY",
-      "date": "2026-03-11",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Escola da Inteligência — Nova Parceria",
-      "pillar": "PROJETO",
-      "date": "2026-03-13",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Dia da Família — Gincana Escolar",
-      "pillar": "PROJETO",
-      "date": "2026-03-30",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Choco Tour Nestlé",
-      "pillar": "PROJETO",
-      "date": "2026-03-31",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Trem da Páscoa",
-      "pillar": "PROJETO",
-      "date": "2026-04-05",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Nova Parceria — Fernanda Gabriela",
-      "pillar": "LIDERANÇA",
-      "date": "2026-04-11",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Educação em 60s",
-      "pillar": "LIDERANÇA",
-      "date": "2026-04-15",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Manifesto Cube",
-      "pillar": "LIDERANÇA",
-      "date": "2026-04-24",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "POV: Um dia com a Diretora",
-      "pillar": "LIDERANÇA",
-      "date": "2026-05-05",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Educação em 60s #2 — Como as famílias ricas escolhem suas escolas",
-      "pillar": "LIDERANÇA",
-      "date": "2026-05-06",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Nova Parceria Cube — SESI e SENAI",
-      "pillar": "PROJETO",
-      "date": "2026-05-09",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Educação em 60 segundos #3 — Avaliação por nota no século XXI",
-      "pillar": "LIDERANÇA",
-      "date": "2026-06-03",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Rifa do Hexa",
-      "pillar": "DAILY",
-      "date": "2026-06-10",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Acampadentro Cube 2026",
-      "pillar": "DAILY",
-      "date": "2026-06-15",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Faltam 10 dias pro Arraiá da Cube",
-      "pillar": "DAILY",
-      "date": "2026-06-17",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "Os alunos do 5º ano criaram o JuniSimples",
-      "pillar": "PROJETO",
-      "date": "2026-06-19",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
       "title": "cubelab",
       "pillar": "PROJETO",
       "date": "2026-06-22",
       "status": "pendente",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -201,6 +66,7 @@ const PORTAL_DATA = {
       "pillar": "PROJETO",
       "date": "2026-06-23",
       "status": "pendente",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -209,6 +75,115 @@ const PORTAL_DATA = {
       "pillar": "PROJETO",
       "date": "2026-06-27",
       "status": "pendente",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Dia das Mulheres",
+      "pillar": "PROJETO",
+      "date": "2026-03-08",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "What's the Song?",
+      "pillar": "Daily",
+      "date": "2026-03-11",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Escola da Inteligência — Nova Parceria",
+      "pillar": "PROJETO",
+      "date": "2026-03-13",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Dia da Família — Gincana Escolar",
+      "pillar": "PROJETO",
+      "date": "2026-03-30",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Choco Tour Nestlé",
+      "pillar": "PROJETO",
+      "date": "2026-03-31",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Trem da Páscoa",
+      "pillar": "PROJETO",
+      "date": "2026-04-05",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Nova Parceria — Fernanda Gabriela",
+      "pillar": "LIDERANÇA",
+      "date": "2026-04-11",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Educação em 60s",
+      "pillar": "LIDERANÇA",
+      "date": "2026-04-15",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Manifesto Cube",
+      "pillar": "LIDERANÇA",
+      "date": "2026-04-24",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "POV: Um dia com a Diretora",
+      "pillar": "LIDERANÇA",
+      "date": "2026-05-05",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Educação em 60s #2 — Como as famílias ricas escolhem suas escolas",
+      "pillar": "LIDERANÇA",
+      "date": "2026-05-06",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Nova Parceria Cube — SESI e SENAI",
+      "pillar": "PROJETO",
+      "date": "2026-05-09",
+      "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -217,6 +192,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-03-24",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -225,6 +201,7 @@ const PORTAL_DATA = {
       "pillar": "ANÁLISE",
       "date": "2026-03-26",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -233,6 +210,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-04-02",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -241,6 +219,7 @@ const PORTAL_DATA = {
       "pillar": "ANÁLISE",
       "date": "2026-04-04",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -249,6 +228,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-04-06",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -257,6 +237,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-04-08",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -265,6 +246,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-04-09",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -273,6 +255,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-04-10",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -281,6 +264,7 @@ const PORTAL_DATA = {
       "pillar": "ANÁLISE",
       "date": "2026-04-14",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -289,14 +273,16 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-04-17",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
       "client": "pallefort",
       "title": "POV: O vendedor leva tudo ao pé da letra",
-      "pillar": "TREND/MEME",
+      "pillar": "TREND",
       "date": "2026-04-19",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -305,22 +291,25 @@ const PORTAL_DATA = {
       "pillar": "ANÁLISE",
       "date": "2026-04-23",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
       "client": "pallefort",
       "title": "POV: Chefe falou pra conquistar os clientes",
-      "pillar": "TREND/MEME",
+      "pillar": "TREND",
       "date": "2026-04-23",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
       "client": "pallefort",
       "title": "Patrão falou que o que importa é o vídeo",
-      "pillar": "TREND/MEME",
+      "pillar": "TREND",
       "date": "2026-04-24",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -329,22 +318,25 @@ const PORTAL_DATA = {
       "pillar": "ANÁLISE",
       "date": "2026-04-30",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
       "client": "pallefort",
       "title": "POV: O vendedor precisa bater a meta",
-      "pillar": "TREND/MEME",
+      "pillar": "TREND",
       "date": "2026-05-01",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
       "client": "pallefort",
       "title": "Medo de golpe? A gente...",
-      "pillar": "TREND/MEME",
+      "pillar": "TREND",
       "date": "2026-05-05",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -353,6 +345,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-05-07",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -361,6 +354,7 @@ const PORTAL_DATA = {
       "pillar": "AUTORIDADE",
       "date": "2026-05-08",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -369,71 +363,8 @@ const PORTAL_DATA = {
       "pillar": "ANÁLISE",
       "date": "2026-05-09",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "Velozes e Furiosos: Logística Edition",
-      "pillar": "TREND/MEME",
-      "date": "2026-06-04",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "POV: o time de logística se preparando pra começar o dia",
-      "pillar": "AUTORIDADE",
-      "date": "2026-06-12",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "Quando recebo elogio do cliente",
-      "pillar": "AUTORIDADE",
-      "date": "2026-06-18",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "GRAVE: Anúncio urgente (Copa do Brasil)",
-      "pillar": "TREND/MEME",
-      "date": "2026-06-19",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "Façam os estudos valerem a pena! Com 20 anos já sou operador de máquinas",
-      "pillar": "TREND/MEME",
-      "date": "2026-06-22",
-      "status": "postado",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "Sua paleteira não desce? Testa isso antes de chamar manutenção",
-      "pillar": "ANÁLISE",
-      "date": "2026-06-24",
-      "status": "pendente",
-      "roteiro": "[0:00-0:03] HOOK\nFala: Sua paleteira não está descendo? Antes de ligar pra manutenção, faz esse teste aqui.\nVisual: Câmera próxima do pistão/êmbolo, garfos travados\n\n[0:03-0:15] PROBLEMA\nFala: O problema mais comum é esse: o pistão hidráulico fica travado porque o óleo está sujo ou com nível baixo.\nVisual: Mostrar reservatório de óleo, abrir tampa\nLegenda: Óleo baixo ou sujo = pistão travado\n\n[0:15-0:35] DIAGNÓSTICO\nFala: Primeira coisa: abre o reservatório e olha o nível. Se estiver abaixo da marca, esse é o seu problema. Segunda: olha a cor — se estiver escuro ou com espuma, tá contaminado.\nVisual: Mão apontando para marca de nível → close no óleo escuro → comparação com óleo limpo\n\n[0:35-0:48] SOLUÇÃO\nFala: Se for nível baixo: completa com óleo hidráulico ISO 46. Se for contaminado: drena tudo e troca. Na maioria dos casos, volta a funcionar na hora.\nVisual: Mão colocando óleo novo → fechar tampa → acionar alavanca → garfos descendo\n\n[0:48-0:55] CTA\nFala: Testou e não resolveu? Aí é hora de chamar a Pallefort. Link na bio."
-    },
-    {
-      "client": "pallefort",
-      "title": "Recebemos assim. Entregamos assim.",
-      "pillar": "AUTORIDADE",
-      "date": "2026-06-25",
-      "status": "pendente",
-      "roteiro": "[0:00-0:03] HOOK — câmera na paleteira destruída (corte direto, sem intro)\nVisual: Paleteira enferrujada, garfos tortos, pistão vazando\nLegenda: Recebemos assim\n\n[0:03-0:12] PROCESSO — cortes rápidos (sem narração, só música)\nVisual: Desmontando pistão → peças enferrujadas → limpeza → peças novas → soldagem\nLegenda: Durante...\n\n[0:12-0:22] REVEAL — paleteira restaurada\nVisual: Câmera revela paleteira pintada, limpa, funcionando\nLegenda: Entregamos assim\n\n[0:22-0:28] CTA\nFala: Seu equipamento parado custa caro. A Pallefort resolve.\nLegenda: Orçamento → link na bio"
-    },
-    {
-      "client": "pallefort",
-      "title": "Cada quantos meses trocar o óleo da paleteira? A maioria erra.",
-      "pillar": "AUTORIDADE",
-      "date": "2026-06-26",
-      "status": "pendente",
-      "roteiro": "[0:00-0:03] HOOK\nFala: Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?\nVisual: Câmera no reservatório de óleo\n\n[0:03-0:10] ERRO COMUM\nFala: A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais.\n\n[0:10-0:30] RESPOSTA\nFala: Uso leve/moderado — troca a cada 12 meses. Uso intenso, turno duplo — a cada 6 meses. Óleo escuro ou com espuma — troca imediata.\n\n[0:30-0:38] DICA BÔNUS\nFala: Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações.\n\n[0:38-0:44] CTA\nFala: Salva esse vídeo pra mandar pro responsável pela manutenção."
     },
     {
       "client": "mania",
@@ -441,6 +372,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-05-06",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -449,6 +381,7 @@ const PORTAL_DATA = {
       "pillar": "DESEJO",
       "date": "2026-05-07",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -457,6 +390,7 @@ const PORTAL_DATA = {
       "pillar": "CONVERSÃO",
       "date": "2026-05-08",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -465,6 +399,7 @@ const PORTAL_DATA = {
       "pillar": "DESEJO",
       "date": "2026-05-23",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -473,6 +408,7 @@ const PORTAL_DATA = {
       "pillar": "CONVERSÃO",
       "date": "2026-05-26",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -481,6 +417,7 @@ const PORTAL_DATA = {
       "pillar": "DESEJO",
       "date": "2026-05-28",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -489,6 +426,7 @@ const PORTAL_DATA = {
       "pillar": "CONVERSÃO",
       "date": "2026-06-01",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -497,6 +435,7 @@ const PORTAL_DATA = {
       "pillar": "DESEJO",
       "date": "2026-06-03",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -505,6 +444,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-10",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -513,6 +453,7 @@ const PORTAL_DATA = {
       "pillar": "DESEJO",
       "date": "2026-06-15",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -521,6 +462,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-16",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
     },
     {
@@ -529,7 +471,125 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-18",
       "status": "postado",
+      "ref": "",
       "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Educação em 60 segundos #3 — Avaliação por nota no século XXI",
+      "pillar": "LIDERANÇA",
+      "date": "2026-06-03",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Rifa do Hexa",
+      "pillar": "Daily",
+      "date": "2026-06-10",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Acampadentro Cube 2026",
+      "pillar": "Daily",
+      "date": "2026-06-15",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Faltam 10 dias pro Arraiá da Cube",
+      "pillar": "Daily",
+      "date": "2026-06-17",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "Os alunos do 5º ano criaram o JuniSimples",
+      "pillar": "PROJETO",
+      "date": "2026-06-19",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "Velozes e Furiosos: Logística Edition",
+      "pillar": "TREND",
+      "date": "2026-06-04",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "POV: o time de logística se preparando pra começar o dia",
+      "pillar": "AUTORIDADE",
+      "date": "2026-06-12",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "Quando recebo elogio do cliente",
+      "pillar": "AUTORIDADE",
+      "date": "2026-06-18",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "GRAVE: Anúncio urgente (Copa do Brasil)",
+      "pillar": "TREND",
+      "date": "2026-06-19",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "Façam os estudos valerem a pena! Com 20 anos já sou operador de máquinas",
+      "pillar": "TREND",
+      "date": "2026-06-22",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "Sua paleteira não desce? Testa isso antes de chamar manutenção",
+      "pillar": "ANÁLISE",
+      "date": "2026-06-24",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "[0:00-0:03] HOOK — câmera no pistão travado\nFala: Sua paleteira não está descendo? Antes de ligar pra manutenção, faz esse teste aqui.\n\n[0:03-0:15] PROBLEMA\nFala: O problema mais comum é esse: o pistão hidráulico fica travado porque o óleo está sujo ou com nível baixo.\n\n[0:15-0:35] DIAGNÓSTICO\nFala: Primeira coisa: abre o reservatório e olha o nível.\n\n[0:35-0:48] SOLUÇÃO\nFala: Se for nível baixo: completa com óleo hidráulico ISO 46.\n\n[0:48-0:55] CTA\nFala: Testou e não resolveu? Aí é hora de chamar a Pallefort."
+    },
+    {
+      "client": "pallefort",
+      "title": "Recebemos assim. Entregamos assim.",
+      "pillar": "AUTORIDADE",
+      "date": "2026-06-25",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "[0:00-0:03] HOOK — paleteira destruída\n[0:03-0:12] PROCESSO — cortes rápidos\n[0:12-0:22] REVEAL — paleteira restaurada\n[0:22-0:28] CTA — Pallefort resolve."
+    },
+    {
+      "client": "pallefort",
+      "title": "Cada quantos meses trocar o óleo da paleteira? A maioria erra.",
+      "pillar": "AUTORIDADE",
+      "date": "2026-06-26",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "[0:00-0:03] HOOK\nFala: Cada quantos meses você deve trocar o óleo?\n\n[0:03-0:10] ERRO COMUM\nFala: A maioria nunca troca.\n\n[0:10-0:30] RESPOSTA\nLeve: 12 meses. Intenso: 6 meses. Escuro: imediata.\n\n[0:30-0:38] DICA\nFala: Sempre ISO 46.\n\n[0:38-0:44] CTA\nFala: Salva esse vídeo."
     }
   ],
   "tokens": {
@@ -538,5 +598,5 @@ const PORTAL_DATA = {
     "mania": "r60qz4hg",
     "lucas": "0oy7h5p4"
   },
-  "updatedAt": "2026-06-23T17:30:00.000Z"
+  "updatedAt": "2026-06-23T20:52:23.674Z"
 };

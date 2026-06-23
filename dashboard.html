@@ -330,6 +330,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
   <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
   <button class="btn-sm btn-primary" onclick="publicarPortal()">🔗 Publicar portal</button>
+  <button class="btn-sm" onclick="publicarPortalLinks()">📋 Links clientes</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
 <nav>
@@ -789,7 +790,7 @@ const STORAGE_KEYS = { videos: 'smm_videos', finance: 'smm_finance', playbook: '
 function load(key) {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEYS[key])) || null; } catch { return null; }
 }
-function save(key, data) { localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data)); scheduleAutoBackup(); }
+function save(key, data) { localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data)); scheduleAutoBackup(); scheduleAutoPublish(); }
 
 let _backupTimer = null;
 function scheduleAutoBackup() {
@@ -850,7 +851,7 @@ function loadClients() {
   const saved = localStorage.getItem('smm_clients');
   return saved ? JSON.parse(saved) : null;
 }
-function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringify(clients)); scheduleAutoBackup(); }
+function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringify(clients)); scheduleAutoBackup(); scheduleAutoPublish(); }
 
 let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
@@ -2033,6 +2034,9 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
+const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
+const PORTAL_FILE = 'portal-data.js';
+
 function getTokens() {
   const saved = JSON.parse(localStorage.getItem('smm_portal_tokens') || '{}');
   for (const key of Object.keys(CLIENTS)) {
@@ -2042,7 +2046,7 @@ function getTokens() {
   return saved;
 }
 
-function publicarPortal() {
+function buildPortalData() {
   const tokens = getTokens();
   const videos = load('videos') || [];
   const portalData = {
@@ -2053,30 +2057,84 @@ function publicarPortal() {
   };
   for (const [key, cl] of Object.entries(CLIENTS)) {
     portalData.clients[key] = {
-      name: cl.name,
-      valor: cl.valor,
-      pillars: cl.pillars,
-      cadencia: cl.cadencia,
-      objetivo: cl.objetivo || '',
-      icp: cl.icp || ''
+      name: cl.name, valor: cl.valor, pillars: cl.pillars, cadencia: cl.cadencia,
+      objetivo: cl.objetivo || '', icp: cl.icp || ''
     };
   }
-  const js = 'const PORTAL_DATA = ' + JSON.stringify(portalData, null, 2) + ';';
-  const blob = new Blob([js], { type: 'application/javascript' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'portal-data.js';
-  a.click();
+  return 'const PORTAL_DATA = ' + JSON.stringify(portalData, null, 2) + ';';
+}
 
-  const baseUrl = window.location.origin + window.location.pathname.replace('dashboard.html', '') + 'cliente.html';
+function getGithubToken() { return localStorage.getItem('smm_github_token') || ''; }
+function setGithubToken(t) { localStorage.setItem('smm_github_token', t); }
+
+async function pushPortalToGithub(content) {
+  const ghToken = getGithubToken();
+  if (!ghToken) return false;
+  try {
+    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${PORTAL_FILE}`, {
+      headers: { 'Authorization': 'token ' + ghToken }
+    });
+    let sha = '';
+    if (getRes.ok) { sha = (await getRes.json()).sha; }
+
+    const body = { message: 'Atualiza portal do cliente', content: btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${PORTAL_FILE}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + ghToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return putRes.ok;
+  } catch { return false; }
+}
+
+function publicarPortal() {
+  const ghToken = getGithubToken();
+  if (!ghToken) {
+    const t = prompt('Pra publicar automaticamente, cole seu GitHub Token aqui.\n\nCrie em: github.com/settings/tokens → Generate new token (classic) → marque "repo" → Generate.\n\nCole o token:');
+    if (!t) return;
+    setGithubToken(t.trim());
+  }
+  const content = buildPortalData();
+  const btn = document.querySelector('[onclick="publicarPortal()"]');
+  const original = btn.textContent;
+  btn.textContent = '⏳ Publicando...';
+  btn.disabled = true;
+
+  pushPortalToGithub(content).then(ok => {
+    btn.disabled = false;
+    if (ok) {
+      btn.textContent = '✅ Publicado!';
+      setTimeout(() => { btn.textContent = original; }, 3000);
+    } else {
+      btn.textContent = original;
+      localStorage.removeItem('smm_github_token');
+      alert('Erro ao publicar. Verifique o token e tente novamente.');
+    }
+  });
+}
+
+// Auto-publish when data changes (debounced)
+let _autoPublishTimer = null;
+function scheduleAutoPublish() {
+  if (!getGithubToken()) return;
+  if (_autoPublishTimer) clearTimeout(_autoPublishTimer);
+  _autoPublishTimer = setTimeout(() => {
+    const content = buildPortalData();
+    pushPortalToGithub(content);
+  }, 10000);
+}
+
+function publicarPortalLinks() {
+  const tokens = getTokens();
+  const baseUrl = 'https://lucashenrique011.github.io/dashboard-smm/cliente.html';
   let links = '📋 LINKS DOS CLIENTES:\n\n';
   for (const [key, cl] of Object.entries(CLIENTS)) {
     links += `${cl.name}:\n${baseUrl}?c=${key}&k=${tokens[key]}\n\n`;
   }
-  setTimeout(() => {
-    alert(links + '\n⚠️ Agora coloque o arquivo portal-data.js na pasta do projeto e faça push pro GitHub.');
-    navigator.clipboard.writeText(links).then(() => {}).catch(() => {});
-  }, 500);
+  alert(links);
+  navigator.clipboard.writeText(links).catch(() => {});
 }
 
 // ============ THEME ============
