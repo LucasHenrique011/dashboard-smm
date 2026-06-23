@@ -234,6 +234,18 @@ body.light td { border-color: #eee; }
 body.light .fin-row { border-color: #eee; }
 body.light .modal-overlay { background: rgba(0,0,0,.3); }
 
+/* Ocultar valores */
+body.hide-valores .card-valor,
+body.hide-valores .fin-box .val,
+body.hide-valores .fin-row input[type="number"],
+body.hide-valores #meta-receita,
+body.hide-valores #meta-ticket,
+body.hide-valores #meta-capacidade,
+body.hide-valores #meta-progresso,
+body.hide-valores #fin-receita,
+body.hide-valores #fin-custos,
+body.hide-valores #fin-margem { filter: blur(8px); user-select: none; pointer-events: none; }
+
 /* Mobile */
 @media (max-width: 768px) {
   body { overflow-x: hidden; }
@@ -309,6 +321,7 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
   <h1 style="font-size:20px;color:#4f9;margin:0;">📊 SM Hub</h1>
 </div>
 <div class="toolbar">
+  <button class="btn-sm" onclick="toggleValores()" id="btn-valores">👁 Ocultar valores</button>
   <button class="btn-sm" onclick="toggleTheme()">☀/☾ Tema</button>
   <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
@@ -1818,6 +1831,14 @@ function importData(e) {
 }
 
 // ============ THEME ============
+// ============ OCULTAR VALORES ============
+let valoresOcultos = false;
+function toggleValores() {
+  valoresOcultos = !valoresOcultos;
+  document.body.classList.toggle('hide-valores', valoresOcultos);
+  document.getElementById('btn-valores').textContent = valoresOcultos ? '👁 Mostrar valores' : '👁 Ocultar valores';
+}
+
 function toggleTheme() {
   document.body.classList.toggle('light');
   localStorage.setItem('smm_theme', document.body.classList.contains('light') ? 'light' : 'dark');
