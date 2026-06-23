@@ -2281,7 +2281,7 @@ function renderTemplates() {
       </div>
       <div class="tpl-body" style="display:none;margin-top:10px;">
         <pre style="white-space:pre-wrap;font-size:12px;color:#aaa;line-height:1.6;font-family:inherit;">${t.conteudo}</pre>
-        <button class="btn-sm btn-primary" onclick="event.stopPropagation(); navigator.clipboard.writeText(\`${t.conteudo.replace(/`/g, '\\`')}\`).then(() => alert('Template copiado!'))" style="margin-top:8px;">📋 Copiar</button>
+        <button class="btn-sm btn-primary" onclick="event.stopPropagation(); navigator.clipboard.writeText(this.previousElementSibling.textContent).then(function(){ alert('Template copiado!') })" style="margin-top:8px;">📋 Copiar</button>
       </div>
     </div>
   `).join('');
@@ -2313,27 +2313,6 @@ function calcularProposta() {
 }
 
 // -- Checklist de Entrega --
-function renderChecklist() {
-  const items = [
-    { id: 'chk-roteiro', label: 'Roteiro aprovado pelo cliente' },
-    { id: 'chk-gravacao', label: 'Vídeo gravado (vertical 9:16)' },
-    { id: 'chk-edicao', label: 'Edição finalizada (cortes, ritmo)' },
-    { id: 'chk-legenda', label: 'Legendas adicionadas' },
-    { id: 'chk-musica', label: 'Música/áudio selecionado' },
-    { id: 'chk-capa', label: 'Capa/thumbnail definida' },
-    { id: 'chk-copy', label: 'Copy da legenda pronta (hashtags, CTA)' },
-    { id: 'chk-preview', label: 'Preview enviado pro cliente' },
-    { id: 'chk-aprovado', label: 'Cliente aprovou' },
-    { id: 'chk-postado', label: 'Postado na plataforma' },
-  ];
-  const saved = JSON.parse(localStorage.getItem('smm_checklist') || '{}');
-  document.getElementById('checklist-container').innerHTML = items.map(item => `
-    <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1f1f2f;">
-      <input type="checkbox" ${saved[item.id] ? 'checked' : ''} style="width:auto;flex:0;" onchange="const s=JSON.parse(localStorage.getItem('smm_checklist')||'{}'); s['${item.id}']=this.checked; localStorage.setItem('smm_checklist',JSON.stringify(s));">
-      <span style="font-size:13px;color:${saved[item.id] ? '#555' : '#ccc'};text-decoration:${saved[item.id] ? 'line-through' : 'none'};">${item.label}</span>
-    </div>
-  `).join('') + `<button class="btn-sm" onclick="localStorage.setItem('smm_checklist','{}'); renderChecklist();" style="margin-top:12px;">🔄 Resetar checklist</button>`;
-}
 
 function renderFerramentas() {
   populateRelatorioMeses();
