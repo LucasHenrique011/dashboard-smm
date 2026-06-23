@@ -593,10 +593,10 @@ const PORTAL_DATA = {
     }
   ],
   "tokens": {
-    "cube": "bnb173be",
-    "pallefort": "7d00begq",
-    "mania": "r60qz4hg",
-    "lucas": "0oy7h5p4"
+    "cube": "cube2026ls",
+    "pallefort": "pall2026ls",
+    "mania": "mania2026ls",
+    "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-23T21:19:31.949Z"
+  "updatedAt": "2026-06-23T21:37:06.026Z"
 };
