@@ -2182,6 +2182,34 @@ let timerInterval = null;
 let timerSeconds = 0;
 let timerRunning = false;
 
+function saveTimerState() {
+  localStorage.setItem('smm_timer_state', JSON.stringify({
+    startedAt: Date.now() - (timerSeconds * 1000),
+    client: document.getElementById('timer-client').value,
+    atividade: document.getElementById('timer-atividade').value,
+    running: timerRunning
+  }));
+}
+
+function restoreTimer() {
+  const state = JSON.parse(localStorage.getItem('smm_timer_state') || 'null');
+  if (!state || !state.running) return;
+  timerSeconds = Math.floor((Date.now() - state.startedAt) / 1000);
+  if (document.getElementById('timer-client')) document.getElementById('timer-client').value = state.client;
+  if (document.getElementById('timer-atividade')) document.getElementById('timer-atividade').value = state.atividade;
+  timerRunning = true;
+  document.getElementById('timer-btn').textContent = '⏸ Pausar e salvar';
+  updateTimerDisplay();
+  timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
+}
+
+function updateTimerDisplay() {
+  const h = Math.floor(timerSeconds / 3600);
+  const m = Math.floor((timerSeconds % 3600) / 60);
+  const s = timerSeconds % 60;
+  document.getElementById('timer-display').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
 function toggleTimer() {
   if (timerRunning) {
     clearInterval(timerInterval);
@@ -2195,16 +2223,15 @@ function toggleTimer() {
       localStorage.setItem('smm_timer_hist', JSON.stringify(hist.slice(0, 50)));
       renderTimerHist();
     }
+    localStorage.removeItem('smm_timer_state');
+    timerSeconds = 0;
+    updateTimerDisplay();
   } else {
     if (!document.getElementById('timer-client').value) { alert('Selecione o cliente'); return; }
     timerRunning = true;
     document.getElementById('timer-btn').textContent = '⏸ Pausar e salvar';
-    timerInterval = setInterval(() => {
-      timerSeconds++;
-      const h = Math.floor(timerSeconds / 3600);
-      const m = Math.floor((timerSeconds % 3600) / 60);
-      const s = timerSeconds % 60;
-      document.getElementById('timer-display').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    saveTimerState();
+    timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
     }, 1000);
   }
 }
@@ -2313,6 +2340,7 @@ function renderFerramentas() {
   renderTemplates();
   renderTimerHist();
   calcularProposta();
+  restoreTimer();
 }
 
 // ============ BANCO DE IDEIAS ============
