@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal do Cliente — Lucas SM</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0a0f; color: #e0e0e0; min-height: 100vh; }
+
+.loading { display: flex; align-items: center; justify-content: center; min-height: 100vh; flex-direction: column; gap: 16px; }
+.loading h2 { color: #4f9; }
+.loading p { color: #888; }
+.error { color: #f66; }
+
+header { background: linear-gradient(135deg, #0f1a14, #111118); border-bottom: 1px solid #1a3a2a; padding: 24px 20px; text-align: center; }
+header h1 { font-size: 22px; color: #fff; margin-bottom: 4px; }
+header .subtitle { font-size: 13px; color: #4f9; }
+header .brand { font-size: 11px; color: #555; margin-top: 8px; }
+
+.container { max-width: 900px; margin: 0 auto; padding: 20px; }
+
+nav { display: flex; gap: 0; background: #111118; border-bottom: 1px solid #2a2a3a; position: sticky; top: 0; z-index: 10; }
+nav button { flex: 1; padding: 14px 8px; background: none; border: none; color: #666; font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; transition: all .2s; }
+nav button.active { color: #fff; border-bottom-color: #4f9; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+h2 { font-size: 17px; color: #4f9; margin-bottom: 16px; }
+h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
+
+.card { background: linear-gradient(145deg, #1a1a24, #14141c); border: 1px solid #2a2a3a; border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.3); }
+.card-label { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+.card-value { font-size: 16px; font-weight: 600; color: #fff; }
+.card-value.green { color: #4f9; }
+
+.pills { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.pill { padding: 4px 12px; border-radius: 12px; font-size: 11px; font-weight: 600; background: #1a3a2a; color: #4f9; border: 1px solid #2a5a3a; }
+
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+
+/* Video list */
+.video-item { background: #14141c; border: 1px solid #2a2a3a; border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+.video-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.video-title { font-size: 14px; font-weight: 600; color: #fff; }
+.video-date { font-size: 11px; color: #888; }
+.video-meta { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.status-badge { padding: 2px 10px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status-badge.pendente { background: #2a1a1a; color: #f66; }
+.status-badge.gravado { background: #2a2a1a; color: #fc6; }
+.status-badge.editado { background: #1a2a3a; color: #6cf; }
+.status-badge.postado { background: #1a3a1a; color: #6f6; }
+.video-roteiro { background: #0f0f14; border: 1px solid #222; border-radius: 8px; padding: 12px; font-size: 12px; color: #aaa; line-height: 1.7; white-space: pre-wrap; margin-top: 8px; max-height: 200px; overflow-y: auto; }
+.video-roteiro-toggle { font-size: 12px; color: #4f9; cursor: pointer; background: none; border: none; padding: 4px 0; }
+
+/* Calendar */
+.cal-month { margin-bottom: 24px; }
+.cal-month-header { font-size: 14px; font-weight: 700; color: #4f9; margin-bottom: 8px; padding: 8px 12px; background: #1a1a24; border-radius: 8px; }
+.cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; margin-bottom: 3px; }
+.cal-day-header { font-size: 10px; color: #555; text-align: center; padding: 4px; font-weight: 600; }
+.cal-day { background: #14141c; border: 1px solid #1f1f2f; border-radius: 6px; min-height: 60px; padding: 4px; }
+.cal-day.empty { background: transparent; border-color: transparent; }
+.cal-day.today { border-color: #4f9; }
+.cal-day-num { font-size: 10px; color: #666; margin-bottom: 2px; }
+.cal-event { font-size: 9px; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; background: #1a3a2a; color: #4f9; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.cal-event.pendente { border-left: 2px solid #f66; }
+.cal-event.gravado { border-left: 2px solid #fc6; }
+.cal-event.editado { border-left: 2px solid #6cf; }
+.cal-event.postado { border-left: 2px solid #6f6; }
+
+/* Suggestions */
+.suggestion-form textarea { width: 100%; background: #14141c; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 12px; border-radius: 10px; font-size: 14px; font-family: inherit; min-height: 120px; resize: vertical; }
+.suggestion-form textarea:focus { outline: none; border-color: #4f9; box-shadow: 0 0 0 3px rgba(68,255,153,.1); }
+.suggestion-form select { width: 100%; background: #14141c; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 12px; }
+.suggestion-form input { width: 100%; background: #14141c; border: 1px solid #2a2a3a; color: #e0e0e0; padding: 10px 12px; border-radius: 10px; font-size: 14px; font-family: inherit; margin-bottom: 12px; }
+
+.btn { padding: 12px 24px; border-radius: 10px; border: none; font-size: 14px; font-weight: 600; cursor: pointer; transition: all .2s; }
+.btn-primary { background: linear-gradient(135deg, #1a5a3a, #2a7a4a); color: #fff; box-shadow: 0 2px 8px rgba(68,255,153,.15); width: 100%; }
+.btn-primary:hover { background: linear-gradient(135deg, #2a7a4a, #3a9a5a); }
+.btn-whatsapp { background: #25D366; color: #fff; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+.suggestion-sent { text-align: center; padding: 24px; }
+.suggestion-sent h3 { color: #4f9; margin-bottom: 8px; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.stat-box { background: linear-gradient(145deg, #1a1a24, #14141c); border: 1px solid #2a2a3a; border-radius: 14px; padding: 16px; text-align: center; }
+.stat-val { font-size: 24px; font-weight: 700; color: #4f9; }
+.stat-label { font-size: 11px; color: #888; margin-top: 4px; }
+
+/* Roteiro options */
+.roteiro-option { background: #14141c; border: 2px solid #2a2a3a; border-radius: 10px; padding: 14px; margin-bottom: 10px; cursor: pointer; transition: border-color .2s; }
+.roteiro-option:hover { border-color: #4f9; }
+.roteiro-option.selected { border-color: #4f9; background: #0f1f15; }
+.roteiro-option h4 { color: #fff; font-size: 13px; margin-bottom: 6px; }
+.roteiro-option pre { font-size: 11px; color: #aaa; white-space: pre-wrap; font-family: inherit; line-height: 1.5; }
+
+@media (max-width: 768px) {
+  .container { padding: 12px; }
+  .info-grid { grid-template-columns: 1fr; }
+  .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .stat-val { font-size: 18px; }
+  nav button { font-size: 11px; padding: 12px 4px; }
+  .cal-day { min-height: 50px; }
+  .cal-event { font-size: 8px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app-loading" class="loading">
+  <h2>Carregando...</h2>
+  <p>Verificando acesso ao portal</p>
+</div>
+
+<div id="app-error" class="loading" style="display:none;">
+  <h2 class="error">Acesso negado</h2>
+  <p>Link inválido ou expirado. Solicite um novo link ao seu social media.</p>
+</div>
+
+<div id="app" style="display:none;">
+  <header>
+    <h1 id="client-name"></h1>
+    <div class="subtitle">Portal do Cliente</div>
+    <div class="brand">Gerenciado por Lucas SM</div>
+  </header>
+
+  <nav>
+    <button class="active" onclick="showTab('visao')">Visão Geral</button>
+    <button onclick="showTab('videos')">Vídeos</button>
+    <button onclick="showTab('calendario')">Calendário</button>
+    <button onclick="showTab('ideias')">Sugestões</button>
+  </nav>
+
+  <div class="container">
+
+    <!-- VISÃO GERAL -->
+    <div id="tab-visao" class="section active">
+      <div class="stats-grid" id="stats-grid"></div>
+
+      <div class="card">
+        <div class="card-label">Contrato</div>
+        <div class="info-grid">
+          <div><div class="card-label">Valor</div><div class="card-value green" id="info-valor"></div></div>
+          <div><div class="card-label">Cadência</div><div class="card-value" id="info-cadencia"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Pilares de Conteúdo</div>
+        <div class="pills" id="info-pillars"></div>
+        <p style="font-size:12px;color:#888;margin-top:8px;">Cada vídeo segue um desses pilares estratégicos.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">Objetivo</div>
+        <p style="font-size:13px;color:#ccc;line-height:1.6;" id="info-objetivo"></p>
+      </div>
+
+      <div class="card">
+        <div class="card-label">ICP — Público-alvo</div>
+        <p style="font-size:13px;color:#ccc;line-height:1.6;" id="info-icp"></p>
+      </div>
+    </div>
+
+    <!-- VÍDEOS -->
+    <div id="tab-videos" class="section">
+      <h2>Vídeos</h2>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+        <select id="vid-filter-status" onchange="renderVideos()" style="background:#14141c;border:1px solid #2a2a3a;color:#e0e0e0;padding:8px 12px;border-radius:8px;font-size:13px;">
+          <option value="all">Todos os status</option>
+          <option value="pendente">Pendente</option>
+          <option value="gravado">Gravado</option>
+          <option value="editado">Editado</option>
+          <option value="postado">Postado</option>
+        </select>
+        <select id="vid-filter-month" onchange="renderVideos()" style="background:#14141c;border:1px solid #2a2a3a;color:#e0e0e0;padding:8px 12px;border-radius:8px;font-size:13px;">
+          <option value="all">Todos os meses</option>
+        </select>
+      </div>
+      <div id="videos-list"></div>
+    </div>
+
+    <!-- CALENDÁRIO -->
+    <div id="tab-calendario" class="section">
+      <h2>Calendário de Conteúdo</h2>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;">
+        <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changeCalMonth(-1)">← Anterior</button>
+        <span id="cal-month-label" style="font-size:14px;font-weight:600;color:#fff;flex:1;text-align:center;"></span>
+        <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changeCalMonth(1)">Próximo →</button>
+      </div>
+      <div id="calendar-view"></div>
+
+      <div style="display:flex;gap:12px;margin-top:12px;flex-wrap:wrap;">
+        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#f66;"></span> Pendente</span>
+        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#fc6;"></span> Gravado</span>
+        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#6cf;"></span> Editado</span>
+        <span style="font-size:10px;color:#888;display:flex;align-items:center;gap:4px;"><span style="width:8px;height:8px;border-radius:50%;background:#6f6;"></span> Postado</span>
+      </div>
+    </div>
+
+    <!-- SUGESTÕES -->
+    <div id="tab-ideias" class="section">
+      <h2>Enviar Sugestão</h2>
+      <p style="color:#888;font-size:13px;margin-bottom:16px;">Tem uma ideia de conteúdo, quer mostrar algo ou tem uma referência? Manda aqui que eu recebo direto.</p>
+
+      <div class="card suggestion-form">
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Tipo</label>
+          <select id="sug-tipo">
+            <option value="ideia">💡 Ideia de conteúdo</option>
+            <option value="mostrar">📸 Quero mostrar/gravar algo</option>
+            <option value="referencia">🔗 Referência (vi um vídeo legal)</option>
+            <option value="feedback">💬 Feedback sobre um vídeo</option>
+            <option value="outro">📝 Outro</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Sua sugestão</label>
+          <textarea id="sug-texto" placeholder="Descreva sua ideia, o que quer mostrar, cole um link de referência..."></textarea>
+        </div>
+
+        <div style="margin-bottom:16px;">
+          <label style="font-size:12px;color:#888;display:block;margin-bottom:4px;">Link de referência (opcional)</label>
+          <input id="sug-link" type="url" placeholder="https://instagram.com/reel/...">
+        </div>
+
+        <button class="btn btn-whatsapp" onclick="enviarSugestao()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+          Enviar via WhatsApp
+        </button>
+      </div>
+
+      <div id="sugestoes-anteriores" style="margin-top:24px;"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const WHATSAPP_NUMBER = '5511961184582';
+
+let clientData = null;
+let clientKey = null;
+let allVideos = [];
+let calMonth = new Date().toISOString().slice(0, 7);
+
+function init() {
+  const params = new URLSearchParams(window.location.search);
+  clientKey = params.get('c');
+  const token = params.get('k');
+
+  if (!clientKey || !token) {
+    showError();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = 'portal-data.js?t=' + Date.now();
+  script.onload = function() {
+    if (typeof PORTAL_DATA === 'undefined' || !PORTAL_DATA.clients[clientKey]) {
+      showError();
+      return;
+    }
+    const stored = PORTAL_DATA.tokens[clientKey];
+    if (stored !== token) {
+      showError();
+      return;
+    }
+    clientData = PORTAL_DATA.clients[clientKey];
+    allVideos = PORTAL_DATA.videos.filter(v => v.client === clientKey);
+    showApp();
+  };
+  script.onerror = function() {
+    showError();
+  };
+  document.head.appendChild(script);
+}
+
+function showError() {
+  document.getElementById('app-loading').style.display = 'none';
+  document.getElementById('app-error').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('app-loading').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  document.getElementById('client-name').textContent = clientData.name;
+  document.title = clientData.name + ' — Portal do Cliente';
+
+  document.getElementById('info-valor').textContent = clientData.valor;
+  document.getElementById('info-cadencia').textContent = clientData.cadencia;
+  document.getElementById('info-objetivo').textContent = clientData.objetivo || 'A definir';
+  document.getElementById('info-icp').textContent = clientData.icp || 'A definir';
+
+  const pillsEl = document.getElementById('info-pillars');
+  pillsEl.innerHTML = clientData.pillars.map(p => `<span class="pill">${p}</span>`).join('');
+
+  renderStats();
+  renderVideos();
+  populateMonthFilter();
+  renderCalendar();
+  loadSugestoes();
+}
+
+function renderStats() {
+  const now = new Date().toISOString().slice(0, 7);
+  const mesVideos = allVideos.filter(v => v.date && v.date.startsWith(now));
+  const postados = mesVideos.filter(v => v.status === 'postado').length;
+  const emProducao = mesVideos.filter(v => v.status !== 'postado').length;
+  const total = allVideos.length;
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat-box"><div class="stat-val">${postados}</div><div class="stat-label">Postados este mês</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#fc6;">${emProducao}</div><div class="stat-label">Em produção</div></div>
+    <div class="stat-box"><div class="stat-val" style="color:#6cf;">${total}</div><div class="stat-label">Total de vídeos</div></div>
+  `;
+}
+
+function renderVideos() {
+  const fs = document.getElementById('vid-filter-status').value;
+  const fm = document.getElementById('vid-filter-month').value;
+
+  let filtered = allVideos.filter(v =>
+    (fs === 'all' || v.status === fs) &&
+    (fm === 'all' || (v.date && v.date.startsWith(fm)))
+  );
+  filtered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+  const el = document.getElementById('videos-list');
+  if (filtered.length === 0) {
+    el.innerHTML = '<div class="card" style="text-align:center;color:#555;">Nenhum vídeo encontrado</div>';
+    return;
+  }
+
+  el.innerHTML = filtered.map(v => {
+    const statusLabel = v.status.charAt(0).toUpperCase() + v.status.slice(1);
+    const dateLabel = v.date ? v.date.split('-').reverse().join('/') : '—';
+    return `<div class="video-item">
+      <div class="video-header">
+        <span class="video-title">${v.title}</span>
+        <span class="video-date">${dateLabel}</span>
+      </div>
+      <div class="video-meta">
+        <span class="status-badge ${v.status}">${statusLabel}</span>
+        <span class="pill" style="font-size:10px;">${v.pillar}</span>
+      </div>
+      ${v.roteiro ? `
+        <button class="video-roteiro-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.nextElementSibling.style.display === 'none' ? '▶ Ver roteiro' : '▼ Ocultar roteiro'">▶ Ver roteiro</button>
+        <div class="video-roteiro" style="display:none;">${v.roteiro}</div>
+      ` : ''}
+    </div>`;
+  }).join('');
+}
+
+function populateMonthFilter() {
+  const months = [...new Set(allVideos.filter(v => v.date).map(v => v.date.slice(0, 7)))].sort().reverse();
+  const sel = document.getElementById('vid-filter-month');
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  months.forEach(m => {
+    const [y, mo] = m.split('-');
+    sel.innerHTML += `<option value="${m}">${meses[parseInt(mo)-1]} ${y}</option>`;
+  });
+}
+
+// Calendar
+function changeCalMonth(dir) {
+  const [y, m] = calMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  calMonth = d.toISOString().slice(0, 7);
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const [year, month] = calMonth.split('-').map(Number);
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-month-label').textContent = `${meses[month-1]} ${year}`;
+
+  const firstDay = new Date(year, month - 1, 1);
+  const lastDay = new Date(year, month, 0);
+  const startDow = (firstDay.getDay() + 6) % 7;
+  const totalDays = lastDay.getDate();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const monthVideos = allVideos.filter(v => v.date && v.date.startsWith(calMonth));
+
+  let html = '<div class="cal-week">';
+  ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(d => {
+    html += `<div class="cal-day-header">${d}</div>`;
+  });
+  html += '</div><div class="cal-week">';
+
+  for (let i = 0; i < startDow; i++) html += '<div class="cal-day empty"></div>';
+
+  for (let d = 1; d <= totalDays; d++) {
+    const ds = `${calMonth}-${String(d).padStart(2, '0')}`;
+    const isToday = ds === today;
+    const dayVids = monthVideos.filter(v => v.date === ds);
+
+    html += `<div class="cal-day${isToday ? ' today' : ''}">`;
+    html += `<div class="cal-day-num">${d}</div>`;
+    dayVids.forEach(v => {
+      html += `<div class="cal-event ${v.status}" title="${v.title}">${v.title.substring(0, 15)}</div>`;
+    });
+    html += '</div>';
+
+    if ((startDow + d) % 7 === 0 && d < totalDays) html += '</div><div class="cal-week">';
+  }
+
+  const remaining = (7 - (startDow + totalDays) % 7) % 7;
+  for (let i = 0; i < remaining; i++) html += '<div class="cal-day empty"></div>';
+  html += '</div>';
+
+  document.getElementById('calendar-view').innerHTML = html;
+}
+
+// Suggestions
+function enviarSugestao() {
+  const tipo = document.getElementById('sug-tipo');
+  const texto = document.getElementById('sug-texto').value.trim();
+  const link = document.getElementById('sug-link').value.trim();
+
+  if (!texto) { alert('Escreva sua sugestão antes de enviar.'); return; }
+
+  const tipoLabel = tipo.options[tipo.selectedIndex].text;
+  let msg = `*Portal do Cliente — ${clientData.name}*\n\n`;
+  msg += `*Tipo:* ${tipoLabel}\n\n`;
+  msg += `*Sugestão:*\n${texto}`;
+  if (link) msg += `\n\n*Referência:* ${link}`;
+
+  // Save locally
+  const sugestoes = JSON.parse(localStorage.getItem('portal_sugestoes_' + clientKey) || '[]');
+  sugestoes.unshift({ tipo: tipoLabel, texto, link, data: new Date().toISOString().slice(0, 10) });
+  localStorage.setItem('portal_sugestoes_' + clientKey, JSON.stringify(sugestoes.slice(0, 20)));
+
+  const encoded = encodeURIComponent(msg);
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encoded}`, '_blank');
+
+  document.getElementById('sug-texto').value = '';
+  document.getElementById('sug-link').value = '';
+  loadSugestoes();
+}
+
+function loadSugestoes() {
+  const sugestoes = JSON.parse(localStorage.getItem('portal_sugestoes_' + clientKey) || '[]');
+  const el = document.getElementById('sugestoes-anteriores');
+  if (sugestoes.length === 0) { el.innerHTML = ''; return; }
+
+  el.innerHTML = `
+    <h3 style="color:#4f9;">Sugestões enviadas</h3>
+    ${sugestoes.map(s => `
+      <div class="card" style="padding:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;">
+          <span>${s.tipo}</span><span>${s.data}</span>
+        </div>
+        <p style="font-size:13px;color:#ccc;">${s.texto}</p>
+        ${s.link ? `<a href="${s.link}" target="_blank" style="font-size:11px;color:#4f9;">Ver referência</a>` : ''}
+      </div>
+    `).join('')}
+  `;
+}
+
+// Tabs
+function showTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  document.querySelector(`nav button[onclick="showTab('${id}')"]`).classList.add('active');
+}
+
+init();
+</script>
+</body>
+</html>

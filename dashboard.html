@@ -329,6 +329,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
   <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
+  <button class="btn-sm btn-primary" onclick="publicarPortal()">🔗 Publicar portal</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
 <nav>
@@ -2021,6 +2022,53 @@ function importData(e) {
     } catch { alert('Arquivo inválido.'); }
   };
   reader.readAsText(file);
+}
+
+// ============ PORTAL DO CLIENTE ============
+function getTokens() {
+  const saved = JSON.parse(localStorage.getItem('smm_portal_tokens') || '{}');
+  for (const key of Object.keys(CLIENTS)) {
+    if (!saved[key]) saved[key] = Math.random().toString(36).substr(2, 8);
+  }
+  localStorage.setItem('smm_portal_tokens', JSON.stringify(saved));
+  return saved;
+}
+
+function publicarPortal() {
+  const tokens = getTokens();
+  const videos = load('videos') || [];
+  const portalData = {
+    clients: {},
+    videos: videos.map(v => ({ client: v.client, title: v.title, pillar: v.pillar, date: v.date, status: v.status, roteiro: v.roteiro || '' })),
+    tokens: tokens,
+    updatedAt: new Date().toISOString()
+  };
+  for (const [key, cl] of Object.entries(CLIENTS)) {
+    portalData.clients[key] = {
+      name: cl.name,
+      valor: cl.valor,
+      pillars: cl.pillars,
+      cadencia: cl.cadencia,
+      objetivo: cl.objetivo || '',
+      icp: cl.icp || ''
+    };
+  }
+  const js = 'const PORTAL_DATA = ' + JSON.stringify(portalData, null, 2) + ';';
+  const blob = new Blob([js], { type: 'application/javascript' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'portal-data.js';
+  a.click();
+
+  const baseUrl = window.location.origin + window.location.pathname.replace('dashboard.html', '') + 'cliente.html';
+  let links = '📋 LINKS DOS CLIENTES:\n\n';
+  for (const [key, cl] of Object.entries(CLIENTS)) {
+    links += `${cl.name}:\n${baseUrl}?c=${key}&k=${tokens[key]}\n\n`;
+  }
+  setTimeout(() => {
+    alert(links + '\n⚠️ Agora coloque o arquivo portal-data.js na pasta do projeto e faça push pro GitHub.');
+    navigator.clipboard.writeText(links).then(() => {}).catch(() => {});
+  }, 500);
 }
 
 // ============ THEME ============
