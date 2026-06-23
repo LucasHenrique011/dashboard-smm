@@ -107,7 +107,29 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
 .tp-scroll { flex: 1; overflow-y: auto; padding: 40px 20px; }
 .tp-text { color: #fff; font-size: 28px; line-height: 1.8; white-space: pre-wrap; text-align: center; padding-bottom: 80vh; }
 
+/* Planejamento */
+.plan-card { background: linear-gradient(145deg, #14141c, #111118); border: 1px solid #2a2a3a; border-radius: 14px; padding: 18px; margin-bottom: 14px; position: relative; overflow: hidden; }
+.plan-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; }
+.plan-card.s-pendente::before { background: #f66; }
+.plan-card.s-gravado::before { background: #fc6; }
+.plan-card.s-editado::before { background: #6cf; }
+.plan-card.s-postado::before { background: #6f6; }
+.plan-date { font-size: 12px; color: #4f9; font-weight: 700; margin-bottom: 4px; }
+.plan-title { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px; }
+.plan-meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.plan-ref { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; color: #6cf; text-decoration: none; background: #1a2a3a; padding: 4px 10px; border-radius: 6px; margin-top: 6px; }
+.plan-ref:hover { background: #2a3a4a; }
+.plan-roteiro { background: #0a0a10; border: 1px solid #1f1f2f; border-radius: 8px; padding: 14px; margin-top: 10px; font-size: 13px; color: #bbb; line-height: 1.7; white-space: pre-wrap; }
+.plan-week { margin-bottom: 24px; }
+.plan-week-header { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: .5px; padding: 8px 0; border-bottom: 1px solid #1f1f2f; margin-bottom: 12px; }
+.plan-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 24px; }
+.plan-summary-box { background: #14141c; border: 1px solid #2a2a3a; border-radius: 10px; padding: 12px; text-align: center; }
+.plan-summary-val { font-size: 20px; font-weight: 700; }
+.plan-summary-lbl { font-size: 10px; color: #888; margin-top: 2px; }
+.plan-actions { display: flex; gap: 6px; margin-top: 8px; }
+
 @media (max-width: 768px) {
+  .plan-summary { grid-template-columns: repeat(2, 1fr); }
   .container { padding: 12px; }
   .info-grid { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
@@ -154,6 +176,7 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
 
   <nav>
     <button class="active" onclick="showTab('visao')">Visão Geral</button>
+    <button onclick="showTab('planejamento')">Planejamento</button>
     <button onclick="showTab('videos')">Vídeos</button>
     <button onclick="showTab('calendario')">Calendário</button>
     <button onclick="showTab('ideias')">Sugestões</button>
@@ -188,6 +211,21 @@ h3 { font-size: 14px; color: #aaa; margin: 16px 0 8px; }
         <div class="card-label">ICP — Público-alvo</div>
         <p style="font-size:13px;color:#ccc;line-height:1.6;" id="info-icp"></p>
       </div>
+    </div>
+
+    <!-- PLANEJAMENTO -->
+    <div id="tab-planejamento" class="section">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+        <h2 style="margin:0;">Planejamento do Mês</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changePlanMonth(-1)">← Anterior</button>
+          <span id="plan-month-label" style="font-size:14px;font-weight:600;color:#fff;"></span>
+          <button class="btn" style="padding:8px 14px;font-size:12px;background:#1a1a24;color:#e0e0e0;border:1px solid #2a2a3a;" onclick="changePlanMonth(1)">Próximo →</button>
+        </div>
+      </div>
+      <p style="color:#888;font-size:13px;margin:8px 0 16px;">Tudo que está planejado, em produção e já postado neste mês.</p>
+      <div id="plan-summary"></div>
+      <div id="plan-content"></div>
     </div>
 
     <!-- VÍDEOS -->
@@ -326,6 +364,7 @@ function showApp() {
   pillsEl.innerHTML = clientData.pillars.map(p => `<span class="pill">${p}</span>`).join('');
 
   renderStats();
+  renderPlan();
   renderVideos();
   populateMonthFilter();
   renderCalendar();
@@ -491,6 +530,100 @@ function loadSugestoes() {
       </div>
     `).join('')}
   `;
+}
+
+// Planejamento
+let planMonth = new Date().toISOString().slice(0, 7);
+
+function changePlanMonth(dir) {
+  const [y, m] = planMonth.split('-').map(Number);
+  const d = new Date(y, m - 1 + dir, 1);
+  planMonth = d.toISOString().slice(0, 7);
+  renderPlan();
+}
+
+function renderPlan() {
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [year, month] = planMonth.split('-').map(Number);
+  document.getElementById('plan-month-label').textContent = `${meses[month-1]} ${year}`;
+
+  const monthVids = allVideos.filter(v => v.date && v.date.startsWith(planMonth));
+  monthVids.sort((a, b) => a.date.localeCompare(b.date));
+
+  const counts = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
+  monthVids.forEach(v => counts[v.status]++);
+
+  document.getElementById('plan-summary').innerHTML = `
+    <div class="plan-summary">
+      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#fff;">${monthVids.length}</div><div class="plan-summary-lbl">Total</div></div>
+      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#f66;">${counts.pendente}</div><div class="plan-summary-lbl">Pendente</div></div>
+      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#fc6;">${counts.gravado + counts.editado}</div><div class="plan-summary-lbl">Em produção</div></div>
+      <div class="plan-summary-box"><div class="plan-summary-val" style="color:#6f6;">${counts.postado}</div><div class="plan-summary-lbl">Postado</div></div>
+    </div>
+  `;
+
+  if (monthVids.length === 0) {
+    document.getElementById('plan-content').innerHTML = '<div class="card" style="text-align:center;color:#555;padding:32px;">Nenhum vídeo planejado para este mês</div>';
+    return;
+  }
+
+  // Group by week
+  const weeks = {};
+  const dias = ['Domingo','Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  monthVids.forEach(v => {
+    const d = new Date(v.date + 'T12:00:00');
+    const weekStart = new Date(d);
+    const day = weekStart.getDay();
+    const diff = day === 0 ? -6 : 1 - day;
+    weekStart.setDate(weekStart.getDate() + diff);
+    const wk = weekStart.toISOString().slice(0, 10);
+    if (!weeks[wk]) weeks[wk] = [];
+    weeks[wk].push(v);
+  });
+
+  let html = '';
+  const planVidsAll = [];
+  Object.keys(weeks).sort().forEach(wk => {
+    const wkDate = new Date(wk + 'T12:00:00');
+    const wkEnd = new Date(wkDate); wkEnd.setDate(wkEnd.getDate() + 6);
+    const label = `Semana ${wkDate.getDate()}/${month} — ${wkEnd.getDate()}/${month}`;
+    html += `<div class="plan-week"><div class="plan-week-header">${label}</div>`;
+
+    weeks[wk].forEach(v => {
+      const idx = planVidsAll.length;
+      planVidsAll.push(v);
+      const d = new Date(v.date + 'T12:00:00');
+      const dayName = dias[d.getDay()];
+      const dateLabel = `${dayName}, ${d.getDate()}/${month}`;
+      const statusLabel = v.status.charAt(0).toUpperCase() + v.status.slice(1);
+
+      html += `<div class="plan-card s-${v.status}">
+        <div class="plan-date">${dateLabel}</div>
+        <div class="plan-title">${v.title}</div>
+        <div class="plan-meta">
+          <span class="status-badge ${v.status}">${statusLabel}</span>
+          <span class="pill" style="font-size:10px;">${v.pillar}</span>
+        </div>
+        ${v.ref ? `<a href="${v.ref}" target="_blank" class="plan-ref">🔗 Referência</a>` : ''}
+        ${v.roteiro ? `
+          <div class="plan-actions">
+            <button class="video-roteiro-toggle" onclick="this.parentElement.nextElementSibling.style.display = this.parentElement.nextElementSibling.style.display === 'none' ? 'block' : 'none'; this.textContent = this.parentElement.nextElementSibling.style.display === 'none' ? '▶ Ver roteiro' : '▼ Ocultar roteiro'">▶ Ver roteiro</button>
+            <button class="video-roteiro-toggle" style="color:#fc6;" onclick="openPlanTeleprompter(${idx})">▶ Teleprompter</button>
+          </div>
+          <div class="plan-roteiro" style="display:none;">${v.roteiro}</div>
+        ` : '<div style="font-size:12px;color:#555;margin-top:6px;font-style:italic;">Roteiro em desenvolvimento</div>'}
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  document.getElementById('plan-content').innerHTML = html;
+  window._planVids = planVidsAll;
+}
+
+function openPlanTeleprompter(idx) {
+  const v = window._planVids[idx];
+  if (v && v.roteiro) openTeleprompter(v.title, v.roteiro);
 }
 
 // Teleprompter
