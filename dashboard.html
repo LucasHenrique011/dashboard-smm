@@ -2517,8 +2517,7 @@ function renderMetas() {
 // ============ SEED NOTION VIDEOS ============
 function seedNotionVideos() {
   const videos = load('videos') || [];
-  if (videos.some(v => v.id === 'plan-p03')) return;
-  const notionVideos = [
+  const seedVideos = [
     // CUBE — março
     { id:'notion-c01', client:'cube', title:'Dia das Mulheres', pillar:'PROJETO', status:'postado', date:'2026-03-08', link:'https://www.instagram.com/reel/DVoHnf_jmSL/' },
     { id:'notion-c02', client:'cube', title:"What's the Song?", pillar:'Daily', status:'postado', date:'2026-03-11', link:'https://www.instagram.com/reel/DVwaj_-ElLp/' },
@@ -2589,7 +2588,7 @@ function seedNotionVideos() {
     { id:'plan-p03', client:'pallefort', title:'Cada quantos meses trocar o óleo da paleteira? A maioria erra.', pillar:'AUTORIDADE', status:'pendente', date:'2026-06-26', roteiro:'[0:00–0:03] HOOK\n🎙️ "Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?"\n📹 Câmera no reservatório de óleo, mão apontando\n📝 "Você sabe a resposta?"\n\n[0:03–0:10] ERRO COMUM\n🎙️ "A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais."\n📹 Close no óleo escuro e com espuma\n📝 "Nunca trocar = pistão travado + vedações destruídas"\n\n[0:10–0:30] RESPOSTA\n🎙️ "A frequência correta depende do uso:\n• Uso leve/moderado — troca a cada 12 meses\n• Uso intenso, turno duplo — a cada 6 meses\n• Óleo escuro ou com espuma — troca imediata"\n📹 Tabela escrita à mão ou impressa\n📝 Mesmos dados em texto sobreposto\n\n[0:30–0:38] DICA BÔNUS\n🎙️ "Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações."\n📹 Close na embalagem ISO 46\n📝 "⚠️ Só ISO 46 — nunca óleo de motor"\n\n[0:38–0:44] CTA\n🎙️ "Salva esse vídeo pra mandar pro responsável pela manutenção."\n📹 Ícone de salvar + logo Pallefort\n📝 "Salva e manda pro responsável 👆"' },
   ];
   const existingIds = new Set(videos.map(v => v.id));
-  const newVideos = notionVideos.filter(v => !existingIds.has(v.id));
+  const newVideos = seedVideos.filter(v => !existingIds.has(v.id));
   if (newVideos.length === 0) return;
   videos.push(...newVideos);
   save('videos', videos);
