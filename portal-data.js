@@ -652,7 +652,7 @@ const PORTAL_DATA = {
       "date": "2026-06-30",
       "status": "pendente",
       "ref": "",
-      "roteiro": ""
+      "roteiro": "roteiro teste"
     },
     {
       "client": "mania",
@@ -697,5 +697,5 @@ const PORTAL_DATA = {
     "mania": "sszn3l6w",
     "lucas": "q1txol3g"
   },
-  "updatedAt": "2026-06-23T21:08:31.640Z"
+  "updatedAt": "2026-06-23T21:13:12.298Z"
 };
