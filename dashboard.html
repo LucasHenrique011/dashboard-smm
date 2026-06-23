@@ -1855,9 +1855,10 @@ function seedPipelineClients() {
     { id:'p49', name:'Distribuidora JG Bebidas', segment:'Distribuidora', value:1300, stage:'prospect', notes:'@jgbebidas.distribuidora · 16k seg., conteúdo genérico, alto faturamento', createdAt:'2026-06-23' },
     { id:'p50', name:'Expresso Distribuidora (ZN)', segment:'Distribuidora', value:1300, stage:'prospect', notes:'@expressodistribuidora · 7,8k seg., sem linha editorial · ZN', createdAt:'2026-06-23' },
   ];
-  const existingIds = new Set(existing.map(p => p.id));
-  const newProspects = seed.filter(p => !existingIds.has(p.id));
-  if (newProspects.length > 0) saveProspects([...existing, ...newProspects]);
+  const existingMap = {};
+  existing.forEach(p => { existingMap[p.id] = p; });
+  seed.forEach(p => { existingMap[p.id] = p; });
+  saveProspects(Object.values(existingMap));
 }
 
 // ============ WEEKLY SUMMARY ============
