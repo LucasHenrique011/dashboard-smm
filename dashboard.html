@@ -1698,6 +1698,9 @@ function renderKanban() {
             ${reactivateAlert ? `<div class="kc-alert" style="border-color:#fc6;background:#fc622;color:#fc6;">🔄 Hora de reativar!</div>` : ''}
             ${lastLog ? `<div class="kc-log">${lastLog}</div>` : ''}
             <div class="kc-actions">
+              <select class="btn-sm kc-move" onchange="moveProspect('${c.id}', this.value)" style="width:auto;padding:4px 6px;font-size:10px;">
+                ${PIPELINE_STAGES.map(s => `<option value="${s.id}" ${s.id === stage.id ? 'selected' : ''}>${s.name}</option>`).join('')}
+              </select>
               <button class="btn-sm" onclick="editProspect('${c.id}')">✎</button>
               <button class="btn-sm btn-danger" onclick="deleteProspect('${c.id}')">✕</button>
             </div>
@@ -1707,6 +1710,12 @@ function renderKanban() {
       <button class="kanban-add" onclick="openProspectModal('${stage.id}')">+ Adicionar</button>
     </div>`;
   }).join('');
+}
+
+function moveProspect(id, stage) {
+  const prospects = getProspects();
+  const p = prospects.find(x => x.id === id);
+  if (p) { p.stage = stage; saveProspects(prospects); renderPipeline(); }
 }
 
 let draggedProspectId = null;
@@ -1860,7 +1869,6 @@ function seedPipelineClients() {
   seed.forEach(p => { existingMap[p.id] = p; });
   const all = Object.values(existingMap);
   save('prospects', all);
-  console.log('Prospects salvos:', all.length);
 }
 
 // ============ WEEKLY SUMMARY ============
