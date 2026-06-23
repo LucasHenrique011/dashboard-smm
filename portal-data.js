@@ -691,12 +691,25 @@ const PORTAL_DATA = {
       "roteiro": ""
     }
   ],
-  "metricas": {},
+  "metricas": {
+    "mania": {
+      "2026-06": {
+        "seguidores": 561,
+        "alcance": 0,
+        "impressoes": 0,
+        "engajamento": 0,
+        "views": 0,
+        "novos": 0,
+        "melhor": "",
+        "obs": ""
+      }
+    }
+  },
   "tokens": {
     "cube": "cube2026ls",
     "pallefort": "pall2026ls",
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-23T21:51:18.934Z"
+  "updatedAt": "2026-06-23T21:52:39.229Z"
 };
