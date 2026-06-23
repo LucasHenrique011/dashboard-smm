@@ -457,6 +457,10 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
       <div class="lbl">Receita atual</div>
       <div class="val green" id="meta-receita">R$ 0</div>
     </div>
+    <div class="fin-box">
+      <div class="lbl">Ticket médio</div>
+      <div class="val" style="color:#fc6;" id="meta-ticket">R$ 0</div>
+    </div>
   </div>
 
   <div class="card" style="margin-bottom:16px;">
@@ -1960,6 +1964,8 @@ function renderMetas() {
   document.getElementById('meta-clientes').textContent = clientesAtivos;
   document.getElementById('meta-capacidade').textContent = `${clientesAtivos} / ${maxClientes}`;
   document.getElementById('meta-receita').textContent = `R$ ${receitaAtual.toFixed(0)}`;
+  const ticketMedio = clientesAtivos > 0 ? receitaAtual / clientesAtivos : 0;
+  document.getElementById('meta-ticket').textContent = `R$ ${ticketMedio.toFixed(0)}`;
 
   const ocupacao = Math.round((clientesAtivos / maxClientes) * 100);
   const corOcupacao = ocupacao >= 90 ? '#f66' : ocupacao >= 60 ? '#fc6' : '#4f9';
