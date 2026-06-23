@@ -251,8 +251,12 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
   .cal-item { font-size: 10px; padding: 3px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
   /* Tabelas — scroll horizontal */
-  table { font-size: 11px; display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { font-size: 11px; width: 100%; }
   th, td { padding: 5px 4px; white-space: nowrap; }
+  #tracker-body { display: table-row-group; }
+  table { display: table; }
+  .module table { overflow-x: auto; display: block; -webkit-overflow-scrolling: touch; }
+  .module table thead, .module table tbody { display: table; width: 100%; }
 
   /* Financeiro */
   .fin-row { flex-wrap: wrap; gap: 4px; }
