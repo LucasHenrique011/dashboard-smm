@@ -229,43 +229,68 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
 
 /* Mobile */
 @media (max-width: 768px) {
-  .module { padding: 12px 8px; }
+  body { overflow-x: hidden; }
+  .module { padding: 12px 8px; max-width: 100%; overflow-x: hidden; }
   nav button { padding: 10px 4px; font-size: 12px; }
   .cards { grid-template-columns: 1fr; }
   .fin-grid { grid-template-columns: 1fr; }
-  .calendar-week { grid-template-columns: repeat(7, 1fr); gap: 2px; }
-  .cal-day { padding: 4px; min-height: 70px; }
-  .cal-day-label { font-size: 9px; }
-  .cal-item { font-size: 9px; padding: 2px 4px; }
+  h2 { font-size: 16px; }
+  .form-row { grid-template-columns: 1fr; }
+  .toolbar { padding: 6px 8px; flex-wrap: wrap; }
+
+  /* Resumo da semana — empilha os grupos */
   .week-summary { flex-direction: column; }
   .ws-group + .ws-group { border-left: none; border-top: 2px solid #333; }
   .ws-item .ws-val { font-size: 15px; }
-  .form-row { grid-template-columns: 1fr; }
-  .toolbar { padding: 6px 8px; flex-wrap: wrap; }
-  table { font-size: 11px; display: block; overflow-x: auto; }
-  th, td { padding: 5px 4px; }
-  .fin-row .fin-name input { width: 140px; }
-  .fin-row input { width: 80px; }
-  .bowtie-container { overflow-x: auto; }
-  .kanban { overflow-x: auto; }
-  h2 { font-size: 16px; }
 
-  /* Playbook mobile */
-  .playbook-body textarea { min-height: 250px; font-size: 14px; line-height: 1.6; padding: 12px; }
+  /* Calendário — 3 colunas pra caber na tela, scrollável */
+  .calendar-week { grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  .cal-day { padding: 6px; min-height: 60px; }
+  .cal-day-label { font-size: 10px; }
+  .cal-item { font-size: 10px; padding: 3px 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Tabelas — viram lista vertical no celular */
+  table { width: 100%; }
+  table thead { display: none; }
+  table tbody tr { display: flex; flex-direction: column; padding: 10px; margin-bottom: 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; }
+  table tbody td { display: flex; justify-content: space-between; padding: 4px 0; border: none; font-size: 13px; }
+  table tbody td::before { font-weight: 600; color: #888; margin-right: 8px; }
+
+  /* Financeiro */
+  .fin-row { flex-wrap: wrap; gap: 4px; }
+  .fin-row .fin-name input { width: 100%; }
+  .fin-row input { width: 100px; }
+
+  /* Playbook — textarea ocupa tela toda */
+  .playbook-body textarea { min-height: 300px; font-size: 14px; line-height: 1.7; padding: 14px; width: 100%; }
   .playbook-header h3 { font-size: 15px; }
+  .playbook-body { padding: 0 8px 12px; }
 
-  /* Roteiro no modal mobile */
-  #v-roteiro { min-height: 200px; font-size: 14px; line-height: 1.6; }
-  .modal { width: 95%; padding: 16px; max-height: 90vh; }
+  /* Modal — quase tela cheia */
+  .modal-overlay { align-items: flex-end; }
+  .modal { width: 100%; max-width: 100%; max-height: 92vh; border-radius: 16px 16px 0 0; padding: 20px 16px; }
   .modal h3 { font-size: 16px; }
+  #v-roteiro { min-height: 200px; font-size: 14px; line-height: 1.6; }
   label { font-size: 13px; }
-  input, textarea, select { font-size: 14px; padding: 10px; }
+  input, textarea, select { font-size: 16px; padding: 10px; }
   button, .btn { font-size: 14px; padding: 10px 14px; }
   .btn-sm { font-size: 12px; padding: 6px 10px; }
 
-  /* Detalhes dos cards mobile */
+  /* Cards */
   details summary { font-size: 13px; }
   details p { font-size: 13px; line-height: 1.5; }
+  .card-header { flex-wrap: wrap; gap: 6px; }
+
+  /* Pipeline */
+  .bowtie-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kanban { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Filtros */
+  .filter-bar { flex-wrap: wrap; }
+  .filter-bar select { flex: 1; min-width: 120px; }
+
+  /* Vídeos por mês */
+  #history-container table tbody td { font-size: 12px; }
 }
 </style>
 </head>
