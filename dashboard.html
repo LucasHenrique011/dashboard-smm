@@ -236,14 +236,12 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
 /* Ocultar valores */
 body.hide-valores .card-valor,
 body.hide-valores .fin-box .val,
-body.hide-valores .fin-row input[type="number"],
-body.hide-valores #meta-receita,
-body.hide-valores #meta-ticket,
-body.hide-valores #meta-capacidade,
-body.hide-valores #meta-progresso,
-body.hide-valores #fin-receita,
-body.hide-valores #fin-custos,
-body.hide-valores #fin-margem { filter: blur(8px); user-select: none; pointer-events: none; }
+body.hide-valores .fin-row input[type="number"] { font-size: 0 !important; }
+body.hide-valores .card-valor::after,
+body.hide-valores .fin-box .val::after { content: '•••••'; font-size: 16px; color: #555; }
+body.hide-valores .fin-box .val::after { font-size: 24px; }
+body.hide-valores .fin-row input[type="number"] { color: transparent !important; }
+body.hide-valores .fin-row input[type="number"]::placeholder { color: transparent; }
 
 /* Mobile */
 @media (max-width: 768px) {
