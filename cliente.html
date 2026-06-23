@@ -377,20 +377,20 @@ function renderClientMetrics() {
         ${card('Views Reels', met.views, prev.views)}
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;">
+        ${card('Interações', met.interacoes, prev.interacoes)}
+        ${card('Engajados', met.engajados, prev.engajados)}
         ${card('Engajamento', met.engajamento, prev.engajamento, '%')}
-        ${card('Novos Seguidores', met.novos, prev.novos)}
-        ${card('Impressões', met.impressoes, prev.impressoes)}
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:12px;">
         ${card('Visitas ao Perfil', met.visitas, prev.visitas)}
         ${card('Link da Bio', met.linkbio, prev.linkbio)}
-        ${card('Curtidas', met.curtidas, prev.curtidas)}
+        ${card('Novos Seguidores', met.novos, prev.novos)}
       </div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-        ${card('Comentários', met.comentarios, prev.comentarios)}
+      ${(met.curtidas || met.compartilhamentos || met.salvamentos) ? `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
+        ${card('Curtidas', met.curtidas, prev.curtidas)}
         ${card('Compartilhamentos', met.compartilhamentos, prev.compartilhamentos)}
         ${card('Salvamentos', met.salvamentos, prev.salvamentos)}
-      </div>
+      </div>` : ''}
       ${met.melhor ? `<div class="card" style="margin-top:12px;background:#1a2a1a;border-color:#2a4a3a;">
         <div style="font-size:11px;color:#888;">🏆 Melhor vídeo do mês</div>
         <div style="font-size:15px;color:#4f9;font-weight:600;margin-top:4px;">${met.melhor}</div>

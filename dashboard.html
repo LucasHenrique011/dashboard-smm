@@ -545,29 +545,32 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 
   <div class="card" style="margin-bottom:16px;">
     <h3 style="color:#4f9;margin:0 0 12px;">Preencher Métricas</h3>
+    <p style="color:#888;font-size:11px;margin-bottom:12px;">📱 Dados do Instagram Insights (últimos 30 dias)</p>
     <div class="form-row">
-      <div class="form-group"><label>Seguidores</label><input type="number" id="met-seguidores" placeholder="Ex: 2500" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Alcance total</label><input type="number" id="met-alcance" placeholder="Ex: 15000" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Seguidores (total atual)</label><input type="number" id="met-seguidores" placeholder="Ex: 561" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Contas alcançadas</label><input type="number" id="met-alcance" placeholder="Ex: 1612" onchange="saveMetricas()"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Impressões</label><input type="number" id="met-impressoes" placeholder="Ex: 30000" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Engajamento (%)</label><input type="number" id="met-engajamento" step="0.1" placeholder="Ex: 4.5" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Visualizações totais</label><input type="number" id="met-views" placeholder="Ex: 2612" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Interações totais</label><input type="number" id="met-interacoes" placeholder="Ex: 113" onchange="saveMetricas()"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Visualizações de reels</label><input type="number" id="met-views" placeholder="Ex: 50000" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Novos seguidores</label><input type="number" id="met-novos" placeholder="Ex: 120" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Contas com engajamento</label><input type="number" id="met-engajados" placeholder="Ex: 36" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Visitas ao perfil</label><input type="number" id="met-visitas" placeholder="Ex: 61" onchange="saveMetricas()"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Visitas ao perfil</label><input type="number" id="met-visitas" placeholder="Ex: 800" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Toques no link da bio</label><input type="number" id="met-linkbio" placeholder="Ex: 45" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Toques no link da bio</label><input type="number" id="met-linkbio" placeholder="Ex: 9" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Taxa de engajamento (%)</label><input type="number" id="met-engajamento" step="0.1" placeholder="Calcular: interações ÷ alcance × 100" onchange="saveMetricas()"></div>
+    </div>
+    <p style="color:#555;font-size:10px;margin:-8px 0 12px;">💡 Engajamento = interações ÷ alcance × 100. Se deixar vazio, calcula automático.</p>
+    <h3 style="color:#888;font-size:12px;margin:16px 0 8px;">📱 Extras (opcional — disponível no app)</h3>
+    <div class="form-row">
+      <div class="form-group"><label>Novos seguidores</label><input type="number" id="met-novos" placeholder="Opcional" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Compartilhamentos</label><input type="number" id="met-compartilhamentos" placeholder="Opcional" onchange="saveMetricas()"></div>
     </div>
     <div class="form-row">
-      <div class="form-group"><label>Compartilhamentos</label><input type="number" id="met-compartilhamentos" placeholder="Ex: 230" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Salvamentos</label><input type="number" id="met-salvamentos" placeholder="Ex: 180" onchange="saveMetricas()"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Comentários</label><input type="number" id="met-comentarios" placeholder="Ex: 95" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Curtidas</label><input type="number" id="met-curtidas" placeholder="Ex: 1200" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Salvamentos</label><input type="number" id="met-salvamentos" placeholder="Opcional" onchange="saveMetricas()"></div>
+      <div class="form-group"><label>Curtidas</label><input type="number" id="met-curtidas" placeholder="Opcional" onchange="saveMetricas()"></div>
     </div>
     <div class="form-group"><label>Melhor vídeo do mês</label><input id="met-melhor" placeholder="Título do vídeo com melhor performance" onchange="saveMetricas()"></div>
     <div class="form-group"><label>Observações</label><textarea id="met-obs" placeholder="Destaques, insights, próximos passos..." style="min-height:60px;" onchange="saveMetricas()"></textarea></div>
@@ -2222,18 +2225,25 @@ function saveMetricas() {
   if (!client) return;
   const all = loadAllMetricas();
   if (!all[client]) all[client] = {};
+  const alcance = parseFloat(document.getElementById('met-alcance').value) || 0;
+  const interacoes = parseFloat(document.getElementById('met-interacoes').value) || 0;
+  let engajamento = parseFloat(document.getElementById('met-engajamento').value) || 0;
+  if (!engajamento && alcance > 0 && interacoes > 0) {
+    engajamento = parseFloat(((interacoes / alcance) * 100).toFixed(1));
+    document.getElementById('met-engajamento').value = engajamento;
+  }
   all[client][metMonth] = {
     seguidores: parseFloat(document.getElementById('met-seguidores').value) || 0,
-    alcance: parseFloat(document.getElementById('met-alcance').value) || 0,
-    impressoes: parseFloat(document.getElementById('met-impressoes').value) || 0,
-    engajamento: parseFloat(document.getElementById('met-engajamento').value) || 0,
+    alcance,
     views: parseFloat(document.getElementById('met-views').value) || 0,
-    novos: parseFloat(document.getElementById('met-novos').value) || 0,
+    interacoes,
+    engajados: parseFloat(document.getElementById('met-engajados').value) || 0,
     visitas: parseFloat(document.getElementById('met-visitas').value) || 0,
     linkbio: parseFloat(document.getElementById('met-linkbio').value) || 0,
+    engajamento,
+    novos: parseFloat(document.getElementById('met-novos').value) || 0,
     compartilhamentos: parseFloat(document.getElementById('met-compartilhamentos').value) || 0,
     salvamentos: parseFloat(document.getElementById('met-salvamentos').value) || 0,
-    comentarios: parseFloat(document.getElementById('met-comentarios').value) || 0,
     curtidas: parseFloat(document.getElementById('met-curtidas').value) || 0,
     melhor: document.getElementById('met-melhor').value.trim(),
     obs: document.getElementById('met-obs').value.trim()
@@ -2258,15 +2268,15 @@ function renderMetricas() {
 
   document.getElementById('met-seguidores').value = met.seguidores || '';
   document.getElementById('met-alcance').value = met.alcance || '';
-  document.getElementById('met-impressoes').value = met.impressoes || '';
-  document.getElementById('met-engajamento').value = met.engajamento || '';
   document.getElementById('met-views').value = met.views || '';
-  document.getElementById('met-novos').value = met.novos || '';
+  document.getElementById('met-interacoes').value = met.interacoes || '';
+  document.getElementById('met-engajados').value = met.engajados || '';
   document.getElementById('met-visitas').value = met.visitas || '';
   document.getElementById('met-linkbio').value = met.linkbio || '';
+  document.getElementById('met-engajamento').value = met.engajamento || '';
+  document.getElementById('met-novos').value = met.novos || '';
   document.getElementById('met-compartilhamentos').value = met.compartilhamentos || '';
   document.getElementById('met-salvamentos').value = met.salvamentos || '';
-  document.getElementById('met-comentarios').value = met.comentarios || '';
   document.getElementById('met-curtidas').value = met.curtidas || '';
   document.getElementById('met-melhor').value = met.melhor || '';
   document.getElementById('met-obs').value = met.obs || '';
@@ -2289,16 +2299,16 @@ function renderMetricas() {
   document.getElementById('met-evolution').innerHTML =
     evol(met.seguidores, prev.seguidores, 'Seguidores') +
     evol(met.alcance, prev.alcance, 'Alcance') +
-    evol(met.views, prev.views, 'Views Reels') +
+    evol(met.views, prev.views, 'Visualizações') +
+    evol(met.interacoes, prev.interacoes, 'Interações') +
+    evol(met.engajados, prev.engajados, 'Engajados') +
     evol(met.engajamento, prev.engajamento, 'Engajamento') +
-    evol(met.novos, prev.novos, 'Novos Seg.') +
-    evol(met.impressoes, prev.impressoes, 'Impressões') +
     evol(met.visitas, prev.visitas, 'Visitas Perfil') +
     evol(met.linkbio, prev.linkbio, 'Link da Bio') +
-    evol(met.curtidas, prev.curtidas, 'Curtidas') +
-    evol(met.comentarios, prev.comentarios, 'Comentários') +
+    evol(met.novos, prev.novos, 'Novos Seg.') +
     evol(met.compartilhamentos, prev.compartilhamentos, 'Compartilham.') +
-    evol(met.salvamentos, prev.salvamentos, 'Salvamentos');
+    evol(met.salvamentos, prev.salvamentos, 'Salvamentos') +
+    evol(met.curtidas, prev.curtidas, 'Curtidas');
 
   renderMetChart(client);
 }
@@ -2378,22 +2388,22 @@ function gerarRelatorioMensal() {
       </div>
 
       <div class="fin-grid" style="margin-bottom:20px;">
+        <div class="fin-box"><div class="lbl">Interações</div><div class="val green">${(met.interacoes || 0).toLocaleString('pt-BR')}</div>${diff(met.interacoes, prev.interacoes)}</div>
+        <div class="fin-box"><div class="lbl">Contas Engajadas</div><div class="val green">${(met.engajados || 0).toLocaleString('pt-BR')}</div>${diff(met.engajados, prev.engajados)}</div>
         <div class="fin-box"><div class="lbl">Engajamento</div><div class="val" style="color:#fc6;">${(met.engajamento || 0).toFixed(1)}%</div>${diff(met.engajamento, prev.engajamento)}</div>
-        <div class="fin-box"><div class="lbl">Novos Seguidores</div><div class="val green">${(met.novos || 0).toLocaleString('pt-BR')}</div>${diff(met.novos, prev.novos)}</div>
-        <div class="fin-box"><div class="lbl">Impressões</div><div class="val green">${(met.impressoes || 0).toLocaleString('pt-BR')}</div>${diff(met.impressoes, prev.impressoes)}</div>
       </div>
 
       <div class="fin-grid" style="margin-bottom:20px;">
         <div class="fin-box"><div class="lbl">Visitas ao Perfil</div><div class="val green">${(met.visitas || 0).toLocaleString('pt-BR')}</div>${diff(met.visitas, prev.visitas)}</div>
         <div class="fin-box"><div class="lbl">Toques no Link da Bio</div><div class="val" style="color:#fc6;">${(met.linkbio || 0).toLocaleString('pt-BR')}</div>${diff(met.linkbio, prev.linkbio)}</div>
-        <div class="fin-box"><div class="lbl">Curtidas</div><div class="val green">${(met.curtidas || 0).toLocaleString('pt-BR')}</div>${diff(met.curtidas, prev.curtidas)}</div>
+        ${met.novos ? `<div class="fin-box"><div class="lbl">Novos Seguidores</div><div class="val green">${(met.novos).toLocaleString('pt-BR')}</div>${diff(met.novos, prev.novos)}</div>` : ''}
       </div>
 
-      <div class="fin-grid" style="margin-bottom:20px;">
-        <div class="fin-box"><div class="lbl">Comentários</div><div class="val green">${(met.comentarios || 0).toLocaleString('pt-BR')}</div>${diff(met.comentarios, prev.comentarios)}</div>
-        <div class="fin-box"><div class="lbl">Compartilhamentos</div><div class="val green">${(met.compartilhamentos || 0).toLocaleString('pt-BR')}</div>${diff(met.compartilhamentos, prev.compartilhamentos)}</div>
-        <div class="fin-box"><div class="lbl">Salvamentos</div><div class="val green">${(met.salvamentos || 0).toLocaleString('pt-BR')}</div>${diff(met.salvamentos, prev.salvamentos)}</div>
-      </div>
+      ${(met.curtidas || met.compartilhamentos || met.salvamentos) ? `<div class="fin-grid" style="margin-bottom:20px;">
+        ${met.curtidas ? `<div class="fin-box"><div class="lbl">Curtidas</div><div class="val green">${met.curtidas.toLocaleString('pt-BR')}</div>${diff(met.curtidas, prev.curtidas)}</div>` : ''}
+        ${met.compartilhamentos ? `<div class="fin-box"><div class="lbl">Compartilhamentos</div><div class="val green">${met.compartilhamentos.toLocaleString('pt-BR')}</div>${diff(met.compartilhamentos, prev.compartilhamentos)}</div>` : ''}
+        ${met.salvamentos ? `<div class="fin-box"><div class="lbl">Salvamentos</div><div class="val green">${met.salvamentos.toLocaleString('pt-BR')}</div>${diff(met.salvamentos, prev.salvamentos)}</div>` : ''}
+      </div>` : ''}
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
         <div class="fin-box"><div class="lbl">Vídeos Postados</div><div class="val green">${postados.length}</div></div>
