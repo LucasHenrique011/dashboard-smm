@@ -328,6 +328,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="toggleTheme()">☀/☾ Tema</button>
   <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
+  <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
 <nav>
@@ -782,7 +783,38 @@ const STORAGE_KEYS = { videos: 'smm_videos', finance: 'smm_finance', playbook: '
 function load(key) {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEYS[key])) || null; } catch { return null; }
 }
-function save(key, data) { localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data)); }
+function save(key, data) { localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data)); scheduleAutoBackup(); }
+
+let _backupTimer = null;
+function scheduleAutoBackup() {
+  if (_backupTimer) clearTimeout(_backupTimer);
+  _backupTimer = setTimeout(doAutoBackup, 5000);
+}
+function doAutoBackup() {
+  const data = {};
+  Object.values(STORAGE_KEYS).forEach(k => { data[k] = localStorage.getItem(k); });
+  ['smm_clients','smm_stage_info','smm_metas','smm_ideias','smm_timer_hist','smm_timer_state','smm_processos','smm_theme'].forEach(k => {
+    const v = localStorage.getItem(k);
+    if (v) data[k] = v;
+  });
+  data._backupDate = new Date().toISOString();
+  const backups = JSON.parse(localStorage.getItem('smm_auto_backups') || '[]');
+  backups.unshift(data);
+  localStorage.setItem('smm_auto_backups', JSON.stringify(backups.slice(0, 5)));
+}
+function restoreAutoBackup() {
+  const backups = JSON.parse(localStorage.getItem('smm_auto_backups') || '[]');
+  if (backups.length === 0) { alert('Nenhum backup automático encontrado.'); return; }
+  const dates = backups.map((b, i) => `${i + 1}. ${new Date(b._backupDate).toLocaleString('pt-BR')}`).join('\n');
+  const choice = prompt('Backups disponíveis:\n' + dates + '\n\nDigite o número do backup:');
+  if (!choice) return;
+  const idx = parseInt(choice) - 1;
+  if (idx < 0 || idx >= backups.length) { alert('Número inválido.'); return; }
+  if (!confirm('Isso vai substituir todos os seus dados atuais pelo backup. Continuar?')) return;
+  const backup = backups[idx];
+  Object.entries(backup).forEach(([k, v]) => { if (k !== '_backupDate' && v) localStorage.setItem(k, typeof v === 'string' ? v : JSON.stringify(v)); });
+  location.reload();
+}
 
 // ============ CLIENT CONFIG ============
 const DEFAULT_CLIENTS = {
@@ -812,7 +844,7 @@ function loadClients() {
   const saved = localStorage.getItem('smm_clients');
   return saved ? JSON.parse(saved) : null;
 }
-function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringify(clients)); }
+function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringify(clients)); scheduleAutoBackup(); }
 
 let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
@@ -2026,7 +2058,7 @@ const DEFAULT_PROCESSOS = [
 ];
 
 function loadProcessos() { try { return JSON.parse(localStorage.getItem('smm_processos')) || null; } catch { return null; } }
-function saveProcessos(d) { localStorage.setItem('smm_processos', JSON.stringify(d)); }
+function saveProcessos(d) { localStorage.setItem('smm_processos', JSON.stringify(d)); scheduleAutoBackup(); }
 
 function addProcesso() {
   const procs = loadProcessos() || [];
@@ -2232,7 +2264,6 @@ function toggleTimer() {
     document.getElementById('timer-btn').textContent = '⏸ Pausar e salvar';
     saveTimerState();
     timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
-    }, 1000);
   }
 }
 
@@ -2324,7 +2355,7 @@ function renderFerramentas() {
 
 // ============ BANCO DE IDEIAS ============
 function loadIdeias() { try { return JSON.parse(localStorage.getItem('smm_ideias')) || []; } catch { return []; } }
-function saveIdeias(d) { localStorage.setItem('smm_ideias', JSON.stringify(d)); }
+function saveIdeias(d) { localStorage.setItem('smm_ideias', JSON.stringify(d)); scheduleAutoBackup(); }
 
 function addIdeia() {
   const ideias = loadIdeias();
@@ -2404,6 +2435,7 @@ function saveMetas() {
     metasMes: loadMetas().metasMes || []
   };
   localStorage.setItem('smm_metas', JSON.stringify(m));
+  scheduleAutoBackup();
 }
 
 function addMetaMes() {
@@ -2651,6 +2683,7 @@ function renderAll() {
 }
 
 renderAll();
+doAutoBackup();
 </script>
 </body>
 </html>
