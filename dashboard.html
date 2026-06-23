@@ -526,12 +526,13 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <!-- RELATÓRIO MENSAL -->
   <div class="card" style="margin-bottom:16px;">
     <h3 style="color:#4f9;margin:0 0 12px;">📊 Relatório Mensal</h3>
-    <p style="color:#888;font-size:12px;margin-bottom:12px;">Gera um resumo do mês pra revisar ou mandar pro cliente.</p>
+    <p style="color:#888;font-size:12px;margin-bottom:12px;">Gera um resumo completo pra revisar ou apresentar pro cliente.</p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+      <select id="relatorio-mes" style="width:auto;"></select>
       <select id="relatorio-client" style="width:auto;"><option value="all">Todos os clientes</option></select>
       <button class="btn-primary btn-sm" onclick="gerarRelatorio()">Gerar relatório</button>
     </div>
-    <div id="relatorio-resultado" style="display:none;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;padding:16px;"></div>
+    <div id="relatorio-resultado" style="display:none;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;padding:20px;"></div>
   </div>
 
   <!-- CONTROLE DE HORAS -->
@@ -585,12 +586,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <div id="calc-resultado" style="margin-top:12px;padding:16px;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;"></div>
   </div>
 
-  <!-- CHECKLIST DE ENTREGA -->
-  <div class="card">
-    <h3 style="color:#4f9;margin:0 0 12px;">✅ Checklist de Entrega</h3>
-    <p style="color:#888;font-size:12px;margin-bottom:12px;">Antes de postar, confira tudo.</p>
-    <div id="checklist-container"></div>
-  </div>
+
 </div>
 
 <!-- MODULE 3: PLAYBOOK -->
@@ -2003,41 +1999,110 @@ function renderProcessos() {
 // ============ FERRAMENTAS ============
 
 // -- Relatório Mensal --
+function populateRelatorioMeses() {
+  const sel = document.getElementById('relatorio-mes');
+  if (!sel || sel.options.length > 1) return;
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const now = new Date();
+  for (let i = 0; i < 12; i++) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const val = d.toISOString().slice(0, 7);
+    const label = `${meses[d.getMonth()]} ${d.getFullYear()}`;
+    sel.innerHTML += `<option value="${val}" ${i === 0 ? 'selected' : ''}>${label}</option>`;
+  }
+}
+
 function gerarRelatorio() {
   const fc = document.getElementById('relatorio-client').value;
+  const mesSel = document.getElementById('relatorio-mes').value;
   const videos = load('videos') || [];
-  const now = new Date().toISOString().slice(0, 7);
   const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const [y, m] = now.split('-');
+  const [y, m] = mesSel.split('-');
   const mesNome = `${meses[parseInt(m)-1]} ${y}`;
 
-  const mesVideos = videos.filter(v => v.date && v.date.startsWith(now) && (fc === 'all' || v.client === fc));
+  const mesVideos = videos.filter(v => v.date && v.date.startsWith(mesSel) && (fc === 'all' || v.client === fc));
   const postados = mesVideos.filter(v => v.status === 'postado').length;
+  const emProducao = mesVideos.filter(v => v.status !== 'postado').length;
   const total = mesVideos.length;
 
   const porPilar = {};
   mesVideos.forEach(v => { porPilar[v.pillar] = (porPilar[v.pillar] || 0) + 1; });
 
-  const allFin = load('finance') || {};
-  const finData = allFin[now];
-  const receita = finData ? finData.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0) : 0;
+  const porTipo = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
+  mesVideos.forEach(v => { porTipo[v.status] = (porTipo[v.status] || 0) + 1; });
 
-  const clienteNome = fc === 'all' ? 'Todos os clientes' : (CLIENTS[fc]?.name || fc);
+  // Mes anterior pra comparar
+  const [py, pm] = [parseInt(y), parseInt(m) - 1];
+  const mesAnt = pm < 1 ? `${py - 1}-12` : `${py}-${String(pm).padStart(2, '0')}`;
+  const videosAnt = videos.filter(v => v.date && v.date.startsWith(mesAnt) && (fc === 'all' || v.client === fc));
+  const postadosAnt = videosAnt.filter(v => v.status === 'postado').length;
+  const diff = postados - postadosAnt;
+  const diffLabel = diff > 0 ? `↑ +${diff} vs mês anterior` : diff < 0 ? `↓ ${diff} vs mês anterior` : '= igual ao mês anterior';
+  const diffColor = diff > 0 ? '#4f9' : diff < 0 ? '#f66' : '#888';
+
+  // Horas do timer
+  const timerHist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
+  const horasMes = timerHist.filter(h => h.data && h.data.startsWith(mesSel) && (fc === 'all' || h.client === fc))
+    .reduce((s, h) => s + h.segundos, 0);
+  const horasLabel = (horasMes / 3600).toFixed(1);
+
+  // Lista de vídeos postados
+  const listaPostados = mesVideos.filter(v => v.status === 'postado').sort((a, b) => a.date.localeCompare(b.date));
+
+  const clienteNome = fc === 'all' ? 'Visão Geral' : (CLIENTS[fc]?.name || fc);
 
   const el = document.getElementById('relatorio-resultado');
   el.style.display = 'block';
   el.innerHTML = `
-    <h3 style="color:#4f9;margin:0 0 12px;">📊 ${mesNome} — ${clienteNome}</h3>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-      <div style="text-align:center;padding:12px;background:#252530;border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#4f9;">${postados}</div><div style="font-size:11px;color:#888;">Postados</div></div>
-      <div style="text-align:center;padding:12px;background:#252530;border-radius:8px;"><div style="font-size:22px;font-weight:700;color:#fc6;">${total - postados}</div><div style="font-size:11px;color:#888;">Em produção</div></div>
+    <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #2a2a3a;">
+      <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Relatório</div>
+      <h3 style="color:#4f9;margin:4px 0;font-size:18px;">${clienteNome}</h3>
+      <div style="font-size:13px;color:#aaa;">${mesNome}</div>
     </div>
-    <div style="margin-bottom:12px;">
-      <strong style="color:#ccc;font-size:12px;">Por pilar:</strong>
-      ${Object.entries(porPilar).map(([p, c]) => `<span style="display:inline-block;margin:4px 4px 0 0;padding:3px 10px;background:#252530;border-radius:8px;font-size:11px;color:#aaa;">${p}: ${c}</span>`).join('')}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
+      <div style="text-align:center;padding:14px 8px;background:#252530;border-radius:10px;">
+        <div style="font-size:24px;font-weight:700;color:#4f9;">${postados}</div>
+        <div style="font-size:10px;color:#888;">Postados</div>
+      </div>
+      <div style="text-align:center;padding:14px 8px;background:#252530;border-radius:10px;">
+        <div style="font-size:24px;font-weight:700;color:#fc6;">${emProducao}</div>
+        <div style="font-size:10px;color:#888;">Em produção</div>
+      </div>
+      <div style="text-align:center;padding:14px 8px;background:#252530;border-radius:10px;">
+        <div style="font-size:24px;font-weight:700;color:#6cf;">${horasLabel}h</div>
+        <div style="font-size:10px;color:#888;">Horas</div>
+      </div>
     </div>
-    ${fc === 'all' ? `<div style="font-size:13px;color:#888;">Receita do mês: <strong style="color:#4f9;">R$ ${receita.toFixed(0)}</strong></div>` : ''}
-    <button class="btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('relatorio-resultado').innerText).then(() => alert('Copiado!'))" style="margin-top:12px;">📋 Copiar texto</button>
+
+    <div style="text-align:center;font-size:12px;color:${diffColor};margin-bottom:16px;">${diffLabel}</div>
+
+    ${Object.keys(porPilar).length > 0 ? `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Por pilar</div>
+      ${Object.entries(porPilar).map(([p, c]) => {
+        const pct = Math.round((c / total) * 100);
+        return `<div style="margin-bottom:6px;">
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px;"><span>${p}</span><span>${c} (${pct}%)</span></div>
+          <div style="background:#252530;border-radius:4px;height:6px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:#4f9;border-radius:4px;"></div></div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    ${listaPostados.length > 0 ? `
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Vídeos entregues</div>
+      ${listaPostados.map(v => `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1f1f2f;font-size:12px;">
+          <span style="color:#ccc;">${v.title}</span>
+          <span style="color:#555;">${v.date.split('-').reverse().slice(0,2).join('/')}</span>
+        </div>
+      `).join('')}
+    </div>` : ''}
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <button class="btn-sm btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('relatorio-resultado').innerText).then(() => alert('Texto copiado!'))">📋 Copiar texto</button>
+    </div>
   `;
 }
 
@@ -2173,9 +2238,9 @@ function renderChecklist() {
 }
 
 function renderFerramentas() {
+  populateRelatorioMeses();
   renderTemplates();
   renderTimerHist();
-  renderChecklist();
   calcularProposta();
 }
 
