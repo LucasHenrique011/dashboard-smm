@@ -287,7 +287,26 @@ body.light .modal-overlay { background: rgba(0,0,0,.3); }
   </div>
   <div class="calendar-week" id="calendar"></div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center;">
+  <h2>Tracker da Semana</h2>
+  <div class="filter-bar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+    <select id="filter-client" onchange="renderTracker()">
+      <option value="all">Todos os clientes</option>
+    </select>
+    <select id="filter-status" onchange="renderTracker()">
+      <option value="all">Todos os status</option>
+      <option value="pendente">Pendente</option>
+      <option value="gravado">Gravado</option>
+      <option value="editado">Editado</option>
+      <option value="postado">Postado</option>
+    </select>
+    <button class="btn-primary" onclick="openVideoModal()">+ Novo vídeo</button>
+  </div>
+  <table>
+    <thead><tr><th>Cliente</th><th>Título</th><th>Pilar</th><th>Status</th><th>Data</th><th></th></tr></thead>
+    <tbody id="tracker-body"></tbody>
+  </table>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-top:32px;">
     <h2>Vídeos por Mês</h2>
     <div style="display:flex;gap:8px;align-items:center;">
       <select id="hist-client" onchange="renderHistory()" style="width:auto;">
@@ -550,7 +569,7 @@ function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringi
 let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
 function populateClientSelects() {
-  ['v-client', 'hist-client'].forEach(id => {
+  ['filter-client', 'v-client', 'hist-client'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const val = sel.value;
@@ -677,6 +696,7 @@ function changeWeek(dir) {
   renderCalendar();
   renderWeeklySummary();
   renderCards();
+  renderTracker();
 }
 
 function renderCalendar() {
@@ -709,7 +729,9 @@ function renderTracker() {
   const videos = load('videos') || [];
   const fc = document.getElementById('filter-client').value;
   const fs = document.getElementById('filter-status').value;
-  const filtered = videos.filter(v => (fc === 'all' || v.client === fc) && (fs === 'all' || v.status === fs));
+  const weekEnd = new Date(currentWeekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  const ws = dateStr(currentWeekStart), we = dateStr(weekEnd);
+  const filtered = videos.filter(v => v.date >= ws && v.date <= we && (fc === 'all' || v.client === fc) && (fs === 'all' || v.status === fs));
   filtered.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
   const tbody = document.getElementById('tracker-body');
   tbody.innerHTML = filtered.length === 0
@@ -1705,6 +1727,7 @@ function renderAll() {
   renderCards();
   renderWeeklySummary();
   renderCalendar();
+  renderTracker();
   renderHistory();
   renderFinance();
   renderFinChart();
