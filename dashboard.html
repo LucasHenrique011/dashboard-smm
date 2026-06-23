@@ -2037,13 +2037,13 @@ function importData(e) {
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
+const FIXED_TOKENS = { cube: 'cube2026ls', pallefort: 'pall2026ls', mania: 'mania2026ls', lucas: 'lucas2026ls' };
 function getTokens() {
-  const saved = JSON.parse(localStorage.getItem('smm_portal_tokens') || '{}');
+  const tokens = Object.assign({}, FIXED_TOKENS);
   for (const key of Object.keys(CLIENTS)) {
-    if (!saved[key]) saved[key] = Math.random().toString(36).substr(2, 8);
+    if (!tokens[key]) tokens[key] = key.slice(0,4) + '2026ls';
   }
-  localStorage.setItem('smm_portal_tokens', JSON.stringify(saved));
-  return saved;
+  return tokens;
 }
 
 function buildPortalData() {
