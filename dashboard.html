@@ -1,0 +1,1691 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard SMM</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
+nav { display: flex; gap: 0; background: #1a1a1a; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 10; }
+nav button { flex: 1; padding: 14px; background: none; border: none; color: #888; font-size: 14px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; }
+nav button.active { color: #fff; border-bottom-color: #4f9; }
+nav button:hover { color: #ccc; }
+.module { display: none; padding: 20px; max-width: 1100px; margin: 0 auto; }
+.module.active { display: block; }
+h2 { font-size: 18px; margin-bottom: 16px; color: #4f9; }
+h3 { font-size: 15px; margin: 16px 0 8px; color: #aaa; }
+
+/* Cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.card { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.card-header h3 { margin: 0; color: #fff; font-size: 16px; }
+.card-valor { color: #4f9; font-weight: 700; }
+.card-header h3.client-name-cube { color: #b388e8; }
+.card-header h3.client-name-pallefort { color: #f66; }
+.card-header h3.client-name-mania { color: #f6a; }
+.card-header h3.client-name-lucas { color: #4fd; }
+.pillars { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+.pill { padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.pill.pill-cube { background: #5b1e8a33; color: #b388e8; border: 1px solid #5b1e8a; }
+.pill.pill-pallefort { background: #d91c1c22; color: #f66; border: 1px solid #d91c1c; }
+.pill.pill-mania { background: #e91e8c22; color: #f6a; border: 1px solid #e91e8c; }
+.pill.pill-lucas { background: #1abc9c22; color: #4fd; border: 1px solid #1abc9c; }
+.card p { font-size: 13px; color: #888; margin: 4px 0; }
+
+/* Calendar */
+.calendar-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 24px; }
+.cal-day { background: #1a1a1a; border: 1px solid #333; border-radius: 6px; padding: 8px; min-height: 100px; }
+.cal-day-label { font-size: 11px; color: #888; margin-bottom: 6px; font-weight: 600; }
+.cal-item { font-size: 11px; padding: 3px 6px; margin: 2px 0; border-radius: 4px; cursor: pointer; }
+.cal-item.cube { background: #1a3a2a; color: #6fc; border-left: 2px solid #4f9; }
+.cal-item.pallefort { background: #2a2a3a; color: #aaf; border-left: 2px solid #88f; }
+.cal-item.mania { background: #3a2a1a; color: #fc6; border-left: 2px solid #f90; }
+.cal-item.lucas { background: #2a1a3a; color: #c8f; border-left: 2px solid #a6f; }
+.cal-item.empty { background: transparent; border: 1px dashed #333; color: #555; cursor: pointer; text-align: center; }
+
+/* Tracker */
+table { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+th { text-align: left; padding: 8px 10px; font-size: 12px; color: #888; border-bottom: 1px solid #333; }
+td { padding: 8px 10px; font-size: 13px; border-bottom: 1px solid #1f1f1f; }
+.status-badge { padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600; }
+.status-badge.gravado { background: #2a2a1a; color: #fc6; }
+.status-badge.editado { background: #1a2a3a; color: #6cf; }
+.status-badge.postado { background: #1a3a1a; color: #6f6; }
+.status-badge.pendente { background: #2a1a1a; color: #f66; }
+
+/* Buttons */
+button, .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid #333; background: #1a1a1a; color: #e0e0e0; cursor: pointer; font-size: 13px; transition: background .2s; }
+button:hover, .btn:hover { background: #2a2a2a; }
+.btn-primary { background: #1a3a2a; border-color: #4f9; color: #4f9; }
+.btn-primary:hover { background: #2a4a3a; }
+.btn-danger { border-color: #f44; color: #f44; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+/* Forms */
+input, textarea, select { background: #1a1a1a; border: 1px solid #333; color: #e0e0e0; padding: 8px 10px; border-radius: 6px; font-size: 13px; width: 100%; font-family: inherit; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: #4f9; }
+textarea { resize: vertical; min-height: 60px; }
+label { font-size: 12px; color: #888; display: block; margin-bottom: 4px; }
+.form-group { margin-bottom: 12px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-error { color: #f44; font-size: 11px; margin-top: 2px; }
+
+/* Modal */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.7); z-index: 100; justify-content: center; align-items: center; }
+.modal-overlay.open { display: flex; }
+.modal { background: #1a1a1a; border: 1px solid #333; border-radius: 10px; padding: 24px; width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto; }
+.modal h3 { color: #fff; margin: 0 0 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+
+/* Financeiro */
+.fin-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.fin-box { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; text-align: center; }
+.fin-box .val { font-size: 24px; font-weight: 700; margin: 8px 0; }
+.fin-box .val.green { color: #4f9; }
+.fin-box .val.red { color: #f66; }
+.fin-box .val.blue { color: #6cf; }
+.fin-box .lbl { font-size: 12px; color: #888; }
+.fin-table { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+.fin-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid #1f1f1f; }
+.fin-row:last-child { border: none; }
+.fin-row input { width: 120px; text-align: right; }
+.fin-row .fin-name { font-size: 13px; }
+.fin-row .fin-name input { width: 200px; text-align: left; }
+
+/* Playbook */
+.playbook-section { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; margin-bottom: 12px; }
+.playbook-header { padding: 12px 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.playbook-header h3 { margin: 0; color: #fff; font-size: 14px; }
+.playbook-header .arrow { color: #888; transition: transform .2s; }
+.playbook-header .arrow.open { transform: rotate(90deg); }
+.playbook-body { padding: 0 16px 16px; display: none; }
+.playbook-body.open { display: block; }
+.playbook-body textarea { min-height: 120px; width: 100%; }
+
+/* Week nav */
+.week-nav { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.week-nav span { font-size: 14px; font-weight: 600; }
+
+/* Filter */
+.filter-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center; }
+.filter-bar select { width: auto; }
+
+/* Video status selector */
+select.status-select { width: auto; padding: 4px 8px; font-size: 11px; font-weight: 600; border-radius: 10px; }
+select.status-select.s-pendente { background: #2a1a1a; color: #f66; border-color: #f66; }
+select.status-select.s-gravado { background: #2a2a1a; color: #fc6; border-color: #fc6; }
+select.status-select.s-editado { background: #1a2a3a; color: #6cf; border-color: #6cf; }
+select.status-select.s-postado { background: #1a3a1a; color: #6f6; border-color: #6f6; }
+
+/* Pipeline - Bowtie */
+.bowtie-container { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 24px; margin-bottom: 24px; overflow-x: auto; }
+.bowtie-stages { display: flex; justify-content: space-between; gap: 4px; margin-bottom: 0; min-width: 900px; }
+.bowtie-stage { flex: 1; text-align: center; position: relative; }
+.bowtie-stage-header { font-size: 11px; font-weight: 700; letter-spacing: .5px; padding: 6px 4px; border-radius: 6px 6px 0 0; }
+.bowtie-stage .thinking { font-size: 10px; color: #aaa; padding: 6px 4px; min-height: 48px; display: flex; align-items: center; justify-content: center; text-align: center; line-height: 1.3; }
+.bowtie-cr { display: flex; justify-content: space-around; min-width: 900px; margin: 8px 0; }
+.bowtie-cr-item { text-align: center; }
+.bowtie-cr-item .cr-label { font-size: 10px; color: #888; }
+.bowtie-cr-item .cr-value { font-size: 16px; font-weight: 700; color: #4f9; }
+.bowtie-divider { width: 2px; background: #333; margin: 0 2px; align-self: stretch; }
+.bowtie-shape { display: flex; min-width: 900px; height: 80px; margin: 8px 0; }
+.bowtie-shape-segment { flex: 1; position: relative; }
+
+/* Pipeline bars */
+.pipeline-bars { display: flex; flex-direction: column; gap: 4px; min-width: 900px; margin-top: 12px; }
+.pipeline-bar { display: flex; height: 28px; border-radius: 4px; overflow: hidden; position: relative; }
+.pipeline-bar-label { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 700; color: #fff; z-index: 1; white-space: nowrap; }
+.pipeline-bar-segment { height: 100%; }
+
+/* Pipeline metrics */
+.pipeline-metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.metric-box { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px; text-align: center; }
+.metric-box .metric-val { font-size: 20px; font-weight: 700; color: #4f9; }
+.metric-box .metric-label { font-size: 11px; color: #888; margin-top: 4px; }
+
+/* Kanban */
+.kanban { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; min-height: 300px; }
+.kanban-col { flex: 0 0 200px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; display: flex; flex-direction: column; }
+.kanban-col-header { padding: 10px; font-size: 12px; font-weight: 700; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+.kanban-col-header .count { background: #2a2a2a; padding: 1px 7px; border-radius: 10px; font-size: 10px; color: #888; }
+.kanban-col-body { flex: 1; padding: 6px; min-height: 60px; }
+.kanban-col-body.drag-over { background: #1f2f1f; }
+.kanban-card { background: #0f0f0f; border: 1px solid #333; border-radius: 6px; padding: 8px; margin-bottom: 6px; cursor: grab; font-size: 12px; transition: border-color .2s; }
+.kanban-card:hover { border-color: #4f9; }
+.kanban-card.dragging { opacity: .4; }
+.kanban-card .kc-name { font-weight: 600; color: #fff; margin-bottom: 4px; }
+.kanban-card .kc-info { color: #888; font-size: 11px; }
+.kanban-card .kc-value { color: #4f9; font-size: 11px; font-weight: 600; }
+.kanban-card .kc-actions { display: flex; gap: 4px; margin-top: 6px; }
+.kanban-add { width: 100%; padding: 6px; background: none; border: 1px dashed #333; border-radius: 6px; color: #555; font-size: 11px; cursor: pointer; margin-top: auto; }
+.kanban-add:hover { border-color: #4f9; color: #4f9; background: none; }
+
+/* Pipeline stage details */
+.stage-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 4px; min-width: 900px; margin-top: 8px; }
+.stage-detail-btn { background: none; border: none; color: #888; font-size: 16px; cursor: pointer; padding: 4px; transition: color .2s; }
+.stage-detail-btn:hover { color: #4f9; background: none; }
+.stage-info-panel { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-top: 12px; display: none; }
+.stage-info-panel.open { display: block; }
+.stage-info-panel h3 { color: #fff; margin: 0 0 8px; font-size: 14px; }
+.stage-info-panel p { font-size: 12px; color: #aaa; line-height: 1.6; margin: 4px 0; }
+.stage-info-panel .info-section { margin-bottom: 12px; }
+.stage-info-panel .info-label { font-size: 11px; font-weight: 700; color: #4f9; margin-bottom: 4px; }
+
+/* Weekly summary */
+.week-summary { display: flex; gap: 0; margin-bottom: 20px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; overflow: hidden; }
+.ws-group { display: flex; gap: 0; flex: 1; padding: 12px 8px; }
+.ws-group + .ws-group { border-left: 2px solid #333; }
+.ws-group-label { font-size: 9px; color: #555; text-transform: uppercase; letter-spacing: 1px; text-align: center; padding: 4px 8px 0; }
+.ws-item { text-align: center; flex: 1; }
+.ws-item .ws-val { font-size: 18px; font-weight: 700; }
+.ws-item .ws-lbl { font-size: 10px; color: #888; }
+
+/* Calendar status indicators */
+.cal-status { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 3px; }
+.cal-status-pendente { background: #f66; }
+.cal-status-gravado { background: #fc6; }
+.cal-status-editado { background: #6cf; }
+.cal-status-postado { background: #6f6; }
+
+/* Finance chart */
+.fin-chart { background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+
+/* Follow-up alert */
+.kc-alert { background: #f4433622; border: 1px solid #f44; border-radius: 4px; padding: 2px 6px; font-size: 9px; color: #f66; margin-top: 4px; }
+
+/* Interaction log */
+.kc-log { font-size: 10px; color: #888; margin-top: 4px; max-height: 60px; overflow-y: auto; }
+.kc-log-entry { padding: 1px 0; border-bottom: 1px solid #1f1f1f; }
+
+/* Export button */
+.toolbar { display: flex; gap: 8px; justify-content: flex-end; padding: 8px 20px; }
+.toolbar button { font-size: 11px; }
+
+/* Light mode */
+body.light { background: #f5f5f5; color: #222; }
+body.light nav { background: #fff; border-color: #ddd; }
+body.light nav button { color: #888; }
+body.light nav button.active { color: #222; border-bottom-color: #2a7; }
+body.light .card, body.light .fin-box, body.light .fin-table, body.light .playbook-section,
+body.light .bowtie-container, body.light .metric-box, body.light .kanban-col,
+body.light .cal-day, body.light .week-summary, body.light .fin-chart,
+body.light .stage-info-panel, body.light .modal { background: #fff; border-color: #ddd; }
+body.light .kanban-card { background: #f9f9f9; border-color: #ddd; }
+body.light .kanban-card .kc-name { color: #222; }
+body.light input, body.light textarea, body.light select { background: #fff; border-color: #ddd; color: #222; }
+body.light .card-header h3 { color: #222; }
+body.light h2 { color: #2a7; }
+body.light .playbook-header h3 { color: #222; }
+body.light th { color: #666; }
+body.light td { border-color: #eee; }
+body.light .fin-row { border-color: #eee; }
+body.light .modal-overlay { background: rgba(0,0,0,.3); }
+</style>
+</head>
+<body>
+
+<div class="toolbar">
+  <button class="btn-sm" onclick="toggleTheme()">☀/☾ Tema</button>
+  <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
+  <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
+  <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+<nav>
+  <button class="active" onclick="showModule('clientes')">Clientes</button>
+  <button onclick="showModule('financeiro')">Financeiro</button>
+  <button onclick="showModule('playbook')">Playbook</button>
+  <button onclick="showModule('pipeline')">Pipeline</button>
+</nav>
+
+<!-- MODULE 1: CLIENTES -->
+<div id="mod-clientes" class="module active">
+  <h2>Resumo da Semana</h2>
+  <div class="week-summary" id="week-summary"></div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h2>Painel de Clientes</h2>
+    <button class="btn-primary btn-sm" onclick="openClientModal()">+ Novo cliente</button>
+  </div>
+  <div class="cards" id="client-cards"></div>
+
+  <h2>Calendário Semanal</h2>
+  <div class="week-nav">
+    <button class="btn-sm" onclick="changeWeek(-1)">← Anterior</button>
+    <span id="week-label"></span>
+    <button class="btn-sm" onclick="changeWeek(1)">Próxima →</button>
+    <button class="btn-sm" onclick="changeWeek(0)">Hoje</button>
+  </div>
+  <div class="calendar-week" id="calendar"></div>
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <h2>Vídeos por Mês</h2>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <select id="hist-client" onchange="renderHistory()" style="width:auto;">
+        <option value="all">Todos os clientes</option>
+      </select>
+      <select id="hist-status" onchange="renderHistory()" style="width:auto;">
+        <option value="all">Todos os status</option>
+        <option value="pendente">Pendente</option>
+        <option value="gravado">Gravado</option>
+        <option value="editado">Editado</option>
+        <option value="postado">Postado</option>
+      </select>
+      <button class="btn-primary btn-sm" onclick="openVideoModal()">+ Novo vídeo</button>
+    </div>
+    </div>
+    <div id="history-container"></div>
+  </div>
+</div>
+
+<!-- MODULE 2: FINANCEIRO -->
+<div id="mod-financeiro" class="module">
+  <h2>Financeiro MEI</h2>
+  <div class="week-nav" style="margin-bottom:16px;">
+    <button class="btn-sm" onclick="changeMonth(-1)">← Anterior</button>
+    <span id="month-label"></span>
+    <button class="btn-sm" onclick="changeMonth(1)">Próximo →</button>
+    <button class="btn-sm" onclick="changeMonth(0)">Hoje</button>
+  </div>
+  <div class="fin-grid">
+    <div class="fin-box"><div class="lbl">Receita Total</div><div class="val green" id="fin-receita">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Custos Totais</div><div class="val red" id="fin-custos">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Margem / Sobra</div><div class="val blue" id="fin-margem">R$ 0</div></div>
+  </div>
+
+  <div class="fin-table">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;color:#4f9;">Receitas</h3>
+      <button class="btn-sm btn-primary" onclick="addFinRow('receitas')">+ Adicionar</button>
+    </div>
+    <div id="fin-receitas"></div>
+  </div>
+
+  <div class="fin-table">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <h3 style="margin:0;color:#f66;">Custos Fixos</h3>
+      <button class="btn-sm btn-primary" onclick="addFinRow('custos')">+ Adicionar</button>
+    </div>
+    <div id="fin-custos-list"></div>
+  </div>
+
+  <div class="fin-chart">
+    <h3 style="margin:0 0 12px;color:#4f9;">Evolução Mensal</h3>
+    <svg id="fin-chart-svg" viewBox="0 0 700 200" style="width:100%;height:200px;"></svg>
+  </div>
+</div>
+
+<!-- MODULE 3: PLAYBOOK -->
+<div id="mod-playbook" class="module">
+  <h2>Playbook — Consulta Rápida</h2>
+  <p style="color:#888;font-size:13px;margin-bottom:16px;">Clique em cada seção para expandir e editar suas anotações. Tudo salva automaticamente.</p>
+  <div id="playbook-sections"></div>
+</div>
+
+<!-- MODULE 4: PIPELINE -->
+<div id="mod-pipeline" class="module">
+  <h2>Pipeline — Land & Expand</h2>
+
+  <!-- Metrics -->
+  <div class="pipeline-metrics" id="pipeline-metrics"></div>
+
+  <!-- Bowtie Diagram -->
+  <div class="bowtie-container">
+    <div class="bowtie-stages" id="bowtie-stages"></div>
+    <svg id="bowtie-svg" viewBox="0 0 910 90" style="width:100%;min-width:900px;height:90px;display:block;margin:8px 0;">
+    </svg>
+    <div class="bowtie-cr" id="bowtie-cr"></div>
+    <div class="stage-details" id="stage-arrows"></div>
+    <div class="pipeline-bars" id="pipeline-bars"></div>
+  </div>
+  <div id="stage-info-panel" class="stage-info-panel"></div>
+
+  <!-- Kanban -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <h2 style="margin:0;">Kanban de Prospects</h2>
+    <button class="btn-primary" onclick="openProspectModal()">+ Novo prospect</button>
+  </div>
+  <div class="kanban" id="kanban"></div>
+</div>
+
+<!-- MODAL: Novo Prospect -->
+<div class="modal-overlay" id="prospect-modal">
+  <div class="modal">
+    <h3 id="prospect-modal-title">Novo Prospect</h3>
+    <input type="hidden" id="p-edit-id">
+    <div class="form-group">
+      <label>Nome / Empresa *</label>
+      <input id="p-name" placeholder="Ex: Barbearia do João">
+    </div>
+    <div class="form-group">
+      <label>Segmento</label>
+      <input id="p-segment" placeholder="Ex: Barbearia, Clínica, Restaurante...">
+    </div>
+    <div class="form-group">
+      <label>Valor mensal estimado (R$)</label>
+      <input id="p-value" type="number" placeholder="1200">
+    </div>
+    <div class="form-group">
+      <label>Estágio</label>
+      <select id="p-stage">
+        <option value="prospect">Prospect</option>
+        <option value="diagnostico">Diagnóstico</option>
+        <option value="proposta">Proposta</option>
+        <option value="fechamento">Fechamento</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="entregando">Entregando</option>
+        <option value="expansao">Expansão</option>
+        <option value="perdido">Perdido / Reativar</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Data de reativação</label>
+      <input type="date" id="p-reactivate" placeholder="Quando voltar a contatar">
+    </div>
+    <div class="form-group">
+      <label>Nova interação (adicionar ao log)</label>
+      <input id="p-new-log" placeholder="Ex: Mandei DM, aguardando resposta...">
+    </div>
+    <div class="form-group">
+      <label>Log de interações</label>
+      <textarea id="p-notes" placeholder="Histórico de contato..." style="min-height:80px;"></textarea>
+    </div>
+    <div id="prospect-error" class="form-error" style="margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button onclick="closeProspectModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveProspect()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Cliente -->
+<div class="modal-overlay" id="client-modal">
+  <div class="modal">
+    <h3 id="client-modal-title">Novo Cliente</h3>
+    <input type="hidden" id="cl-edit-key">
+    <div class="form-group">
+      <label>Nome *</label>
+      <input id="cl-name" placeholder="Ex: Barbearia do João">
+    </div>
+    <div class="form-group">
+      <label>Valor (ex: R$ 1.300/mês)</label>
+      <input id="cl-valor" placeholder="R$ 1.300">
+    </div>
+    <div class="form-group">
+      <label>Pilares (separados por vírgula)</label>
+      <input id="cl-pillars" placeholder="ATENÇÃO, DESEJO, CONVERSÃO">
+    </div>
+    <div class="form-group">
+      <label>Cadência</label>
+      <input id="cl-cadencia" value="3 reels por semana">
+    </div>
+    <div class="form-group">
+      <label>Objetivo</label>
+      <textarea id="cl-objetivo" placeholder="Objetivo do trabalho"></textarea>
+    </div>
+    <div class="form-group">
+      <label>ICP</label>
+      <textarea id="cl-icp" placeholder="Perfil do cliente ideal"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeClientModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveClientForm()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Novo Vídeo -->
+<div class="modal-overlay" id="video-modal">
+  <div class="modal">
+    <h3 id="modal-title">Novo Vídeo</h3>
+    <input type="hidden" id="video-edit-id">
+    <div class="form-group">
+      <label>Cliente *</label>
+      <select id="v-client" onchange="updatePillarOptions()"></select>
+    </div>
+    <div class="form-group">
+      <label>Título *</label>
+      <input id="v-title" placeholder="Título do vídeo">
+    </div>
+    <div class="form-group">
+      <label>Pilar de conteúdo *</label>
+      <select id="v-pillar"></select>
+    </div>
+    <div class="form-group">
+      <label>Data prevista</label>
+      <input type="date" id="v-date">
+    </div>
+    <div class="form-group">
+      <label>Status</label>
+      <select id="v-status">
+        <option value="pendente">Pendente</option>
+        <option value="gravado">Gravado</option>
+        <option value="editado">Editado</option>
+        <option value="postado">Postado</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label id="lbl-roteiro">Roteiro (opcional)</label>
+      <textarea id="v-roteiro" style="min-height:100px;" placeholder="Gancho → Desenvolvimento → CTA&#10;&#10;Escreva o roteiro completo aqui..."></textarea>
+      <div class="form-error" id="err-roteiro"></div>
+    </div>
+
+    <div id="modal-error" class="form-error" style="margin-bottom:8px;"></div>
+    <div class="modal-actions">
+      <button onclick="closeVideoModal()">Cancelar</button>
+      <button class="btn-primary" onclick="saveVideo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA LAYER (localStorage) ============
+const STORAGE_KEYS = { videos: 'smm_videos', finance: 'smm_finance', playbook: 'smm_playbook', prospects: 'smm_prospects' };
+
+function load(key) {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEYS[key])) || null; } catch { return null; }
+}
+function save(key, data) { localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data)); }
+
+// ============ CLIENT CONFIG ============
+const DEFAULT_CLIENTS = {
+  cube: {
+    name: 'Cube Educacional', valor: 'R$ 1.250 + R$ 150 VT', pillars: ['PROJETO','LIDERANÇA','TREND'], cadencia: '3 reels por semana', color: 'cube',
+    objetivo: 'Fortalecer marca e atrair novos alunos com conteúdo que mistura educação e entretenimento.',
+    icp: 'Pais com condições de pagar R$1.500/mês de mensalidade, que buscam escola completa (tecnologia, lifelong learning, inglês, sistema de avaliação diferenciado). Querem o melhor pro filho e valorizam inovação educacional.'
+  },
+  pallefort: {
+    name: 'Pallefort', valor: 'R$ 700', pillars: ['TREND/MEME (70%)','ANÁLISE (20%)','AUTORIDADE (10%)'], cadencia: '3 reels por semana', color: 'pallefort', requiresScript: true,
+    objetivo: 'Posicionar Pallefort como referência no setor de empilhadeiras e movimentação de cargas. Reconhecimento de marca no B2B industrial.',
+    icp: 'Gestores de operação e donos de empresas que usam empilhadeiras e equipamentos de movimentação de carga. B2B industrial — decisão de compra baseada em confiança técnica.'
+  },
+  mania: {
+    name: 'Mania da Web', valor: 'R$ 900', pillars: ['ATENÇÃO','DESEJO','CONVERSÃO'], cadencia: '3 reels por semana', color: 'mania',
+    objetivo: 'Gerar vendas via conteúdo orgânico e aumentar visibilidade nas plataformas (Instagram, TikTok, TikTok Shop, Shopee).',
+    icp: 'Mulheres 25-50 anos, classes C/D, consumidora final. E-commerce — entrega pra todo o Brasil. Cosméticos, eletrodomésticos, brinquedos, ring lights. Compra por preço bom e praticidade.'
+  },
+  lucas: {
+    name: 'Lucas SM (pessoal)', valor: 'Prospecção', pillars: ['EVOLUÇÃO','CONEXÃO','ATRAÇÃO','AUTORIDADE'], cadencia: '3 reels por semana', color: 'lucas',
+    objetivo: 'Posicionar como referência em social media para PMEs em SP. Gerar leads orgânicos via conteúdo e atrair clientes no ticket de R$1.300-R$1.500/mês.',
+    icp: 'Empresário tradicional, dono de pequena/média empresa em SP capital. Negócio funcionando há 1+ ano, faturamento R$50k-R$500k/mês, vende bem offline mas é invisível online. Segmentos: clínicas/estética, escritórios de serviço, negócios locais premium, pequenas indústrias.'
+  }
+};
+
+function loadClients() {
+  const saved = localStorage.getItem('smm_clients');
+  return saved ? JSON.parse(saved) : null;
+}
+function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringify(clients)); }
+
+let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+
+function populateClientSelects() {
+  ['v-client', 'hist-client'].forEach(id => {
+    const sel = document.getElementById(id);
+    if (!sel) return;
+    const val = sel.value;
+    const isFilter = id !== 'v-client';
+    sel.innerHTML = isFilter ? '<option value="all">Todos os clientes</option>' : '';
+    for (const [key, cl] of Object.entries(CLIENTS)) {
+      sel.innerHTML += `<option value="${key}">${cl.name}</option>`;
+    }
+    if (val && sel.querySelector(`option[value="${val}"]`)) sel.value = val;
+  });
+}
+
+function openClientModal(editKey) {
+  const cl = editKey ? CLIENTS[editKey] : null;
+  document.getElementById('cl-edit-key').value = editKey || '';
+  document.getElementById('cl-name').value = cl ? cl.name : '';
+  document.getElementById('cl-valor').value = cl ? cl.valor : '';
+  document.getElementById('cl-pillars').value = cl ? cl.pillars.join(', ') : '';
+  document.getElementById('cl-cadencia').value = cl ? cl.cadencia : '3 reels por semana';
+  document.getElementById('cl-objetivo').value = cl ? cl.objetivo : '';
+  document.getElementById('cl-icp').value = cl ? cl.icp : '';
+  document.getElementById('client-modal-title').textContent = editKey ? 'Editar Cliente' : 'Novo Cliente';
+  document.getElementById('client-modal').classList.add('open');
+}
+function closeClientModal() { document.getElementById('client-modal').classList.remove('open'); }
+
+function saveClientForm() {
+  const name = document.getElementById('cl-name').value.trim();
+  if (!name) return;
+  const editKey = document.getElementById('cl-edit-key').value;
+  const key = editKey || name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 15);
+  CLIENTS[key] = {
+    name,
+    valor: document.getElementById('cl-valor').value.trim() || 'A definir',
+    pillars: document.getElementById('cl-pillars').value.split(',').map(p => p.trim()).filter(Boolean),
+    cadencia: document.getElementById('cl-cadencia').value.trim() || '3 reels por semana',
+    color: key,
+    objetivo: document.getElementById('cl-objetivo').value.trim(),
+    icp: document.getElementById('cl-icp').value.trim()
+  };
+  saveClients(CLIENTS);
+  closeClientModal();
+  populateClientSelects();
+  renderAll();
+}
+
+function deleteClient(key) {
+  if (!confirm(`Remover ${CLIENTS[key].name}? Os vídeos desse cliente continuam no histórico.`)) return;
+  delete CLIENTS[key];
+  saveClients(CLIENTS);
+  populateClientSelects();
+  renderAll();
+}
+
+// ============ MODULE SWITCHING ============
+function showModule(id) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('mod-' + id).classList.add('active');
+  document.querySelector(`nav button[onclick="showModule('${id}')"]`).classList.add('active');
+}
+
+// ============ MODULE 1: CLIENTES ============
+
+// -- Client Cards --
+function renderCards() {
+  const videos = load('videos') || [];
+  const container = document.getElementById('client-cards');
+  container.innerHTML = '';
+  for (const [key, cl] of Object.entries(CLIENTS)) {
+    const cv = videos.filter(v => v.client === key);
+    const weekEnd = new Date(currentWeekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+    const ws = dateStr(currentWeekStart), we = dateStr(weekEnd);
+    const weekVideos = cv.filter(v => v.date >= ws && v.date <= we);
+    const counts = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
+    weekVideos.forEach(v => counts[v.status]++);
+    container.innerHTML += `
+      <div class="card">
+        <div class="card-header">
+          <h3 class="client-name-${key}">${cl.name}</h3>
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span class="card-valor">${cl.valor}${key !== 'lucas' ? '/mês' : ''}</span>
+            <button class="btn-sm" onclick="openClientModal('${key}')" title="Editar">✎</button>
+            <button class="btn-sm btn-danger" onclick="deleteClient('${key}')" title="Remover">✕</button>
+          </div>
+        </div>
+        <div class="pillars">${cl.pillars.map(p => `<span class="pill pill-${key}">${p}</span>`).join('')}</div>
+        <p>Cadência: ${cl.cadencia}</p>
+        <details style="margin-top:8px;"><summary style="font-size:11px;color:#4f9;cursor:pointer;">ICP & Objetivo</summary>
+          <p style="margin-top:6px;font-size:11px;color:#aaa;"><strong style="color:#ccc;">Objetivo:</strong> ${cl.objetivo || '—'}</p>
+          <p style="margin-top:4px;font-size:11px;color:#aaa;"><strong style="color:#ccc;">ICP:</strong> ${cl.icp || '—'}</p>
+        </details>
+        <p style="margin-top:10px;font-size:11px;color:#555;">
+          ${(() => {
+            const now = new Date().toISOString().slice(0,7);
+            const monthVideos = cv.filter(v => v.date && v.date.startsWith(now) && v.status === 'postado').length;
+            const cadMatch = (cl.cadencia || '').match(/(\d+)/);
+            const perWeek = cadMatch ? parseInt(cadMatch[1]) : 3;
+            const meta = perWeek * 4;
+            const pct = Math.min(100, Math.round((monthVideos / meta) * 100));
+            const color = pct >= 100 ? '#4f9' : pct >= 50 ? '#fc6' : '#f66';
+            return `<span style="color:${color};font-weight:700;">${monthVideos}</span> / ${meta} postados no mês <span style="color:${color};">(${pct}%)</span>`;
+          })()}
+        </p>
+      </div>`;
+  }
+}
+
+// -- Calendar --
+let currentWeekStart = getMonday(new Date());
+
+function getMonday(d) {
+  const dt = new Date(d);
+  const day = dt.getDay();
+  const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
+  dt.setDate(diff);
+  dt.setHours(0,0,0,0);
+  return dt;
+}
+
+function changeWeek(dir) {
+  if (dir === 0) currentWeekStart = getMonday(new Date());
+  else { currentWeekStart.setDate(currentWeekStart.getDate() + dir * 7); }
+  renderCalendar();
+  renderWeeklySummary();
+  renderCards();
+}
+
+function renderCalendar() {
+  const days = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const videos = load('videos') || [];
+  const cal = document.getElementById('calendar');
+  const label = document.getElementById('week-label');
+  const end = new Date(currentWeekStart);
+  end.setDate(end.getDate() + 6);
+  label.textContent = `${fmt(currentWeekStart)} — ${fmt(end)}`;
+  cal.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const dt = new Date(currentWeekStart);
+    dt.setDate(dt.getDate() + i);
+    const ds = dateStr(dt);
+    const dayVideos = videos.filter(v => v.date === ds);
+    let items = dayVideos.map(v =>
+      `<div class="cal-item ${v.client}" onclick="editVideo('${v.id}')"><span class="cal-status cal-status-${v.status}"></span>${CLIENTS[v.client].name.split(' ')[0]}: ${v.title.substring(0,18)}</div>`
+    ).join('');
+    items += `<div class="cal-item empty" onclick="openVideoModalForDate('${ds}')">+</div>`;
+    cal.innerHTML += `<div class="cal-day"><div class="cal-day-label">${days[i]} ${dt.getDate()}/${dt.getMonth()+1}</div>${items}</div>`;
+  }
+}
+
+function fmt(d) { return `${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}`; }
+function dateStr(d) { return d.toISOString().split('T')[0]; }
+
+// -- Tracker --
+function renderTracker() {
+  const videos = load('videos') || [];
+  const fc = document.getElementById('filter-client').value;
+  const fs = document.getElementById('filter-status').value;
+  const filtered = videos.filter(v => (fc === 'all' || v.client === fc) && (fs === 'all' || v.status === fs));
+  filtered.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+  const tbody = document.getElementById('tracker-body');
+  tbody.innerHTML = filtered.length === 0
+    ? '<tr><td colspan="6" style="text-align:center;color:#555;padding:24px;">Nenhum vídeo encontrado</td></tr>'
+    : filtered.map(v => `<tr>
+      <td><span class="cal-item ${v.client}" style="display:inline-block;margin:0;">${CLIENTS[v.client].name}</span></td>
+      <td>${v.title}</td>
+      <td><span class="pill pill-${v.client}">${v.pillar}</span></td>
+      <td>
+        <select class="status-select s-${v.status}" onchange="updateVideoStatus('${v.id}', this.value)">
+          ${['pendente','gravado','editado','postado'].map(s => `<option value="${s}" ${v.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+        </select>
+      </td>
+      <td>${v.date || '—'}</td>
+      <td>
+        <button class="btn-sm" onclick="editVideo('${v.id}')">✎</button>
+        <button class="btn-sm btn-danger" onclick="deleteVideo('${v.id}')">✕</button>
+      </td>
+    </tr>`).join('');
+}
+
+function renderHistory() {
+  const videos = load('videos') || [];
+  const fc = document.getElementById('hist-client').value;
+  const fs = document.getElementById('hist-status').value;
+  const filtered = videos.filter(v => (fc === 'all' || v.client === fc) && (fs === 'all' || v.status === fs));
+  filtered.sort((a,b) => (b.date || '').localeCompare(a.date || ''));
+
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const grouped = {};
+  filtered.forEach(v => {
+    const key = v.date ? v.date.slice(0, 7) : 'sem-data';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(v);
+  });
+
+  const container = document.getElementById('history-container');
+  const months = Object.keys(grouped).sort().reverse();
+  if (months.length === 0) {
+    container.innerHTML = '<p style="color:#555;text-align:center;padding:24px;">Nenhum vídeo encontrado</p>';
+    return;
+  }
+
+  container.innerHTML = months.map(m => {
+    const [y, mo] = m.split('-');
+    const label = m === 'sem-data' ? 'Sem data' : `${meses[parseInt(mo)-1]} ${y}`;
+    const vids = grouped[m];
+    const mid = 'hist-' + m;
+    return `
+      <div style="margin-bottom:4px;">
+        <div onclick="document.getElementById('${mid}').style.display = document.getElementById('${mid}').style.display === 'none' ? 'block' : 'none'" style="cursor:pointer;display:flex;justify-content:space-between;align-items:center;padding:12px 16px;background:#1a1a1a;border:1px solid #333;border-radius:8px;">
+          <span style="color:#4f9;font-weight:700;">${label}</span>
+          <span style="color:#555;font-size:12px;">${vids.length} vídeo${vids.length > 1 ? 's' : ''}</span>
+        </div>
+        <div id="${mid}" style="display:none;padding:8px 0;">
+          <div style="text-align:right;margin-bottom:6px;">
+            <button class="btn-sm btn-primary" onclick="openVideoModalForDate('${m}-15')">+ Adicionar vídeo</button>
+          </div>
+          <table>
+            <thead><tr><th>Cliente</th><th>Título</th><th>Pilar</th><th>Status</th><th>Data</th><th></th></tr></thead>
+            <tbody>${vids.map(v => {
+              const cl = CLIENTS[v.client];
+              const pillars = cl ? cl.pillars : [];
+              return `<tr>
+              <td><span class="cal-item ${v.client}" style="display:inline-block;margin:0;">${cl?.name || v.client}</span></td>
+              <td>${v.title}</td>
+              <td><select style="font-size:11px;padding:2px 4px;width:auto;" onchange="updateVideoPillar('${v.id}', this.value)">
+                ${pillars.map(p => `<option value="${p}" ${v.pillar===p?'selected':''}>${p}</option>`).join('')}
+                ${!pillars.includes(v.pillar) ? `<option value="${v.pillar}" selected>${v.pillar}</option>` : ''}
+              </select></td>
+              <td><select class="status-select s-${v.status}" style="font-size:11px;padding:2px 4px;width:auto;" onchange="updateVideoStatus('${v.id}', this.value)">
+                ${['pendente','gravado','editado','postado'].map(s => `<option value="${s}" ${v.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+              </select></td>
+              <td>${v.date || '—'}</td>
+              <td>
+                <button class="btn-sm" onclick="editVideo('${v.id}')">✎</button>
+                <button class="btn-sm btn-danger" onclick="deleteVideo('${v.id}')">✕</button>
+              </td>
+            </tr>`}).join('')}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateVideoStatus(id, status) {
+  const videos = load('videos') || [];
+  const v = videos.find(x => x.id === id);
+  if (v) { v.status = status; save('videos', videos); renderAll(); }
+}
+
+function updateVideoPillar(id, pillar) {
+  const videos = load('videos') || [];
+  const v = videos.find(x => x.id === id);
+  if (v) { v.pillar = pillar; save('videos', videos); renderAll(); }
+}
+
+// -- Video Modal --
+function openVideoModal() {
+  document.getElementById('video-edit-id').value = '';
+  document.getElementById('modal-title').textContent = 'Novo Vídeo';
+  document.getElementById('v-client').value = 'cube';
+  document.getElementById('v-title').value = '';
+  document.getElementById('v-date').value = dateStr(new Date());
+  document.getElementById('v-status').value = 'pendente';
+  document.getElementById('v-roteiro').value = '';
+  clearErrors();
+  updatePillarOptions();
+  document.getElementById('video-modal').classList.add('open');
+}
+
+function openVideoModalForDate(date) {
+  openVideoModal();
+  document.getElementById('v-date').value = date;
+}
+
+function editVideo(id) {
+  const videos = load('videos') || [];
+  const v = videos.find(x => x.id === id);
+  if (!v) return;
+  document.getElementById('video-edit-id').value = id;
+  document.getElementById('modal-title').textContent = 'Editar Vídeo';
+  document.getElementById('v-client').value = v.client;
+  document.getElementById('v-title').value = v.title;
+  document.getElementById('v-date').value = v.date || '';
+  document.getElementById('v-status').value = v.status;
+  document.getElementById('v-roteiro').value = v.roteiro || v.gancho ? [v.gancho, v.dev, v.cta].filter(Boolean).join('\n\n') : '';
+  clearErrors();
+  updatePillarOptions();
+  document.getElementById('v-pillar').value = v.pillar;
+  document.getElementById('video-modal').classList.add('open');
+}
+
+function closeVideoModal() { document.getElementById('video-modal').classList.remove('open'); }
+
+function updatePillarOptions() {
+  const client = document.getElementById('v-client').value;
+  const sel = document.getElementById('v-pillar');
+  sel.innerHTML = CLIENTS[client].pillars.map(p => `<option value="${p}">${p}</option>`).join('');
+  const isPallefort = client === 'pallefort';
+  document.getElementById('lbl-roteiro').textContent = isPallefort ? 'Roteiro (obrigatório — gancho + desenvolvimento + CTA)' : 'Roteiro (opcional)';
+}
+
+function clearErrors() {
+  ['err-roteiro','modal-error'].forEach(id => document.getElementById(id).textContent = '');
+}
+
+function saveVideo() {
+  clearErrors();
+  const client = document.getElementById('v-client').value;
+  const title = document.getElementById('v-title').value.trim();
+  const pillar = document.getElementById('v-pillar').value;
+  const date = document.getElementById('v-date').value;
+  const status = document.getElementById('v-status').value;
+  const editId = document.getElementById('video-edit-id').value;
+
+  if (!title) { document.getElementById('modal-error').textContent = 'Título é obrigatório.'; return; }
+
+  const roteiro = document.getElementById('v-roteiro').value.trim();
+  if (client === 'pallefort' && !roteiro) {
+    document.getElementById('err-roteiro').textContent = 'Roteiro é obrigatório para Pallefort.';
+    return;
+  }
+
+  const videos = load('videos') || [];
+  const video = { client, title, pillar, date, status, roteiro };
+
+  if (editId) {
+    const idx = videos.findIndex(v => v.id === editId);
+    if (idx >= 0) { videos[idx] = { ...videos[idx], ...video }; }
+  } else {
+    video.id = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    videos.push(video);
+  }
+
+  save('videos', videos);
+  closeVideoModal();
+  renderAll();
+}
+
+function deleteVideo(id) {
+  if (!confirm('Excluir este vídeo?')) return;
+  const videos = (load('videos') || []).filter(v => v.id !== id);
+  save('videos', videos);
+  renderAll();
+}
+
+// ============ MODULE 2: FINANCEIRO ============
+let currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+function getDefaultFinance() {
+  return {
+    receitas: [
+      { name: 'Cube Educacional', value: 1250 },
+      { name: 'Cube — VT', value: 150 },
+      { name: 'Pallefort', value: 700 },
+      { name: 'Mania da Web', value: 900 },
+    ],
+    custos: [
+      { name: 'MacBook (12x)', value: 666 },
+      { name: 'Transporte', value: 600 },
+      { name: 'Mentoria (2x 12x)', value: 204 },
+      { name: 'Claude AI', value: 109 },
+      { name: 'MEI', value: 86 },
+      { name: 'Faculdade', value: 100 },
+      { name: 'Corte de cabelo', value: 90 },
+      { name: 'Cursos', value: 72 },
+      { name: 'Internet', value: 20 },
+    ]
+  };
+}
+
+function seedHistoricalFinance() {
+  const allFin = load('finance') || {};
+  if (allFin['2026-04']) return;
+  const custosAntigos = [
+    { name: 'Transporte', value: 700 },
+    { name: 'Claude AI', value: 109 },
+    { name: 'MEI', value: 86 },
+    { name: 'Faculdade', value: 100 },
+    { name: 'Corte de cabelo', value: 90 },
+    { name: 'Internet', value: 20 },
+  ];
+  allFin['2026-04'] = {
+    receitas: [
+      { name: 'Cube Educacional', value: 950 },
+      { name: 'Cube — VT', value: 220 },
+      { name: 'Pallefort', value: 600 },
+    ],
+    custos: JSON.parse(JSON.stringify(custosAntigos))
+  };
+  allFin['2026-05'] = {
+    receitas: [
+      { name: 'Cube Educacional', value: 950 },
+      { name: 'Cube — VT', value: 220 },
+      { name: 'Pallefort', value: 700 },
+      { name: 'Mania da Web', value: 900 },
+    ],
+    custos: JSON.parse(JSON.stringify(custosAntigos))
+  };
+  save('finance', allFin);
+}
+seedHistoricalFinance();
+
+function getFinanceForMonth() {
+  const allFin = load('finance') || {};
+  if (!allFin[currentMonth]) {
+    const prev = Object.keys(allFin).sort().pop();
+    allFin[currentMonth] = prev ? JSON.parse(JSON.stringify(allFin[prev])) : getDefaultFinance();
+    save('finance', allFin);
+  }
+  return allFin[currentMonth];
+}
+
+function saveFinance(data) {
+  const allFin = load('finance') || {};
+  allFin[currentMonth] = data;
+  save('finance', allFin);
+}
+
+function changeMonth(dir) {
+  if (dir === 0) { currentMonth = new Date().toISOString().slice(0, 7); }
+  else {
+    const [y, m] = currentMonth.split('-').map(Number);
+    const nm = m + dir;
+    const ny = y + Math.floor((nm - 1) / 12);
+    const nmo = ((nm - 1) % 12 + 12) % 12 + 1;
+    const target = `${ny}-${String(nmo).padStart(2, '0')}`;
+    const now = new Date().toISOString().slice(0, 7);
+    if (target > now || target < '2026-04') return;
+    currentMonth = target;
+  }
+  renderFinance();
+  renderFinChart();
+}
+
+function renderFinance() {
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const [y, m] = currentMonth.split('-');
+  document.getElementById('month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
+
+  const data = getFinanceForMonth();
+  const totalRec = data.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0);
+  const totalCus = data.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
+  const margem = totalRec - totalCus;
+
+  document.getElementById('fin-receita').textContent = `R$ ${totalRec.toFixed(2)}`;
+  document.getElementById('fin-custos').textContent = `R$ ${totalCus.toFixed(2)}`;
+  document.getElementById('fin-margem').textContent = `R$ ${margem.toFixed(2)}`;
+  document.getElementById('fin-margem').className = `val ${margem >= 0 ? 'blue' : 'red'}`;
+
+  renderFinRows('receitas', data.receitas, 'fin-receitas');
+  renderFinRows('custos', data.custos, 'fin-custos-list');
+}
+
+function renderFinRows(type, items, containerId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = items.map((item, i) => `
+    <div class="fin-row">
+      <span class="fin-name"><input value="${item.name}" onchange="updateFinItem('${type}', ${i}, 'name', this.value)"></span>
+      <span style="display:flex;align-items:center;gap:8px;">
+        R$ <input value="${item.value}" type="number" step="0.01" onchange="updateFinItem('${type}', ${i}, 'value', this.value)">
+        <button class="btn-sm btn-danger" onclick="removeFinItem('${type}', ${i})">✕</button>
+      </span>
+    </div>
+  `).join('');
+}
+
+function updateFinItem(type, idx, field, val) {
+  const data = getFinanceForMonth();
+  data[type][idx][field] = field === 'value' ? parseFloat(val) || 0 : val;
+  saveFinance(data);
+  renderFinance();
+}
+
+function addFinRow(type) {
+  const data = getFinanceForMonth();
+  data[type].push({ name: 'Novo item', value: 0 });
+  saveFinance(data);
+  renderFinance();
+}
+
+function removeFinItem(type, idx) {
+  const data = getFinanceForMonth();
+  data[type].splice(idx, 1);
+  saveFinance(data);
+  renderFinance();
+}
+
+// ============ MODULE 3: PLAYBOOK ============
+const PLAYBOOK_SECTIONS = [
+  { id: 'reuniao', title: '🤝 Estrutura de Reunião', defaultContent: `1. PREPARAÇÃO
+• Pesquisar perfil do prospect (Instagram, TikTok, site)
+• Anotar 3 problemas visíveis
+• Ver 2 concorrentes dele que fazem melhor
+• Ter prints prontos
+
+2. ABERTURA (2 min)
+• Se apresentar, mostrar que pesquisou
+• "Me conta como tá a parte digital hoje"
+
+3. DIAGNÓSTICO — SPIN (5 min)
+• Situação: "Quem cuida das redes? Com que frequência postam?"
+• Problema: "O que não tá funcionando?"
+• Implicação: "Quanto perde por mês sem presença online?"
+• Necessidade: "Se resolvesse, o que mudaria?"
+
+4. MOSTRAR O PROBLEMA (3 min)
+• Prints do perfil dele vs. concorrente
+• "Não é que tá ruim — é que não tem estratégia"
+
+5. SOLUÇÃO (5 min)
+• Funil: Views → Alcance → Seguidores → Confiança → Venda
+• Estrutura: Gancho → Problema → Virada → Solução → CTA
+• Cases se tiver
+
+6. PROPOSTA — ver "Proposta por Meta"
+
+7. FECHAMENTO
+• Assumir: "Pra começar, preciso de X e Y"
+• Opções: "Mensal ou trimestral?"
+• Próximo passo concreto
+
+8. DEPOIS
+• Proposta por escrito no mesmo dia
+• Follow-up em 48h com valor agregado` },
+
+  { id: 'proposta-meta', title: '💰 Proposta e Precificação', defaultContent: `OBJETIVO: Sair da reunião com o PIX na conta.
+
+PITCH:
+"Meu valor é R$2.000. Mas pra ficar bom pra mim e pra você — pra gente se conhecer e entender como o outro trabalha — consigo fazer por R$1.500/mês ou R$1.300 no trimestral."
+
+POR QUE FUNCIONA:
+• R$2.000 ancora o valor real do trabalho
+• R$1.500 parece desconto genuíno (não é "promoção", é proposta de relacionamento)
+• R$1.300 trimestral premia compromisso e garante recorrência pra você
+• Quando os resultados vierem, reajuste pra R$2.000 já tá justificado
+
+TABELA:
+Valor real (âncora):  R$2.000/mês
+Mensal:               R$1.500/mês
+Trimestral:           R$1.300/mês
+VT:                   Separado ou embutido` },
+
+  { id: 'objecoes', title: '🛡️ Objeções', defaultContent: `"TÁ CARO"
+→ "R$1.300/mês = R$43/dia. Quanto perde por mês sem presença online?"
+
+"VOU PENSAR"
+→ "O que especificamente quer avaliar?" (geralmente é preço)
+
+"JÁ CONTRATEI E NÃO DEU RESULTADO"
+→ "O que não funcionou?" → conectar com seu diferencial (método, não postador)
+
+"MEU SOBRINHO FAZ"
+→ "E tá gerando resultado?" → diferença entre postar e ter estratégia
+
+"NÃO TENHO TEMPO"
+→ "Por isso existe social media — eu cuido de tudo"` },
+
+  { id: 'abordagem', title: '🧊 Abordagem e Follow-up', defaultContent: `(Preencha com suas anotações do Hampesco)
+
+ABORDAGEM POR DM:
+•
+
+ABORDAGEM PRESENCIAL:
+•
+
+FOLLOW-UP:
+Dia 0 — Call
+Dia 1 — Proposta por escrito
+Dia 3 — Follow-up com valor ("vi o perfil do concorrente X e...")
+Dia 7 — Follow-up final
+Dia 14 — Arquivar, reativar em 30 dias` },
+
+  { id: 'onboarding', title: '🚀 Onboarding', defaultContent: `(Preencha com seu processo)
+
+CHECKLIST PÓS-FECHAMENTO:
+• Contrato assinado
+• Pagamento confirmado
+• Acesso às redes
+• Briefing preenchido
+• Onboarding agendado
+
+SEMANA 1: Alinhamento, pilares, cadência, meta definida
+SEMANA 2: Planejamento, primeiros vídeos, aprovação, primeiras postagens` },
+];
+
+function renderPlaybook() {
+  const data = load('playbook') || {};
+  const container = document.getElementById('playbook-sections');
+  container.innerHTML = PLAYBOOK_SECTIONS.map(s => `
+    <div class="playbook-section">
+      <div class="playbook-header" onclick="togglePlaybook('${s.id}')">
+        <h3>${s.title}</h3>
+        <span class="arrow" id="arrow-${s.id}">▶</span>
+      </div>
+      <div class="playbook-body" id="pb-${s.id}">
+        <textarea
+          placeholder="Escreva suas anotações sobre ${s.title} aqui..."
+          onchange="savePlaybookSection('${s.id}', this.value)"
+        >${data[s.id] !== undefined ? data[s.id] : (s.defaultContent || '')}</textarea>
+      </div>
+    </div>
+  `).join('');
+}
+
+function togglePlaybook(id) {
+  const body = document.getElementById('pb-' + id);
+  const arrow = document.getElementById('arrow-' + id);
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+
+function savePlaybookSection(id, value) {
+  const data = load('playbook') || {};
+  data[id] = value;
+  save('playbook', data);
+}
+
+// ============ MODULE 4: PIPELINE ============
+const PIPELINE_STAGES = [
+  { id: 'prospect', name: 'Prospect', color: '#e74c3c', thinking: '"Preciso aparecer nas redes mas não sei como"',
+    info: 'Lead identificado que ainda não teve contato direto com você.',
+    plan: '• Postar conteúdo de Atração no seu perfil (falar com UMA pessoa)\n• Identificar negócios em SP sem presença online\n• Pesquisar Instagram/Google do prospect antes de abordar\n• Meta: 5 prospects novos por semana' },
+  { id: 'diagnostico', name: 'Diagnóstico', color: '#e67e22', thinking: '"Esse cara entende meu problema"',
+    info: 'Primeiro contato feito. Você abordou por DM ou presencial e ele demonstrou interesse.',
+    plan: '• Enviar mensagem de abordagem (ver Playbook)\n• Agendar call de diagnóstico\n• Antes da call: pesquisar perfil, anotar 3 problemas, ver concorrentes\n• Meta: converter 50% dos prospects em call' },
+  { id: 'proposta', name: 'Proposta', color: '#f1c40f', thinking: '"O investimento faz sentido pro que entrega"',
+    info: 'Call feita, diagnóstico apresentado. Hora de enviar a proposta.',
+    plan: '• Usar modelo por meta (R$2.000) → fixo (R$1.300)\n• Enviar proposta escrita no mesmo dia da call\n• Incluir as dores que ELE mencionou\n• Meta: converter 60% das calls em proposta enviada' },
+  { id: 'fechamento', name: 'Fechamento', color: '#2ecc71', thinking: '"Vou fechar, vai dar certo"',
+    info: 'Proposta enviada, em negociação. Follow-up ativo.',
+    plan: '• Follow-up dia 1 (proposta), dia 3 (valor), dia 7 (final)\n• Quebrar objeções com SPIN (ver Playbook)\n• Não deixar esfriar mais de 48h\n• Meta: fechar 50% das propostas enviadas' },
+  { id: 'onboarding', name: 'Onboarding', color: '#1abc9c', thinking: '"Tá organizando tudo certinho"',
+    info: 'Cliente fechou! Configurando tudo pra começar a entregar.',
+    plan: '• Contrato + primeiro pagamento\n• Acesso às redes sociais\n• Reunião de alinhamento (objetivos, tom, referências)\n• Definir pilares, cadência e meta\n• Prazo: tudo pronto em 1 semana' },
+  { id: 'entregando', name: 'Entregando', color: '#3498db', thinking: '"Tá funcionando como prometido"',
+    info: 'Produzindo e postando conteúdo ativamente. Cliente recebendo valor.',
+    plan: '• Cumprir cadência combinada\n• Relatório mensal de resultados\n• Call semanal ou quinzenal de alinhamento\n• Documentar resultados pra usar como case' },
+  { id: 'expansao', name: 'Expansão', color: '#9b59b6', thinking: '"Quero mais, vale o reajuste"',
+    info: 'Resultados aparecendo. Hora de expandir escopo ou reajustar valor.',
+    plan: '• Apresentar resultados concretos (antes/depois)\n• Propor reajuste baseado nas metas batidas (até R$2.000)\n• Oferecer novos serviços (tráfego pago, mais plataformas)\n• Meta: reajustar a cada 3-6 meses de resultado consistente' },
+  { id: 'perdido', name: 'Perdido', color: '#666', thinking: '"Não era o momento / fechou com outro"',
+    info: 'Prospect que não fechou. Manter no radar pra reativar.',
+    plan: '• Anotar o motivo da perda\n• Definir data de reativação (30-60 dias)\n• Manter contato pelo conteúdo (ele vai te ver postando)\n• Quando reativar: abordar com algo novo de valor' },
+];
+
+const PIPELINE_BARS = [
+  { label: 'ENGAGING — Atrair e nutrir leads', stages: [0, 2], color: '#2ecc71' },
+  { label: 'SALES — Venda ativa', stages: [2, 3], color: '#3498db' },
+  { label: 'ONBOARD — Setup do cliente', stages: [3, 4], color: '#1abc9c' },
+  { label: 'ONGOING — Entrega + expansão', stages: [4, 6], color: '#e74c3c' },
+];
+
+function getProspects() { return load('prospects') || []; }
+function saveProspects(data) { save('prospects', data); }
+
+function renderPipeline() {
+  renderBowtie();
+  renderPipelineMetrics();
+  renderKanban();
+}
+
+function renderBowtie() {
+  const stagesEl = document.getElementById('bowtie-stages');
+  stagesEl.innerHTML = PIPELINE_STAGES.map(s =>
+    `<div class="bowtie-stage">
+      <div class="bowtie-stage-header" style="background:${s.color}22;color:${s.color};">${s.name.toUpperCase()}</div>
+    </div>`
+  ).join('');
+
+  const prospects = getProspects();
+  const svg = document.getElementById('bowtie-svg');
+  const n = PIPELINE_STAGES.length;
+  const w = 910, h = 90, mid = h / 2;
+  const segW = w / n;
+  const contractIdx = 3;
+
+  let paths = '';
+  // Top line - narrows to contract point then expands
+  let topPoints = [];
+  let botPoints = [];
+  for (let i = 0; i <= n; i++) {
+    const x = i * segW;
+    const distFromContract = Math.abs(i - contractIdx) / Math.max(contractIdx, n - contractIdx);
+    const spread = distFromContract * (mid - 8);
+    topPoints.push(`${x},${mid - 8 - spread}`);
+    botPoints.push(`${x},${mid + 8 + spread}`);
+  }
+  paths += `<polygon points="${topPoints.join(' ')} ${botPoints.reverse().join(' ')}" fill="#4f922" stroke="#4f9" stroke-width="1" opacity="0.3"/>`;
+
+  // Vertical dashed line at contract point
+  const cx = contractIdx * segW;
+  paths += `<line x1="${cx}" y1="0" x2="${cx}" y2="${h}" stroke="#4f9" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.6"/>`;
+
+  // CR labels between stages
+  let crLabels = '';
+  for (let i = 0; i < n - 1; i++) {
+    const x = (i + 1) * segW;
+    const count = prospects.filter(p => p.stage === PIPELINE_STAGES[i + 1].id).length;
+    const prevCount = prospects.filter(p => p.stage === PIPELINE_STAGES[i].id).length;
+    const cr = prevCount > 0 ? Math.round((count / prevCount) * 100) : 0;
+    crLabels += `<text x="${x}" y="${h - 4}" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">CR${i + 1}</text>`;
+  }
+  paths += crLabels;
+
+  // Stage count dots
+  for (let i = 0; i < n; i++) {
+    const x = i * segW + segW / 2;
+    const count = prospects.filter(p => p.stage === PIPELINE_STAGES[i].id).length;
+    if (count > 0) {
+      paths += `<circle cx="${x}" cy="${mid}" r="14" fill="${PIPELINE_STAGES[i].color}" opacity="0.8"/>`;
+      paths += `<text x="${x}" y="${mid + 4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold" font-family="sans-serif">${count}</text>`;
+    }
+  }
+
+  svg.innerHTML = paths;
+
+  // Pipeline bars
+  const barsEl = document.getElementById('pipeline-bars');
+  const barHTML = PIPELINE_BARS.map(bar => {
+    const startPct = (bar.stages[0] / n) * 100;
+    const widthPct = ((bar.stages[1] - bar.stages[0] + 1) / n) * 100;
+    return `<div style="position:relative;height:24px;">
+      <div style="position:absolute;left:${startPct}%;width:${widthPct}%;height:100%;background:${bar.color};border-radius:4px;display:flex;align-items:center;padding-left:8px;">
+        <span style="font-size:10px;font-weight:700;color:#fff;">${bar.label}</span>
+      </div>
+    </div>`;
+  }).join('');
+  barsEl.innerHTML = barHTML;
+
+  const arrowsEl = document.getElementById('stage-arrows');
+  arrowsEl.innerHTML = PIPELINE_STAGES.map(s =>
+    `<button class="stage-detail-btn" onclick="toggleStageInfo('${s.id}')" title="Ver detalhes: ${s.name}">▼</button>`
+  ).join('');
+}
+
+function toggleStageInfo(stageId) {
+  const panel = document.getElementById('stage-info-panel');
+  const stage = PIPELINE_STAGES.find(s => s.id === stageId);
+  if (panel.dataset.current === stageId && panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    panel.dataset.current = '';
+    return;
+  }
+  panel.dataset.current = stageId;
+  const saved = JSON.parse(localStorage.getItem('smm_stage_info') || '{}');
+  const si = saved[stageId] || {};
+  const infoVal = si.info !== undefined ? si.info : stage.info;
+  const thinkVal = si.thinking !== undefined ? si.thinking : stage.thinking;
+  const planVal = si.plan !== undefined ? si.plan : stage.plan;
+
+  panel.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <h3 style="color:${stage.color};">${stage.name}</h3>
+      <button class="btn-sm" onclick="document.getElementById('stage-info-panel').classList.remove('open')" style="background:none;border:none;color:#888;font-size:16px;">✕</button>
+    </div>
+    <div class="info-section">
+      <div class="info-label">O QUE É</div>
+      <textarea onchange="saveStageInfo('${stageId}','info',this.value)" style="min-height:40px;">${infoVal}</textarea>
+    </div>
+    <div class="info-section">
+      <div class="info-label">O QUE O CLIENTE PENSA</div>
+      <textarea onchange="saveStageInfo('${stageId}','thinking',this.value)" style="min-height:40px;">${thinkVal}</textarea>
+    </div>
+    <div class="info-section">
+      <div class="info-label">PLANO DE AÇÃO</div>
+      <textarea onchange="saveStageInfo('${stageId}','plan',this.value)" style="min-height:100px;">${planVal}</textarea>
+    </div>
+  `;
+  panel.classList.add('open');
+}
+
+function saveStageInfo(stageId, field, value) {
+  const saved = JSON.parse(localStorage.getItem('smm_stage_info') || '{}');
+  if (!saved[stageId]) saved[stageId] = {};
+  saved[stageId][field] = value;
+  localStorage.setItem('smm_stage_info', JSON.stringify(saved));
+}
+
+function renderPipelineMetrics() {
+  const prospects = getProspects();
+  const total = prospects.length;
+  const activeClients = prospects.filter(p => ['entregando', 'expansao'].includes(p.stage)).length;
+  const inSales = prospects.filter(p => ['prospect', 'diagnostico', 'proposta', 'fechamento'].includes(p.stage)).length;
+  const totalPipelineValue = prospects
+    .filter(p => ['prospect', 'diagnostico', 'proposta', 'fechamento'].includes(p.stage))
+    .reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
+  const mrr = prospects
+    .filter(p => ['entregando', 'expansao'].includes(p.stage))
+    .reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
+  const winRate = total > 0 ? Math.round((activeClients / total) * 100) : 0;
+
+  const el = document.getElementById('pipeline-metrics');
+  el.innerHTML = `
+    <div class="metric-box"><div class="metric-val">${total}</div><div class="metric-label">Total prospects</div></div>
+    <div class="metric-box"><div class="metric-val">${inSales}</div><div class="metric-label">Em negociação</div></div>
+    <div class="metric-box"><div class="metric-val">${activeClients}</div><div class="metric-label">Clientes ativos</div></div>
+    <div class="metric-box"><div class="metric-val">R$ ${totalPipelineValue.toLocaleString('pt-BR')}</div><div class="metric-label">Pipeline (potencial)</div></div>
+    <div class="metric-box"><div class="metric-val">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="metric-label">MRR (recorrente)</div></div>
+    <div class="metric-box"><div class="metric-val">${winRate}%</div><div class="metric-label">Win rate</div></div>
+  `;
+}
+
+function renderKanban() {
+  const prospects = getProspects();
+  const kanban = document.getElementById('kanban');
+  kanban.innerHTML = PIPELINE_STAGES.map(stage => {
+    const cards = prospects.filter(p => p.stage === stage.id);
+    return `<div class="kanban-col">
+      <div class="kanban-col-header" style="border-top:3px solid ${stage.color};">
+        ${stage.name} <span class="count">${cards.length}</span>
+      </div>
+      <div class="kanban-col-body" data-stage="${stage.id}"
+        ondragover="event.preventDefault(); this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="dropProspect(event, '${stage.id}')">
+        ${cards.map(c => {
+          const lastLog = (c.notes || '').split('\n').filter(Boolean).pop();
+          const daysSince = c.lastContact ? Math.floor((Date.now() - new Date(c.lastContact).getTime()) / 86400000) : null;
+          const alertFollow = daysSince !== null && daysSince > 2 && ['diagnostico','proposta','fechamento'].includes(stage.id);
+          const reactivateAlert = c.reactivate && new Date(c.reactivate) <= new Date() && stage.id === 'perdido';
+          return `
+          <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}">
+            <div class="kc-name">${c.name}</div>
+            ${c.segment ? `<div class="kc-info">${c.segment}</div>` : ''}
+            ${c.value ? `<div class="kc-value">R$ ${parseFloat(c.value).toLocaleString('pt-BR')}/mês</div>` : ''}
+            ${alertFollow ? `<div class="kc-alert">⚠ ${daysSince} dias sem contato</div>` : ''}
+            ${reactivateAlert ? `<div class="kc-alert" style="border-color:#fc6;background:#fc622;color:#fc6;">🔄 Hora de reativar!</div>` : ''}
+            ${lastLog ? `<div class="kc-log">${lastLog}</div>` : ''}
+            <div class="kc-actions">
+              <button class="btn-sm" onclick="editProspect('${c.id}')">✎</button>
+              <button class="btn-sm btn-danger" onclick="deleteProspect('${c.id}')">✕</button>
+            </div>
+          </div>`;
+        }).join('')}
+      </div>
+      <button class="kanban-add" onclick="openProspectModal('${stage.id}')">+ Adicionar</button>
+    </div>`;
+  }).join('');
+}
+
+let draggedProspectId = null;
+function dragProspect(e, id) { draggedProspectId = id; e.dataTransfer.effectAllowed = 'move'; }
+function dropProspect(e, stage) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drag-over');
+  if (!draggedProspectId) return;
+  const prospects = getProspects();
+  const p = prospects.find(x => x.id === draggedProspectId);
+  if (p) { p.stage = stage; saveProspects(prospects); renderPipeline(); }
+  draggedProspectId = null;
+}
+
+function openProspectModal(stage) {
+  document.getElementById('p-edit-id').value = '';
+  document.getElementById('prospect-modal-title').textContent = 'Novo Prospect';
+  document.getElementById('p-name').value = '';
+  document.getElementById('p-segment').value = '';
+  document.getElementById('p-value').value = '';
+  document.getElementById('p-stage').value = stage || 'prospect';
+  document.getElementById('p-reactivate').value = '';
+  document.getElementById('p-new-log').value = '';
+  document.getElementById('p-notes').value = '';
+  document.getElementById('prospect-error').textContent = '';
+  document.getElementById('prospect-modal').classList.add('open');
+}
+
+function closeProspectModal() { document.getElementById('prospect-modal').classList.remove('open'); }
+
+function editProspect(id) {
+  const p = getProspects().find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('p-edit-id').value = id;
+  document.getElementById('prospect-modal-title').textContent = 'Editar Prospect';
+  document.getElementById('p-name').value = p.name;
+  document.getElementById('p-segment').value = p.segment || '';
+  document.getElementById('p-value').value = p.value || '';
+  document.getElementById('p-stage').value = p.stage;
+  document.getElementById('p-reactivate').value = p.reactivate || '';
+  document.getElementById('p-new-log').value = '';
+  document.getElementById('p-notes').value = p.notes || '';
+  document.getElementById('prospect-error').textContent = '';
+  document.getElementById('prospect-modal').classList.add('open');
+}
+
+function saveProspect() {
+  const name = document.getElementById('p-name').value.trim();
+  if (!name) { document.getElementById('prospect-error').textContent = 'Nome é obrigatório.'; return; }
+  const newLog = document.getElementById('p-new-log').value.trim();
+  let notes = document.getElementById('p-notes').value.trim();
+  if (newLog) {
+    const dt = new Date().toLocaleDateString('pt-BR');
+    notes = `[${dt}] ${newLog}\n${notes}`;
+  }
+  const prospect = {
+    name,
+    segment: document.getElementById('p-segment').value.trim(),
+    value: document.getElementById('p-value').value,
+    stage: document.getElementById('p-stage').value,
+    reactivate: document.getElementById('p-reactivate').value,
+    notes,
+    lastContact: newLog ? new Date().toISOString() : undefined,
+  };
+  const editId = document.getElementById('p-edit-id').value;
+  const prospects = getProspects();
+  if (editId) {
+    const idx = prospects.findIndex(x => x.id === editId);
+    if (idx >= 0) {
+      if (!prospect.lastContact) delete prospect.lastContact;
+      prospects[idx] = { ...prospects[idx], ...prospect };
+    }
+  } else {
+    prospect.id = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+    prospect.createdAt = new Date().toISOString();
+    prospects.push(prospect);
+  }
+  saveProspects(prospects);
+  closeProspectModal();
+  renderPipeline();
+}
+
+function deleteProspect(id) {
+  if (!confirm('Excluir este prospect?')) return;
+  saveProspects(getProspects().filter(p => p.id !== id));
+  renderPipeline();
+}
+
+// Seed current clients into pipeline if empty
+function seedPipelineClients() {
+  if (getProspects().length > 0) return;
+  const seed = [
+    { id: 'seed1', name: 'Cube Educacional', segment: 'Educação', value: 1400, stage: 'entregando', notes: 'R$1.250 + R$150 VT. Pilares: Projeto, Liderança, Rotina/Trend.', createdAt: '2026-01-01' },
+    { id: 'seed2', name: 'Pallefort', segment: 'Indústria / Manutenção', value: 700, stage: 'entregando', notes: 'Roteiro obrigatório: gancho + desenvolvimento + CTA. Pilares: Autoridade, Análise, Trend.', createdAt: '2026-01-01' },
+    { id: 'seed3', name: 'Mania da Web', segment: 'E-commerce', value: 900, stage: 'entregando', notes: '3 vídeos/sem + 1 visita/sem. Pilares: Atenção, Desejo, Conversão.', createdAt: '2026-01-01' },
+  ];
+  saveProspects(seed);
+}
+
+// ============ WEEKLY SUMMARY ============
+function renderWeeklySummary() {
+  const videos = load('videos') || [];
+  const weekEnd = new Date(currentWeekStart);
+  weekEnd.setDate(weekEnd.getDate() + 6);
+  const ws = dateStr(currentWeekStart);
+  const we = dateStr(weekEnd);
+  const weekVideos = videos.filter(v => v.date >= ws && v.date <= we);
+  const counts = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
+  weekVideos.forEach(v => counts[v.status]++);
+  const total = weekVideos.length;
+
+  const perClient = {};
+  for (const [key, cl] of Object.entries(CLIENTS)) {
+    const c = weekVideos.filter(v => v.client === key).length;
+    perClient[key] = c;
+  }
+
+  const el = document.getElementById('week-summary');
+  el.innerHTML = `
+    <div class="ws-group" style="flex-direction:column;">
+      <div class="ws-group-label">Status</div>
+      <div style="display:flex;flex:1;">
+        <div class="ws-item"><div class="ws-val" style="color:#fff;">${total}</div><div class="ws-lbl">Total</div></div>
+        <div class="ws-item"><div class="ws-val" style="color:#f66;">${counts.pendente}</div><div class="ws-lbl">Pendente</div></div>
+        <div class="ws-item"><div class="ws-val" style="color:#fc6;">${counts.gravado}</div><div class="ws-lbl">Gravado</div></div>
+        <div class="ws-item"><div class="ws-val" style="color:#6cf;">${counts.editado}</div><div class="ws-lbl">Editado</div></div>
+        <div class="ws-item"><div class="ws-val" style="color:#6f6;">${counts.postado}</div><div class="ws-lbl">Postado</div></div>
+      </div>
+    </div>
+    <div class="ws-group" style="flex-direction:column;">
+      <div class="ws-group-label">Por cliente</div>
+      <div style="display:flex;flex:1;">
+        ${Object.entries(perClient).map(([k, c]) => `<div class="ws-item"><div class="ws-val" style="color:${getClientColor(k)};">${c}</div><div class="ws-lbl">${CLIENTS[k].name.split(' ')[0]}</div></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function getClientColor(key) {
+  const colors = { cube: '#b388e8', pallefort: '#f66', mania: '#f6a', lucas: '#4fd' };
+  return colors[key] || '#fff';
+}
+
+// ============ FINANCE CHART ============
+function renderFinChart() {
+  const allFin = load('finance') || {};
+  const months = Object.keys(allFin).sort().filter(m => m >= '2026-04').slice(-6);
+  if (months.length < 2) { document.getElementById('fin-chart-svg').innerHTML = '<text x="350" y="100" text-anchor="middle" fill="#555" font-size="12" font-family="sans-serif">Dados de 2+ meses necessários</text>'; return; }
+
+  const data = months.map(m => {
+    const d = allFin[m];
+    const rec = d.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0);
+    const cus = d.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
+    return { month: m, rec, cus, margem: rec - cus };
+  });
+
+  const maxVal = Math.max(...data.map(d => Math.max(d.rec, d.cus)));
+  const w = 700, h = 180, pad = 40;
+  const stepX = (w - pad * 2) / (data.length - 1);
+
+  function y(val) { return h - pad - (val / maxVal) * (h - pad * 2); }
+
+  const recLine = data.map((d, i) => `${pad + i * stepX},${y(d.rec)}`).join(' ');
+  const cusLine = data.map((d, i) => `${pad + i * stepX},${y(d.cus)}`).join(' ');
+  const marLine = data.map((d, i) => `${pad + i * stepX},${y(Math.max(0, d.margem))}`).join(' ');
+
+  let svg = `<polyline points="${recLine}" fill="none" stroke="#4f9" stroke-width="2"/>`;
+  svg += `<polyline points="${cusLine}" fill="none" stroke="#f66" stroke-width="2"/>`;
+  svg += `<polyline points="${marLine}" fill="none" stroke="#6cf" stroke-width="2" stroke-dasharray="4,4"/>`;
+
+  data.forEach((d, i) => {
+    const x = pad + i * stepX;
+    svg += `<circle cx="${x}" cy="${y(d.rec)}" r="3" fill="#4f9"/>`;
+    svg += `<circle cx="${x}" cy="${y(d.cus)}" r="3" fill="#f66"/>`;
+    const mLabel = d.month.split('-')[1] + '/' + d.month.split('-')[0].slice(2);
+    svg += `<text x="${x}" y="${h - 5}" text-anchor="middle" fill="#888" font-size="10" font-family="sans-serif">${mLabel}</text>`;
+    svg += `<text x="${x}" y="${y(d.rec) - 8}" text-anchor="middle" fill="#4f9" font-size="9" font-family="sans-serif">${d.rec.toFixed(0)}</text>`;
+  });
+
+  svg += `<text x="${w - 10}" y="20" text-anchor="end" fill="#4f9" font-size="10" font-family="sans-serif">● Receita</text>`;
+  svg += `<text x="${w - 10}" y="34" text-anchor="end" fill="#f66" font-size="10" font-family="sans-serif">● Custos</text>`;
+  svg += `<text x="${w - 10}" y="48" text-anchor="end" fill="#6cf" font-size="10" font-family="sans-serif">┄ Margem</text>`;
+
+  document.getElementById('fin-chart-svg').innerHTML = svg;
+}
+
+// ============ EXPORT / IMPORT ============
+function exportData() {
+  const data = {};
+  Object.values(STORAGE_KEYS).forEach(k => { data[k] = localStorage.getItem(k); });
+  data['smm_stage_info'] = localStorage.getItem('smm_stage_info');
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `dashboard-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+}
+
+function importData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (!confirm('Isso vai substituir todos os seus dados atuais. Continuar?')) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const data = JSON.parse(ev.target.result);
+      Object.entries(data).forEach(([k, v]) => { if (v) localStorage.setItem(k, v); });
+      location.reload();
+    } catch { alert('Arquivo inválido.'); }
+  };
+  reader.readAsText(file);
+}
+
+// ============ THEME ============
+function toggleTheme() {
+  document.body.classList.toggle('light');
+  localStorage.setItem('smm_theme', document.body.classList.contains('light') ? 'light' : 'dark');
+}
+if (localStorage.getItem('smm_theme') === 'light') document.body.classList.add('light');
+
+// ============ KEYBOARD SHORTCUTS ============
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+  if (e.key === 'n' || e.key === 'N') { e.preventDefault(); openVideoModal(); }
+  if (e.key === 'p' || e.key === 'P') { e.preventDefault(); showModule('pipeline'); openProspectModal(); }
+  if (e.key === '1') showModule('clientes');
+  if (e.key === '2') showModule('financeiro');
+  if (e.key === '3') showModule('playbook');
+  if (e.key === '4') showModule('pipeline');
+});
+
+// ============ SEED NOTION VIDEOS ============
+function seedNotionVideos() {
+  const videos = load('videos') || [];
+  if (videos.some(v => v.id === 'notion-m12')) return;
+  const notionVideos = [
+    // CUBE — março
+    { id:'notion-c01', client:'cube', title:'Dia das Mulheres', pillar:'PROJETO', status:'postado', date:'2026-03-08', link:'https://www.instagram.com/reel/DVoHnf_jmSL/' },
+    { id:'notion-c02', client:'cube', title:"What's the Song?", pillar:'Daily', status:'postado', date:'2026-03-11', link:'https://www.instagram.com/reel/DVwaj_-ElLp/' },
+    { id:'notion-c03', client:'cube', title:'Escola da Inteligência — Nova Parceria', pillar:'PROJETO', status:'postado', date:'2026-03-13', link:'https://www.instagram.com/reel/DV12uXCDtw7/' },
+    { id:'notion-c04', client:'cube', title:'Dia da Família — Gincana Escolar', pillar:'PROJETO', status:'postado', date:'2026-03-30', link:'https://www.instagram.com/reel/DWhy9A0Dnxp/' },
+    { id:'notion-c05', client:'cube', title:'Choco Tour Nestlé', pillar:'PROJETO', status:'postado', date:'2026-03-31', link:'https://www.instagram.com/reel/DWkX3O-DqGZ/' },
+    // CUBE — abril
+    { id:'notion-c06', client:'cube', title:'Trem da Páscoa', pillar:'PROJETO', status:'postado', date:'2026-04-05', link:'https://www.instagram.com/reel/DWw4-jREh_U/' },
+    { id:'notion-c07', client:'cube', title:'Nova Parceria — Fernanda Gabriela', pillar:'LIDERANÇA', status:'postado', date:'2026-04-11', link:'https://www.instagram.com/reel/DW-G5cVjtxF/' },
+    { id:'notion-c08', client:'cube', title:'Educação em 60s', pillar:'LIDERANÇA', status:'postado', date:'2026-04-15', link:'https://www.instagram.com/reel/DXKuAVEAoDB/' },
+    { id:'notion-c09', client:'cube', title:'Manifesto Cube', pillar:'LIDERANÇA', status:'postado', date:'2026-04-24', link:'https://www.instagram.com/p/DXh0qqkEkVY/' },
+    // CUBE — maio
+    { id:'notion-c10', client:'cube', title:'POV: Um dia com a Diretora', pillar:'LIDERANÇA', status:'postado', date:'2026-05-05', link:'https://www.instagram.com/p/DX7wt0huUVP/' },
+    { id:'notion-c11', client:'cube', title:'Educação em 60s #2 — Como as famílias ricas escolhem suas escolas', pillar:'LIDERANÇA', status:'postado', date:'2026-05-06', link:'https://www.instagram.com/p/DX-JLbEignr/' },
+    { id:'notion-c12', client:'cube', title:'Nova Parceria Cube — SESI e SENAI', pillar:'PROJETO', status:'postado', date:'2026-05-09', link:'https://www.instagram.com/p/DYGCXaWDpfi/' },
+    // PALLEFORT — março
+    { id:'notion-p01', client:'pallefort', title:'Não basta vender — é preciso entender | Treinamento Paletrans', pillar:'AUTORIDADE', status:'postado', date:'2026-03-24', link:'https://www.instagram.com/reel/DWSHMqpD9Ds/' },
+    { id:'notion-p02', client:'pallefort', title:'Sua paleteira está dando esses sinais?', pillar:'ANÁLISE', status:'postado', date:'2026-03-26', link:'https://www.instagram.com/p/DWXIjKmj5CO/' },
+    // PALLEFORT — abril
+    { id:'notion-p03', client:'pallefort', title:'É assim que uma paleteira passa pela nossa oficina', pillar:'AUTORIDADE', status:'postado', date:'2026-04-02', link:'https://www.instagram.com/reel/DWonIP0jgQd/' },
+    { id:'notion-p04', client:'pallefort', title:'Parada custa mais do que você imagina', pillar:'ANÁLISE', status:'postado', date:'2026-04-04', link:'https://www.instagram.com/p/DWupjcFllMG/' },
+    { id:'notion-p05', client:'pallefort', title:'TE21 — O Pequeno Notável | Paletrans', pillar:'AUTORIDADE', status:'postado', date:'2026-04-06', link:'https://www.instagram.com/p/DWzD_92jnBj/' },
+    { id:'notion-p06', client:'pallefort', title:'Processo completo — Roda da paleteira', pillar:'AUTORIDADE', status:'postado', date:'2026-04-08', link:'https://www.instagram.com/reel/DW1o-guDvM6/' },
+    { id:'notion-p07', client:'pallefort', title:'POV: você mandou seu equipamento pra orçamento', pillar:'AUTORIDADE', status:'postado', date:'2026-04-09', link:'https://www.instagram.com/reel/DW4GvNQDoNE/' },
+    { id:'notion-p08', client:'pallefort', title:'Pronto pra entrega — Acabamento da paleteira', pillar:'AUTORIDADE', status:'postado', date:'2026-04-10', link:'https://www.instagram.com/reel/DW60o8Bju3M/' },
+    { id:'notion-p09', client:'pallefort', title:'Corretiva ou Preventiva? — Análise de manutenção', pillar:'ANÁLISE', status:'postado', date:'2026-04-14', link:'https://www.instagram.com/p/DXE1NdMlvf1/' },
+    { id:'notion-p10', client:'pallefort', title:'Olha os Carrinhos! — Antes e depois', pillar:'AUTORIDADE', status:'postado', date:'2026-04-17', link:'instagram.com/p/DXNrRs1Dkcq/' },
+    { id:'notion-p11', client:'pallefort', title:'POV: O vendedor leva tudo ao pé da letra', pillar:'TREND', status:'postado', date:'2026-04-19', link:'instagram.com/reel/DXSsR_ejlmI/' },
+    { id:'notion-p12', client:'pallefort', title:'Peça original vs. peça genérica', pillar:'ANÁLISE', status:'postado', date:'2026-04-23', link:'instagram.com/p/DXcyEECFqaW/' },
+    { id:'notion-p13', client:'pallefort', title:'POV: Chefe falou pra conquistar os clientes', pillar:'TREND', status:'postado', date:'2026-04-23', link:'https://www.instagram.com/p/DXfZ6n5jmy6/' },
+    { id:'notion-p14', client:'pallefort', title:'Patrão falou que o que importa é o vídeo', pillar:'TREND', status:'postado', date:'2026-04-24', link:'https://www.instagram.com/p/DXiEfRYDu0H/' },
+    { id:'notion-p15', client:'pallefort', title:'3 Erros que destroem seus carrinhos', pillar:'ANÁLISE', status:'postado', date:'2026-04-30', link:'https://www.instagram.com/p/DXxKgppPAqK/' },
+    // PALLEFORT — maio
+    { id:'notion-p16', client:'pallefort', title:'POV: O vendedor precisa bater a meta', pillar:'TREND', status:'postado', date:'2026-05-01', link:'https://www.instagram.com/p/DXz3uAvucPv/' },
+    { id:'notion-p17', client:'pallefort', title:'Medo de golpe? A gente...', pillar:'TREND', status:'postado', date:'2026-05-05', link:'https://www.instagram.com/p/DX-OTOMu55y/' },
+    { id:'notion-p18', client:'pallefort', title:'Feito no Brasil. Pra mover o Brasil.', pillar:'AUTORIDADE', status:'postado', date:'2026-05-07', link:'https://www.instagram.com/p/DYCuEnelv88/' },
+    { id:'notion-p19', client:'pallefort', title:'Quem viu o antes não acredita no depois', pillar:'AUTORIDADE', status:'postado', date:'2026-05-08', link:'https://www.instagram.com/p/DYGCqTOusOD/' },
+    { id:'notion-p20', client:'pallefort', title:'3 ERROS que destroem seus CARRINHOS pt 2', pillar:'ANÁLISE', status:'postado', date:'2026-05-09', link:'https://www.instagram.com/p/DYIiSmRuH-k/' },
+    // MANIA DA WEB — maio
+    { id:'notion-m01', client:'mania', title:'Você veio pelo vídeo… ficou pelas cores', pillar:'ATENÇÃO', status:'postado', date:'2026-05-06', link:'' },
+    { id:'notion-m02', client:'mania', title:'O segredo da make perfeita — potinho amarelo', pillar:'DESEJO', status:'postado', date:'2026-05-07', link:'' },
+    { id:'notion-m03', client:'mania', title:"O verdadeiro 'eu te amo mãe' — Mania da Web", pillar:'CONVERSÃO', status:'postado', date:'2026-05-08', link:'' },
+    { id:'notion-m04', client:'mania', title:'3 aplicadores, 3 efeitos diferentes — cílios', pillar:'DESEJO', status:'postado', date:'2026-05-23', link:'https://www.instagram.com/reel/DYp_nifuaFX/' },
+    { id:'notion-m05', client:'mania', title:'Beleza boa não precisa ser cara — Melu Ruby Rose', pillar:'CONVERSÃO', status:'postado', date:'2026-05-26', link:'https://www.instagram.com/reel/DYx04Asu_MU/' },
+    { id:'notion-m06', client:'mania', title:'Os 10 Queridinhos Nude da Dailus', pillar:'DESEJO', status:'postado', date:'2026-05-28', link:'https://www.instagram.com/reel/DY22KEDOApH/' },
+    // MANIA DA WEB — junho
+    { id:'notion-m07', client:'mania', title:'As novas cores da coleção Minhas Memórias já chegaram na Mania da Web!', pillar:'CONVERSÃO', status:'postado', date:'2026-06-01', link:'' },
+    { id:'notion-m08', client:'mania', title:'Não é gasto, é investimento.', pillar:'DESEJO', status:'postado', date:'2026-06-03', link:'' },
+    { id:'notion-m09', client:'mania', title:'olha oque apareceu (fui limpar as maquiagens)', pillar:'ATENÇÃO', status:'postado', date:'2026-06-10', link:'' },
+    { id:'notion-m10', client:'mania', title:'Esse carrega sua autoestima', pillar:'DESEJO', status:'postado', date:'2026-06-15', link:'' },
+    { id:'notion-m11', client:'mania', title:'Esmalte caiu no chão? Assista até o final', pillar:'ATENÇÃO', status:'postado', date:'2026-06-16', link:'' },
+    { id:'notion-m12', client:'mania', title:'POV: achei que era uma armadilha… era só a Mania da Web me levando pro lugar certo', pillar:'ATENÇÃO', status:'postado', date:'2026-06-18', link:'' },
+    // CUBE — junho
+    { id:'notion-c13', client:'cube', title:'Educação em 60 segundos #3 — Avaliação por nota no século XXI', pillar:'LIDERANÇA', status:'postado', date:'2026-06-03', link:'' },
+    { id:'notion-c14', client:'cube', title:'Rifa do Hexa', pillar:'Daily', status:'postado', date:'2026-06-10', link:'' },
+    { id:'notion-c15', client:'cube', title:'Acampadentro Cube 2026', pillar:'Daily', status:'postado', date:'2026-06-15', link:'' },
+    { id:'notion-c16', client:'cube', title:'Faltam 10 dias pro Arraiá da Cube', pillar:'Daily', status:'postado', date:'2026-06-17', link:'' },
+    { id:'notion-c17', client:'cube', title:'Os alunos do 5º ano criaram o JuniSimples', pillar:'PROJETO', status:'postado', date:'2026-06-19', link:'' },
+    // PALLEFORT — junho
+    { id:'notion-p21', client:'pallefort', title:'Velozes e Furiosos: Logística Edition', pillar:'TREND', status:'postado', date:'2026-06-04', link:'' },
+    { id:'notion-p22', client:'pallefort', title:'POV: o time de logística se preparando pra começar o dia', pillar:'AUTORIDADE', status:'postado', date:'2026-06-12', link:'' },
+    { id:'notion-p23', client:'pallefort', title:'Quando recebo elogio do cliente', pillar:'AUTORIDADE', status:'postado', date:'2026-06-18', link:'' },
+    { id:'notion-p24', client:'pallefort', title:'GRAVE: Anúncio urgente (Copa do Brasil)', pillar:'TREND', status:'postado', date:'2026-06-19', link:'' },
+    { id:'notion-p25', client:'pallefort', title:'Façam os estudos valerem a pena! Com 20 anos já sou operador de máquinas', pillar:'TREND', status:'postado', date:'2026-06-22', link:'' },
+  ];
+  const existingIds = new Set(videos.map(v => v.id));
+  const newVideos = notionVideos.filter(v => !existingIds.has(v.id));
+  if (newVideos.length === 0) return;
+  videos.push(...newVideos);
+  save('videos', videos);
+}
+seedNotionVideos();
+
+// ============ RENDER ALL ============
+function renderAll() {
+  populateClientSelects();
+  renderCards();
+  renderWeeklySummary();
+  renderCalendar();
+  renderHistory();
+  renderFinance();
+  renderFinChart();
+  renderPlaybook();
+  seedPipelineClients();
+  renderPipeline();
+}
+
+renderAll();
+</script>
+</body>
+</html>
