@@ -330,7 +330,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button onclick="showModule('ideias')">Ideias</button>
   <button onclick="showModule('metas')">Metas</button>
   <button onclick="showModule('playbook')">Playbook</button>
-  <button onclick="showModule('processos')">Processos</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
 </nav>
 
@@ -402,12 +401,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <button class="btn-sm" onclick="changeMonth(1)">Próximo →</button>
     <button class="btn-sm" onclick="changeMonth(0)">Hoje</button>
   </div>
-  <div class="fin-grid" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
-    <div class="fin-box"><div class="lbl">Receita Total</div><div class="val green" id="fin-receita">R$ 0</div></div>
-    <div class="fin-box"><div class="lbl">Custos Negócio</div><div class="val red" id="fin-custos-pj">R$ 0</div></div>
-    <div class="fin-box"><div class="lbl">Caixa PJ</div><div class="val" style="color:#4fd;" id="fin-caixa-pj">R$ 0</div></div>
-    <div class="fin-box"><div class="lbl">Custos Pessoais</div><div class="val red" id="fin-custos-pessoal">R$ 0</div></div>
-    <div class="fin-box"><div class="lbl">Sobra Final</div><div class="val blue" id="fin-margem">R$ 0</div></div>
+  <div class="fin-grid">
+    <div class="fin-box"><div class="lbl">Receita</div><div class="val green" id="fin-receita">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Custos</div><div class="val red" id="fin-custos">R$ 0</div></div>
+    <div class="fin-box"><div class="lbl">Sobra</div><div class="val blue" id="fin-margem">R$ 0</div></div>
   </div>
 
   <div class="card" style="margin-bottom:16px;padding:12px 16px;">
@@ -430,15 +427,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 
   <div class="fin-table">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="margin:0;color:#f66;">💼 Custos do Negócio</h3>
-      <button class="btn-sm btn-primary" onclick="addFinRow('custosPJ')">+ Adicionar</button>
-    </div>
-    <div id="fin-custos-pj-list"></div>
-  </div>
-
-  <div class="fin-table">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-      <h3 style="margin:0;color:#fc6;">👤 Custos Pessoais</h3>
+      <h3 style="margin:0;color:#f66;">Custos</h3>
       <button class="btn-sm btn-primary" onclick="addFinRow('custos')">+ Adicionar</button>
     </div>
     <div id="fin-custos-list"></div>
@@ -534,16 +523,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <h2>Playbook — Consulta Rápida</h2>
   <p style="color:#888;font-size:13px;margin-bottom:16px;">Clique em cada seção para expandir e editar suas anotações. Tudo salva automaticamente.</p>
   <div id="playbook-sections"></div>
-</div>
-
-<!-- MODULE: PROCESSOS -->
-<div id="mod-processos" class="module">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <h2>📋 Processos</h2>
-    <button class="btn-primary btn-sm" onclick="addProcesso()">+ Novo processo</button>
-  </div>
-  <p style="color:#888;font-size:13px;margin-bottom:16px;">Documente seus processos pra quando contratar alguém, já ter tudo pronto.</p>
-  <div id="processos-container"></div>
 </div>
 
 <!-- MODULE 4: PIPELINE -->
@@ -1248,17 +1227,12 @@ function renderFinance() {
   document.getElementById('month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
 
   const data = getFinanceForMonth();
-  if (!data.custosPJ) data.custosPJ = [];
   const totalRec = data.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0);
-  const totalPJ = data.custosPJ.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
-  const totalPessoal = data.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
-  const caixaPJ = totalRec - totalPJ;
-  const margem = totalRec - totalPJ - totalPessoal;
+  const totalCus = data.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
+  const margem = totalRec - totalCus;
 
   document.getElementById('fin-receita').textContent = `R$ ${totalRec.toFixed(2)}`;
-  document.getElementById('fin-custos-pj').textContent = `R$ ${totalPJ.toFixed(2)}`;
-  document.getElementById('fin-caixa-pj').textContent = `R$ ${caixaPJ.toFixed(2)}`;
-  document.getElementById('fin-custos-pessoal').textContent = `R$ ${totalPessoal.toFixed(2)}`;
+  document.getElementById('fin-custos').textContent = `R$ ${totalCus.toFixed(2)}`;
   document.getElementById('fin-margem').textContent = `R$ ${margem.toFixed(2)}`;
   document.getElementById('fin-margem').className = `val ${margem >= 0 ? 'blue' : 'red'}`;
 
@@ -1273,7 +1247,6 @@ function renderFinance() {
   document.getElementById('fin-mei-bar').style.background = pctMei >= 80 ? 'linear-gradient(90deg,#a33,#f66)' : 'linear-gradient(90deg,#1a5a3a,#4f9)';
 
   renderFinRows('receitas', data.receitas, 'fin-receitas');
-  renderFinRows('custosPJ', data.custosPJ, 'fin-custos-pj-list');
   renderFinRows('custos', data.custos, 'fin-custos-list');
 }
 
@@ -2070,7 +2043,8 @@ function renderMetas() {
   document.getElementById('meta-clientes-alvo').value = clientesAlvo;
 
   const maxClientes = Math.floor(horasSemana / horasCliente);
-  const clientesAtivos = Object.keys(CLIENTS).filter(k => k !== 'lucas').length;
+  const naoClientes = ['lucas', 'pedro', 'guilherme', 'pedroguilherme', 'pedroeguilherme'];
+  const clientesAtivos = Object.keys(CLIENTS).filter(k => !naoClientes.includes(k.toLowerCase())).length;
   const receitaAtual = (() => {
     const allFin = load('finance') || {};
     const now = new Date().toISOString().slice(0, 7);
@@ -2213,7 +2187,6 @@ function renderAll() {
   renderPlaybook();
   renderIdeias();
   renderMetas();
-  renderProcessos();
   seedPipelineClients();
   renderPipeline();
 }
