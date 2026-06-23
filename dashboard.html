@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard SMM</title>
+<title>Lucas SM Hub</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f0f; color: #e0e0e0; }
@@ -222,10 +223,37 @@ body.light th { color: #666; }
 body.light td { border-color: #eee; }
 body.light .fin-row { border-color: #eee; }
 body.light .modal-overlay { background: rgba(0,0,0,.3); }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .module { padding: 12px 8px; }
+  nav button { padding: 10px 4px; font-size: 12px; }
+  .cards { grid-template-columns: 1fr; }
+  .fin-grid { grid-template-columns: 1fr; }
+  .calendar-week { grid-template-columns: repeat(7, 1fr); gap: 2px; }
+  .cal-day { padding: 4px; min-height: 70px; }
+  .cal-day-label { font-size: 9px; }
+  .cal-item { font-size: 9px; padding: 2px 4px; }
+  .week-summary { flex-direction: column; }
+  .ws-group + .ws-group { border-left: none; border-top: 2px solid #333; }
+  .ws-item .ws-val { font-size: 15px; }
+  .form-row { grid-template-columns: 1fr; }
+  .toolbar { padding: 6px 8px; flex-wrap: wrap; }
+  table { font-size: 11px; display: block; overflow-x: auto; }
+  th, td { padding: 5px 4px; }
+  .fin-row .fin-name input { width: 140px; }
+  .fin-row input { width: 80px; }
+  .bowtie-container { overflow-x: auto; }
+  .kanban { overflow-x: auto; }
+  h2 { font-size: 16px; }
+}
 </style>
 </head>
 <body>
 
+<div style="text-align:center;padding:16px 0 4px;">
+  <h1 style="font-size:20px;color:#4f9;margin:0;">🎬 Lucas SM Hub</h1>
+</div>
 <div class="toolbar">
   <button class="btn-sm" onclick="toggleTheme()">☀/☾ Tema</button>
   <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
