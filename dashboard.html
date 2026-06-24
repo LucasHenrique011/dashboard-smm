@@ -336,7 +336,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 <nav>
   <button class="active" onclick="showModule('clientes')">Clientes</button>
   <button onclick="showModule('financeiro')">Financeiro</button>
-  <button onclick="showModule('ideias')">Ideias</button>
   <button onclick="showModule('metas')">Metas</button>
   <button onclick="showModule('metricas')">Métricas</button>
   <button onclick="showModule('ferramentas')">Ferramentas</button>
@@ -450,26 +449,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   </div>
 </div>
 
-<!-- MODULE: BANCO DE IDEIAS -->
-<div id="mod-ideias" class="module">
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <h2>💡 Banco de Ideias</h2>
-    <button class="btn-primary btn-sm" onclick="addIdeia()">+ Nova ideia</button>
-  </div>
-  <p style="color:#888;font-size:13px;margin-bottom:16px;">Anote ideias de conteúdo pra nunca travar na produção. Filtre por cliente e arraste pra produção quando quiser.</p>
-  <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
-    <select id="ideia-filter-client" onchange="renderIdeias()" style="width:auto;">
-      <option value="all">Todos os clientes</option>
-    </select>
-    <select id="ideia-filter-status" onchange="renderIdeias()" style="width:auto;">
-      <option value="all">Todas</option>
-      <option value="nova">💡 Novas</option>
-      <option value="aprovada">✅ Aprovadas</option>
-      <option value="usada">🎬 Usadas</option>
-    </select>
-  </div>
-  <div id="ideias-container"></div>
-</div>
 
 <!-- MODULE: METAS -->
 <div id="mod-metas" class="module">
@@ -614,6 +593,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
         <option value="planejamento">Planejamento</option>
       </select>
       <button class="btn-primary btn-sm" id="timer-btn" onclick="toggleTimer()">▶ Iniciar</button>
+      <button class="btn-sm btn-danger" onclick="stopTimer()">⏹ Salvar e parar</button>
     </div>
     <div id="timer-display" style="font-size:32px;font-weight:700;color:#4f9;text-align:center;padding:12px 0;font-family:monospace;">00:00:00</div>
     <div id="timer-historico"></div>
@@ -913,7 +893,7 @@ function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringi
 let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
 function populateClientSelects() {
-  ['filter-client', 'v-client', 'hist-client', 'ideia-filter-client', 'relatorio-client', 'timer-client'].forEach(id => {
+  ['filter-client', 'v-client', 'hist-client', 'relatorio-client', 'timer-client'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const val = sel.value;
@@ -2643,7 +2623,7 @@ function restoreTimer() {
   if (document.getElementById('timer-client')) document.getElementById('timer-client').value = state.client;
   if (document.getElementById('timer-atividade')) document.getElementById('timer-atividade').value = state.atividade;
   timerRunning = true;
-  document.getElementById('timer-btn').textContent = '⏸ Pausar e salvar';
+  document.getElementById('timer-btn').textContent = '⏸ Pausar';
   updateTimerDisplay();
   timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
 }
@@ -2658,26 +2638,34 @@ function updateTimerDisplay() {
 function toggleTimer() {
   if (timerRunning) {
     clearInterval(timerInterval);
+    timerInterval = null;
     timerRunning = false;
     document.getElementById('timer-btn').textContent = '▶ Continuar';
-    const client = document.getElementById('timer-client').value;
-    const atividade = document.getElementById('timer-atividade').value;
-    if (client && timerSeconds > 60) {
-      const hist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
-      hist.unshift({ client, atividade, segundos: timerSeconds, data: new Date().toISOString().slice(0, 10) });
-      localStorage.setItem('smm_timer_hist', JSON.stringify(hist.slice(0, 50)));
-      renderTimerHist();
-    }
-    localStorage.removeItem('smm_timer_state');
-    timerSeconds = 0;
-    updateTimerDisplay();
+    saveTimerState();
   } else {
     if (!document.getElementById('timer-client').value) { alert('Selecione o cliente'); return; }
     timerRunning = true;
-    document.getElementById('timer-btn').textContent = '⏸ Pausar e salvar';
+    document.getElementById('timer-btn').textContent = '⏸ Pausar';
     saveTimerState();
     timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
   }
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  timerRunning = false;
+  const client = document.getElementById('timer-client').value;
+  const atividade = document.getElementById('timer-atividade').value;
+  if (client && timerSeconds > 10) {
+    const hist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
+    hist.unshift({ client, atividade, segundos: timerSeconds, data: new Date().toISOString().slice(0, 10) });
+    localStorage.setItem('smm_timer_hist', JSON.stringify(hist.slice(0, 50)));
+    renderTimerHist();
+  }
+  localStorage.removeItem('smm_timer_state');
+  timerSeconds = 0;
+  updateTimerDisplay();
+  document.getElementById('timer-btn').textContent = '▶ Iniciar';
 }
 
 function renderTimerHist() {
@@ -3088,7 +3076,6 @@ function renderAll() {
   renderFinance();
   renderFinChart();
   renderPlaybook();
-  renderIdeias();
   renderMetas();
   renderFerramentas();
   renderMetricas();
