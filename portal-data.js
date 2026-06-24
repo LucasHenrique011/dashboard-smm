@@ -118,7 +118,7 @@ const PORTAL_DATA = {
       "client": "lucas",
       "title": "CLAREOU",
       "pillar": "EVOLUÇÃO",
-      "date": "2026-06-24",
+      "date": "2026-06-22",
       "status": "postado",
       "ref": "",
       "roteiro": ""
@@ -787,5 +787,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T05:57:36.169Z"
+  "updatedAt": "2026-06-24T05:58:20.002Z"
 };
