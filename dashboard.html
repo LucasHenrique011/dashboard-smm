@@ -2195,6 +2195,24 @@ function changeMetMonth(dir) {
 
 function loadAllMetricas() { return JSON.parse(localStorage.getItem('smm_metricas') || '{}'); }
 
+function seedMetricas() {
+  const all = loadAllMetricas();
+  const seed = {
+    mania: {
+      '2026-06': { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' }
+    }
+  };
+  let changed = false;
+  for (const [client, months] of Object.entries(seed)) {
+    if (!all[client]) all[client] = {};
+    for (const [month, data] of Object.entries(months)) {
+      if (!all[client][month]) { all[client][month] = data; changed = true; }
+    }
+  }
+  if (changed) localStorage.setItem('smm_metricas', JSON.stringify(all));
+}
+seedMetricas();
+
 function getMetricas(client, month) {
   const all = loadAllMetricas();
   return (all[client] && all[client][month]) || {};
