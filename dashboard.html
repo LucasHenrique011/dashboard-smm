@@ -2222,8 +2222,8 @@ function seedMetricas() {
   const all = loadAllMetricas();
   if (all['_seeded_v3']) return;
   if (!all['mania']) all['mania'] = {};
-  all['mania']['2026-05'] = { seguidores:561, alcance:1491, views:2480, interacoes:103, engajados:50, visitas:42, linkbio:5, engajamento:6.9, novos:0, compartilhamentos:14, salvamentos:0, curtidas:0, melhor:'Dailus "Última Chamada" — 1.000+ views, 47 interações, 14 compartilhamentos. Lançamento de produto com visual forte.', obs:'Primeiro mês completo de gestão. 72% das views de não seguidores. Reels = 90% das visualizações.' };
-  all['mania']['2026-06'] = { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' };
+  all['mania']['2026-05'] = { seguidores:561, alcance:1491, views:2480, interacoes:103, engajados:50, visitas:42, linkbio:5, engajamento:6.9, novos:14, perdidos:32, compartilhamentos:14, salvamentos:0, curtidas:0, melhor:'Dailus "Última Chamada" — 1.000+ views, 47 interações, 14 compartilhamentos. Lançamento de produto com visual forte.', obs:'Primeiro mês completo. 72% views de não seguidores. Reels = 90% das views. +14 novos seguidores, -32 deixaram (limpeza de base). Últimos 60 dias.' };
+  all['mania']['2026-06'] = { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' };
   all['_seeded_v3'] = true;
   localStorage.setItem('smm_metricas', JSON.stringify(all));
 }
