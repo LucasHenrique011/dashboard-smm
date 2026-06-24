@@ -715,7 +715,7 @@ const PORTAL_DATA = {
       "date": "2026-06-24",
       "status": "pendente",
       "ref": "",
-      "roteiro": "a"
+      "roteiro": ""
     },
     {
       "client": "pallefort",
@@ -724,7 +724,7 @@ const PORTAL_DATA = {
       "date": "2026-06-24",
       "status": "pendente",
       "ref": "",
-      "roteiro": "a"
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -787,5 +787,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T05:58:20.002Z"
+  "updatedAt": "2026-06-24T05:59:57.369Z"
 };
