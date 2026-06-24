@@ -1315,8 +1315,9 @@ function getDefaultFinance() {
 
 function seedHistoricalFinance() {
   const allFin = load('finance') || {};
-  if (allFin['2026-04'] && allFin['_fixed_v2']) return;
-  allFin['_fixed_v2'] = true;
+  if (allFin['2026-04'] && localStorage.getItem('smm_fin_fixed_v2')) return;
+  localStorage.setItem('smm_fin_fixed_v2', '1');
+  delete allFin['_fixed_v2'];
   const custosAntigos = [
     { name: 'Transporte', value: 700 },
     { name: 'Claude AI', value: 109 },
@@ -1363,7 +1364,7 @@ function seedHistoricalFinance() {
     ]
   };
   // Remove meses futuros criados por engano
-  Object.keys(allFin).forEach(k => { if (k > '2026-06' && k !== '_fixed_v2') delete allFin[k]; });
+  Object.keys(allFin).forEach(k => { if (k > '2026-06' || !/^\d{4}-\d{2}$/.test(k)) delete allFin[k]; });
   save('finance', allFin);
 }
 seedHistoricalFinance();
@@ -2026,11 +2027,12 @@ function getClientColor(key) {
 // ============ FINANCE CHART ============
 function renderFinChart() {
   const allFin = load('finance') || {};
-  const months = Object.keys(allFin).sort().filter(m => m >= '2026-04').slice(-6);
+  const months = Object.keys(allFin).sort().filter(m => /^\d{4}-\d{2}$/.test(m) && m >= '2026-04').slice(-6);
   if (months.length < 2) { document.getElementById('fin-chart-svg').innerHTML = '<text x="350" y="100" text-anchor="middle" fill="#555" font-size="12" font-family="sans-serif">Dados de 2+ meses necessários</text>'; return; }
 
   const data = months.map(m => {
     const d = allFin[m];
+    if (!d || !d.receitas || !d.custos) return { month: m, rec: 0, cus: 0, margem: 0 };
     const rec = d.receitas.reduce((s, r) => s + (parseFloat(r.value) || 0), 0);
     const cus = d.custos.reduce((s, c) => s + (parseFloat(c.value) || 0), 0);
     return { month: m, rec, cus, margem: rec - cus };
@@ -3107,20 +3109,13 @@ seedNotionVideos();
 
 // ============ RENDER ALL ============
 function renderAll() {
-  populateClientSelects();
-  renderCards();
-  renderWeeklySummary();
-  renderCalendar();
-  renderTracker();
-  renderHistory();
-  renderFinance();
-  renderFinChart();
-  renderPlaybook();
-  renderMetas();
-  renderFerramentas();
-  renderMetricas();
-  seedPipelineClients();
-  renderPipeline();
+  const fns = [
+    populateClientSelects, renderCards, renderWeeklySummary, renderCalendar,
+    renderTracker, renderHistory, renderFinance, renderFinChart,
+    renderPlaybook, renderMetas, renderFerramentas, renderMetricas,
+    seedPipelineClients, renderPipeline
+  ];
+  fns.forEach(fn => { try { fn(); } catch(e) { console.error(fn.name + ':', e); } });
 }
 
 renderAll();
