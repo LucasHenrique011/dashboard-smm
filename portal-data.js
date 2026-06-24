@@ -739,6 +739,7 @@ const PORTAL_DATA = {
         "linkbio": 9,
         "engajamento": 7,
         "novos": 0,
+        "perdidos": 0,
         "compartilhamentos": 0,
         "salvamentos": 0,
         "curtidas": 0,
@@ -770,16 +771,54 @@ const PORTAL_DATA = {
         "visitas": 42,
         "linkbio": 5,
         "engajamento": 6.9,
-        "novos": 41,
+        "novos": 14,
+        "perdidos": 32,
         "compartilhamentos": 14,
         "salvamentos": 0,
         "curtidas": 0,
         "melhor": "Dailus \"Última Chamada\" — 1.000+ views, 47 interações, 14 compartilhamentos. Lançamento de produto com visual forte.",
-        "obs": "Primeiro mês completo de gestão. 72% das views vieram de não seguidores. Reels = 90% das visualizações."
+        "obs": "Primeiro mês completo. 72% views de não seguidores. Reels = 90% das views. +14 novos seguidores, -32 deixaram (limpeza de base). Últimos 60 dias."
       }
     },
     "_seeded_v2": true,
-    "_seeded_v3": true
+    "_seeded_v3": true,
+    "pallefort": {
+      "2026-04": {
+        "seguidores": 125,
+        "alcance": 0,
+        "views": 0,
+        "interacoes": 0,
+        "engajados": 0,
+        "visitas": 0,
+        "linkbio": 12,
+        "engajamento": 0,
+        "novos": 41,
+        "perdidos": 0,
+        "compartilhamentos": 0,
+        "salvamentos": 0,
+        "curtidas": 102,
+        "melhor": "Paleteira passando pela oficina — 28 curtidas. Melhor reel do mês, mostrando o processo completo.",
+        "obs": "Início da gestão. Conta saiu de 84 pra 125 seguidores (+49%) em 3 semanas. De 2 posts pra 10 posts ativos. Curtidas subiram de 4-5 pra média de 12 por post."
+      },
+      "2026-05": {
+        "seguidores": 168,
+        "alcance": 3504,
+        "views": 11114,
+        "interacoes": 503,
+        "engajados": 193,
+        "visitas": 386,
+        "linkbio": 9,
+        "engajamento": 14.4,
+        "novos": 43,
+        "perdidos": 0,
+        "compartilhamentos": 0,
+        "salvamentos": 0,
+        "curtidas": 0,
+        "melhor": "Aquecimento pra bater a meta — 2.170 views, 106 interações, 1.330 contas alcançadas. Humor + contexto do vendedor.",
+        "obs": "55,9% das views de não seguidores. Reels = 89,9% das views. 27 publicações ativas. Top 3 vídeos concentraram 45% das views."
+      }
+    },
+    "_seeded_v4": true
   },
   "tokens": {
     "cube": "cube2026ls",
@@ -787,5 +826,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T05:59:57.369Z"
+  "updatedAt": "2026-06-24T06:51:31.376Z"
 };
