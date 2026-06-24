@@ -1315,7 +1315,8 @@ function getDefaultFinance() {
 
 function seedHistoricalFinance() {
   const allFin = load('finance') || {};
-  if (allFin['2026-04']) return;
+  if (allFin['2026-04'] && allFin['_fixed_v2']) return;
+  allFin['_fixed_v2'] = true;
   const custosAntigos = [
     { name: 'Transporte', value: 700 },
     { name: 'Claude AI', value: 109 },
@@ -1338,9 +1339,31 @@ function seedHistoricalFinance() {
       { name: 'Cube — VT', value: 220 },
       { name: 'Pallefort', value: 700 },
       { name: 'Mania da Web', value: 900 },
+      { name: 'Giovanna Beauty', value: 250 },
     ],
     custos: JSON.parse(JSON.stringify(custosAntigos))
   };
+  allFin['2026-06'] = {
+    receitas: [
+      { name: 'Cube Educacional', value: 1250 },
+      { name: 'Cube — VT', value: 150 },
+      { name: 'Pallefort', value: 700 },
+      { name: 'Mania da Web', value: 900 },
+    ],
+    custos: [
+      { name: 'Transporte', value: 600 },
+      { name: 'Claude AI', value: 109 },
+      { name: 'MEI', value: 86 },
+      { name: 'MacBook (12x)', value: 666 },
+      { name: 'Mentoria (2x 12x)', value: 204 },
+      { name: 'Faculdade', value: 100 },
+      { name: 'Corte de cabelo', value: 90 },
+      { name: 'Cursos', value: 72 },
+      { name: 'Internet', value: 20 },
+    ]
+  };
+  // Remove meses futuros criados por engano
+  Object.keys(allFin).forEach(k => { if (k > '2026-06' && k !== '_fixed_v2') delete allFin[k]; });
   save('finance', allFin);
 }
 seedHistoricalFinance();
@@ -2197,19 +2220,11 @@ function loadAllMetricas() { return JSON.parse(localStorage.getItem('smm_metrica
 
 function seedMetricas() {
   const all = loadAllMetricas();
-  const seed = {
-    mania: {
-      '2026-06': { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' }
-    }
-  };
-  let changed = false;
-  for (const [client, months] of Object.entries(seed)) {
-    if (!all[client]) all[client] = {};
-    for (const [month, data] of Object.entries(months)) {
-      if (!all[client][month]) { all[client][month] = data; changed = true; }
-    }
-  }
-  if (changed) localStorage.setItem('smm_metricas', JSON.stringify(all));
+  if (all['_seeded_v2']) return;
+  if (!all['mania']) all['mania'] = {};
+  all['mania']['2026-06'] = { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' };
+  all['_seeded_v2'] = true;
+  localStorage.setItem('smm_metricas', JSON.stringify(all));
 }
 seedMetricas();
 
