@@ -64,7 +64,7 @@ const PORTAL_DATA = {
       "client": "cube",
       "title": "CASIO",
       "pillar": "PROJETO",
-      "date": "2026-06-23",
+      "date": "2026-06-25",
       "status": "pendente",
       "ref": "",
       "roteiro": ""
@@ -826,5 +826,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T06:58:37.029Z"
+  "updatedAt": "2026-06-24T06:58:54.061Z"
 };
