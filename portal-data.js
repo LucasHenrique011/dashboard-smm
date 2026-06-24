@@ -716,6 +716,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": "a"
+    },
+    {
+      "client": "pallefort",
+      "title": "VENDEDOR MODELO",
+      "pillar": "TREND",
+      "date": "2026-06-24",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "a"
     }
   ],
   "metricas": {
@@ -778,5 +787,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T05:49:11.979Z"
+  "updatedAt": "2026-06-24T05:50:19.784Z"
 };
