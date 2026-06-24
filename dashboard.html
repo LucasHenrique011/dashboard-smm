@@ -868,7 +868,7 @@ const DEFAULT_CLIENTS = {
     icp: 'Pais e mães de classe média-alta em São Paulo, com filhos entre 2 e 14 anos. Renda familiar a partir de R$15k/mês. Valorizam educação bilíngue, tecnologia na sala de aula, formação socioemocional e metodologias ativas. Buscam escola particular completa que prepare o filho pro futuro — não só vestibular. Pesquisam no Instagram antes de visitar.'
   },
   pallefort: {
-    name: 'Pallefort', valor: 'R$ 700', pillars: ['TREND/MEME','ANÁLISE','AUTORIDADE'], cadencia: '3 reels por semana', color: 'pallefort', requiresScript: true,
+    name: 'Pallefort', valor: 'R$ 700', pillars: ['TREND/MEME','ANÁLISE','AUTORIDADE'], cadencia: '3 reels por semana', color: 'pallefort',
     objetivo: 'Posicionar Pallefort como referência no setor de empilhadeiras e movimentação de cargas. Reconhecimento de marca no B2B industrial.',
     icp: 'Gestores de logística, operação e manutenção de empresas que usam empilhadeiras, paleteiras e transpaletes. Indústrias, centros de distribuição e atacadistas em SP e Grande SP. Tomador de decisão técnico — compra por confiança, prazo e qualidade da manutenção. Dor principal: equipamento parado = prejuízo. Buscam fornecedor confiável com atendimento rápido.'
   },
@@ -1237,8 +1237,7 @@ function updatePillarOptions() {
   const client = document.getElementById('v-client').value;
   const sel = document.getElementById('v-pillar');
   sel.innerHTML = CLIENTS[client].pillars.map(p => `<option value="${p}">${p}</option>`).join('');
-  const isPallefort = client === 'pallefort';
-  document.getElementById('lbl-roteiro').textContent = isPallefort ? 'Roteiro (obrigatório — gancho + desenvolvimento + CTA)' : 'Roteiro (opcional)';
+  document.getElementById('lbl-roteiro').textContent = 'Roteiro (opcional)';
 }
 
 function clearErrors() {
@@ -1257,11 +1256,8 @@ function saveVideo() {
   if (!title) { document.getElementById('modal-error').textContent = 'Título é obrigatório.'; return; }
 
   const ref = document.getElementById('v-ref').value.trim();
-  const roteiro = document.getElementById('v-roteiro').value.trim();
-  if (client === 'pallefort' && !roteiro) {
-    document.getElementById('err-roteiro').textContent = 'Roteiro é obrigatório para Pallefort.';
-    return;
-  }
+  let roteiro = document.getElementById('v-roteiro').value.trim();
+  if (roteiro.length <= 2) roteiro = '';
 
   const videos = load('videos') || [];
   const video = { client, title, pillar, date, status, ref, roteiro };
