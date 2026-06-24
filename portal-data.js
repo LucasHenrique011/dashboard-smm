@@ -100,8 +100,8 @@ const PORTAL_DATA = {
       "client": "lucas",
       "title": "POV: VOCE ACEITOU GRAVAR MINHAS IDEIAS",
       "pillar": "CONEXÃO",
-      "date": "2026-06-22",
-      "status": "editado",
+      "date": "2026-06-23",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -109,7 +109,7 @@ const PORTAL_DATA = {
       "client": "lucas",
       "title": "POV: voce me contratou para cuidar das suas redes sociais",
       "pillar": "AUTORIDADE",
-      "date": "2026-06-23",
+      "date": "2026-06-24",
       "status": "editado",
       "ref": "",
       "roteiro": ""
@@ -787,5 +787,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T05:51:22.887Z"
+  "updatedAt": "2026-06-24T05:57:36.169Z"
 };
