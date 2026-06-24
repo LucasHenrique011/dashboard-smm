@@ -2207,7 +2207,7 @@ function publicarPortalLinks() {
 }
 
 // ============ MÉTRICAS ============
-let metMonth = new Date().toISOString().slice(0, 7);
+var metMonth = new Date().toISOString().slice(0, 7);
 
 function changeMetMonth(dir) {
   const [y, m] = metMonth.split('-').map(Number);
