@@ -2220,10 +2220,12 @@ function loadAllMetricas() { return JSON.parse(localStorage.getItem('smm_metrica
 
 function seedMetricas() {
   const all = loadAllMetricas();
-  if (all['_seeded_v2']) return;
+  if (all['_seeded_v3']) return;
   if (!all['mania']) all['mania'] = {};
+  all['mania']['2026-04'] = { seguidores:520, alcance:3, views:62, interacoes:0, engajados:1, visitas:10, linkbio:1, engajamento:0, novos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'Baseline antes do início do trabalho. Conta sem estratégia, sem reels, posts genéricos.' };
+  all['mania']['2026-05'] = { seguidores:561, alcance:1491, views:2480, interacoes:103, engajados:50, visitas:42, linkbio:5, engajamento:6.9, novos:41, compartilhamentos:14, salvamentos:0, curtidas:0, melhor:'Dailus "Última Chamada" — 1.000+ views, 47 interações, 14 compartilhamentos. Lançamento de produto com visual forte.', obs:'Primeiro mês completo de gestão. 72% das views vieram de não seguidores. Reels = 90% das visualizações. Melhor horário: 12h-15h.' };
   all['mania']['2026-06'] = { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' };
-  all['_seeded_v2'] = true;
+  all['_seeded_v3'] = true;
   localStorage.setItem('smm_metricas', JSON.stringify(all));
 }
 seedMetricas();
