@@ -644,7 +644,43 @@ const PORTAL_DATA = {
       }
     },
     "_seeded_v2": true,
-    "_seeded_v3": true
+    "_seeded_v3": true,
+    "pallefort": {
+      "2026-04": {
+        "seguidores": 125,
+        "alcance": 0,
+        "views": 0,
+        "interacoes": 0,
+        "engajados": 0,
+        "visitas": 0,
+        "linkbio": 12,
+        "engajamento": 0,
+        "novos": 41,
+        "perdidos": 0,
+        "compartilhamentos": 0,
+        "salvamentos": 0,
+        "curtidas": 102,
+        "melhor": "Paleteira passando pela oficina — 28 curtidas.",
+        "obs": "Início da gestão. 84→125 seg (+49%). De 2 pra 10 posts ativos."
+      },
+      "2026-05": {
+        "seguidores": 168,
+        "alcance": 3504,
+        "views": 11114,
+        "interacoes": 503,
+        "engajados": 193,
+        "visitas": 386,
+        "linkbio": 9,
+        "engajamento": 14.4,
+        "novos": 43,
+        "perdidos": 0,
+        "compartilhamentos": 0,
+        "salvamentos": 0,
+        "curtidas": 0,
+        "melhor": "Aquecimento pra bater a meta — 2.170 views, 106 interações, 1.330 alcance.",
+        "obs": "55,9% views de não seguidores. Reels = 89,9%. 27 publicações. Top 3 = 45% views."
+      }
+    }
   },
   "tokens": {
     "cube": "cube2026ls",
@@ -652,5 +688,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-24T05:27:07.692Z"
+  "updatedAt": "2026-06-24T05:38:52.296Z"
 };
