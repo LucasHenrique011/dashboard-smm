@@ -819,7 +819,7 @@ function load(key) {
 }
 function save(key, data) { localStorage.setItem(STORAGE_KEYS[key], JSON.stringify(data)); scheduleAutoBackup(); scheduleAutoPublish(); }
 
-let _backupTimer = null;
+var _backupTimer = null;
 function scheduleAutoBackup() {
   if (_backupTimer) clearTimeout(_backupTimer);
   _backupTimer = setTimeout(doAutoBackup, 5000);
@@ -880,7 +880,7 @@ function loadClients() {
 }
 function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringify(clients)); scheduleAutoBackup(); scheduleAutoPublish(); }
 
-let CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+var CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
 function populateClientSelects() {
   ['filter-client', 'v-client', 'hist-client', 'relatorio-client', 'timer-client'].forEach(id => {
@@ -1146,8 +1146,8 @@ function updateVideoPillar(id, pillar) {
 }
 
 // -- Teleprompter --
-let tpInterval = null;
-let tpSpeedVal = 1;
+var tpInterval = null;
+var tpSpeedVal = 1;
 
 function openTeleprompter(id) {
   const videos = load('videos') || [];
@@ -1274,7 +1274,7 @@ function deleteVideo(id) {
 }
 
 // ============ MODULE 2: FINANCEIRO ============
-let currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
+var currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
 
 function getDefaultFinance() {
   return {
@@ -1448,7 +1448,7 @@ function removeFinItem(type, idx) {
 }
 
 // ============ MODULE 3: PLAYBOOK ============
-const PLAYBOOK_SECTIONS = [
+var PLAYBOOK_SECTIONS = [
   { id: 'reuniao', title: '🤝 Estrutura de Reunião', defaultContent: `1. PREPARAÇÃO
 • Pesquisar perfil do prospect (Instagram, TikTok, site)
 • Anotar 3 problemas visíveis
@@ -1579,7 +1579,7 @@ function savePlaybookSection(id, value) {
 }
 
 // ============ MODULE 4: PIPELINE ============
-const PIPELINE_STAGES = [
+var PIPELINE_STAGES = [
   { id: 'prospect', name: 'Prospect', color: '#e74c3c', thinking: '"Preciso aparecer nas redes mas não sei como"',
     info: 'Lead identificado que ainda não teve contato direto com você.',
     plan: '• Postar conteúdo de Atração no seu perfil (falar com UMA pessoa)\n• Identificar negócios em SP sem presença online\n• Pesquisar Instagram/Google do prospect antes de abordar\n• Meta: 5 prospects novos por semana' },
@@ -1606,7 +1606,7 @@ const PIPELINE_STAGES = [
     plan: '• Anotar o motivo da perda\n• Definir data de reativação (30-60 dias)\n• Manter contato pelo conteúdo (ele vai te ver postando)\n• Quando reativar: abordar com algo novo de valor' },
 ];
 
-const PIPELINE_BARS = [
+var PIPELINE_BARS = [
   { label: 'ENGAGING — Atrair e nutrir leads', stages: [0, 2], color: '#2ecc71' },
   { label: 'SALES — Venda ativa', stages: [2, 3], color: '#3498db' },
   { label: 'ONBOARD — Setup do cliente', stages: [3, 4], color: '#1abc9c' },
@@ -1810,7 +1810,7 @@ function moveProspect(id, stage) {
   if (p) { p.stage = stage; saveProspects(prospects); renderPipeline(); }
 }
 
-let draggedProspectId = null;
+var draggedProspectId = null;
 function dragProspect(e, id) { draggedProspectId = id; e.dataTransfer.effectAllowed = 'move'; }
 function dropProspect(e, stage) {
   e.preventDefault();
@@ -2162,7 +2162,7 @@ function publicarPortal() {
 }
 
 // Auto-publish when data changes (debounced)
-let _autoPublishTimer = null;
+var _autoPublishTimer = null;
 function scheduleAutoPublish() {
   if (!getGithubToken()) return;
   if (_autoPublishTimer) clearTimeout(_autoPublishTimer);
@@ -2441,7 +2441,7 @@ function gerarRelatorioMensal() {
 
 // ============ THEME ============
 // ============ OCULTAR VALORES ============
-let valoresOcultos = false;
+var valoresOcultos = false;
 function toggleValores() {
   valoresOcultos = !valoresOcultos;
   document.body.classList.toggle('hide-valores', valoresOcultos);
@@ -2626,9 +2626,9 @@ function gerarRelatorio() {
 }
 
 // -- Timer --
-let timerInterval = null;
-let timerSeconds = 0;
-let timerRunning = false;
+var timerInterval = null;
+var timerSeconds = 0;
+var timerRunning = false;
 
 function saveTimerState() {
   localStorage.setItem('smm_timer_state', JSON.stringify({
@@ -3099,19 +3099,20 @@ function renderAll() {
   fns.forEach(fn => { try { fn(); } catch(e) { console.error(fn.name + ':', e); } });
 }
 
-// Auto-restore: se não tem vídeos no localStorage, carrega do portal-data.js
-(function autoRestore() {
-  const videos = load('videos') || [];
-  if (videos.length > 10) { renderAll(); restoreTimer(); doAutoBackup(); return; }
-  const script = document.createElement('script');
-  script.src = 'portal-data.js?t=' + Date.now();
-  script.onload = function() {
-    if (typeof PORTAL_DATA === 'undefined') { renderAll(); restoreTimer(); doAutoBackup(); return; }
-    // Restore videos
+// Inicialização: carrega portal-data.js pra restaurar dados faltantes, depois renderiza
+(function init() {
+  function startApp() {
+    currentWeekStart = getMonday(new Date());
+    renderAll();
+    restoreTimer();
+    doAutoBackup();
+  }
+
+  function restoreFromPortal() {
+    if (typeof PORTAL_DATA === 'undefined') return;
     if ((load('videos') || []).length < 10 && PORTAL_DATA.videos && PORTAL_DATA.videos.length > 0) {
       save('videos', PORTAL_DATA.videos.map((v, i) => ({ ...v, id: v.id || ('restored-' + i) })));
     }
-    // Restore metrics
     if (PORTAL_DATA.metricas) {
       const met = loadAllMetricas();
       for (const [client, months] of Object.entries(PORTAL_DATA.metricas)) {
@@ -3123,7 +3124,6 @@ function renderAll() {
       }
       localStorage.setItem('smm_metricas', JSON.stringify(met));
     }
-    // Restore clients
     if (PORTAL_DATA.clients && !localStorage.getItem('smm_clients')) {
       const restored = {};
       for (const [key, cl] of Object.entries(PORTAL_DATA.clients)) {
@@ -3132,10 +3132,12 @@ function renderAll() {
       saveClients(restored);
       CLIENTS = restored;
     }
-    currentWeekStart = getMonday(new Date());
-    renderAll(); restoreTimer(); doAutoBackup();
-  };
-  script.onerror = function() { renderAll(); restoreTimer(); doAutoBackup(); };
+  }
+
+  const script = document.createElement('script');
+  script.src = 'portal-data.js?t=' + Date.now();
+  script.onload = function() { restoreFromPortal(); startApp(); };
+  script.onerror = function() { startApp(); };
   document.head.appendChild(script);
 })();
 
