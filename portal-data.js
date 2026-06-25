@@ -686,18 +686,18 @@ const PORTAL_DATA = {
       "title": "VENDEDOR INSISTENTE",
       "pillar": "TREND",
       "date": "2026-06-23",
-      "status": "gravado",
+      "status": "editado",
       "ref": "",
-      "roteiro": "a"
+      "roteiro": ""
     },
     {
       "client": "pallefort",
       "title": "COMO CLIENTE ME VE",
       "pillar": "TREND",
       "date": "2026-06-23",
-      "status": "gravado",
+      "status": "editado",
       "ref": "",
-      "roteiro": "a"
+      "roteiro": ""
     },
     {
       "client": "pallefort",
@@ -835,5 +835,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T03:11:32.853Z"
+  "updatedAt": "2026-06-25T03:24:51.156Z"
 };
