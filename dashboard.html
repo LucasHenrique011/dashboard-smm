@@ -305,17 +305,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   #bowtie-svg { display: none !important; }
   .stage-details { display: none !important; }
   #stage-info-panel { display: none !important; }
-  .pipeline-bars { display: none !important; }
-  #mod-pipeline h2 { font-size: 16px; }
-  #mod-pipeline .btn-primary { width: 100%; margin-bottom: 12px; }
-  .kanban { display: flex; flex-direction: column; gap: 10px; overflow-x: hidden; padding-bottom: 0; min-height: auto; }
-  .kanban-col { min-width: 100%; flex: none; }
-  .kanban-col-body { min-height: 30px; }
-  .kanban-card { font-size: 13px; }
-  .kanban-card .kc-name { font-size: 14px; }
-  .kanban-card .kc-info { font-size: 12px; }
-  .kanban-card .kc-value { font-size: 12px; }
-  .kanban-add { font-size: 13px; padding: 10px; }
+  .pipeline-bars { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .kanban { display: flex; flex-direction: column; gap: 12px; overflow-x: visible; }
+  .kanban-col { min-width: 100%; }
+  .kanban-col-body { min-height: 40px; }
 
   /* Filtros */
   .filter-bar { flex-wrap: wrap; }
