@@ -1302,8 +1302,8 @@ function getDefaultFinance() {
 
 function seedHistoricalFinance() {
   const allFin = load('finance') || {};
-  if (allFin['2026-04'] && localStorage.getItem('smm_fin_fixed_v3')) return;
-  localStorage.setItem('smm_fin_fixed_v3', '1');
+  if (localStorage.getItem('smm_fin_fixed_v4')) return;
+  localStorage.setItem('smm_fin_fixed_v4', '1');
   delete allFin['_fixed_v2'];
   const custosAntigos = [
     { name: 'Transporte', value: 700 },
@@ -1371,7 +1371,8 @@ seedHistoricalFinance();
 function getFinanceForMonth() {
   const allFin = load('finance') || {};
   if (!allFin[currentMonth]) {
-    const prev = Object.keys(allFin).sort().pop();
+    const validMonths = Object.keys(allFin).filter(k => /^\d{4}-\d{2}$/.test(k)).sort();
+    const prev = validMonths.pop();
     allFin[currentMonth] = prev ? JSON.parse(JSON.stringify(allFin[prev])) : getDefaultFinance();
     save('finance', allFin);
   }
