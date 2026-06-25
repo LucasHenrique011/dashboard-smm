@@ -3104,9 +3104,44 @@ function renderAll() {
   fns.forEach(fn => { try { fn(); } catch(e) { console.error(fn.name + ':', e); } });
 }
 
-renderAll();
-restoreTimer();
-doAutoBackup();
+// Auto-restore: se não tem vídeos no localStorage, carrega do portal-data.js
+(function autoRestore() {
+  const videos = load('videos') || [];
+  if (videos.length > 10) { renderAll(); restoreTimer(); doAutoBackup(); return; }
+  const script = document.createElement('script');
+  script.src = 'portal-data.js?t=' + Date.now();
+  script.onload = function() {
+    if (typeof PORTAL_DATA === 'undefined') { renderAll(); restoreTimer(); doAutoBackup(); return; }
+    // Restore videos
+    if ((load('videos') || []).length < 10 && PORTAL_DATA.videos && PORTAL_DATA.videos.length > 0) {
+      save('videos', PORTAL_DATA.videos.map((v, i) => ({ ...v, id: v.id || ('restored-' + i) })));
+    }
+    // Restore metrics
+    if (PORTAL_DATA.metricas) {
+      const met = loadAllMetricas();
+      for (const [client, months] of Object.entries(PORTAL_DATA.metricas)) {
+        if (client.startsWith('_')) continue;
+        if (!met[client]) met[client] = {};
+        for (const [month, data] of Object.entries(months)) {
+          if (!met[client][month]) met[client][month] = data;
+        }
+      }
+      localStorage.setItem('smm_metricas', JSON.stringify(met));
+    }
+    // Restore clients
+    if (PORTAL_DATA.clients && !localStorage.getItem('smm_clients')) {
+      const restored = {};
+      for (const [key, cl] of Object.entries(PORTAL_DATA.clients)) {
+        restored[key] = { ...cl, color: key };
+      }
+      saveClients(restored);
+      CLIENTS = restored;
+    }
+    renderAll(); restoreTimer(); doAutoBackup();
+  };
+  script.onerror = function() { renderAll(); restoreTimer(); doAutoBackup(); };
+  document.head.appendChild(script);
+})();
 
 // Notificação de relatório na última semana do mês
 (function checkReportReminder() {
