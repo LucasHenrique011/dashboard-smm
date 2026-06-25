@@ -687,7 +687,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
+      "ref": "https://www.instagram.com/reel/DOuORHFj8B3/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
     {
@@ -835,5 +835,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T02:08:58.071Z"
+  "updatedAt": "2026-06-25T02:12:26.019Z"
 };
