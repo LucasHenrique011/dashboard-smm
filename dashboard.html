@@ -993,12 +993,7 @@ function renderCards() {
 }
 
 // -- Calendar --
-let currentWeekStart = (function() {
-  const videos = load('videos') || [];
-  const pending = videos.filter(v => v.status !== 'postado' && v.date).sort((a,b) => a.date.localeCompare(b.date));
-  if (pending.length > 0) return getMonday(new Date(pending[0].date + 'T12:00:00'));
-  return getMonday(new Date());
-})();
+var currentWeekStart = getMonday(new Date());
 
 function getMonday(d) {
   const dt = new Date(d);
@@ -3137,6 +3132,7 @@ function renderAll() {
       saveClients(restored);
       CLIENTS = restored;
     }
+    currentWeekStart = getMonday(new Date());
     renderAll(); restoreTimer(); doAutoBackup();
   };
   script.onerror = function() { renderAll(); restoreTimer(); doAutoBackup(); };
