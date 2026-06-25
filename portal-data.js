@@ -734,6 +734,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DZQfTdrOyZx/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "MARMITEX",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-25",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -835,5 +844,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T03:25:36.222Z"
+  "updatedAt": "2026-06-25T03:26:35.292Z"
 };
