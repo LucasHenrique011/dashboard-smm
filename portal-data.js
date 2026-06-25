@@ -678,7 +678,7 @@ const PORTAL_DATA = {
       "pillar": "CONVERSÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
+      "ref": "https://www.instagram.com/reel/DZvsmn_BIz8/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
     {
@@ -835,5 +835,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T02:05:08.208Z"
+  "updatedAt": "2026-06-25T02:07:46.169Z"
 };
