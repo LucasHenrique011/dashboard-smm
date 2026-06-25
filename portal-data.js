@@ -734,6 +734,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": "Intro\n\nTem uma categoria de profissional surgindo nos Estados Unidos que as empresas ainda não sabem nem quanto pagar. Chamam de HIC — High Individual Contributor. São executivos seniores que abriram mão deliberadamente de ter equipe.\n\nTendência reportada em 2026 — mercado tech americano\nTom: revelação, quase confidencial. Pausa antes de \"as empresas ainda não sabem quanto pagar.\"\n\n15–32s\nO conceito\n\nEles dominam IA a um nível em que entregam, sozinhos, o que antes exigia um time inteiro. E aí a lógica vira matemática pura: a empresa economiza em pessoas, estrutura, gestão — e parte dessa economia vira salário pra esse profissional. Um HIC pode ganhar mais que um diretor com vinte pessoas embaixo dele.\n\nEconomia de equipe → vira remuneração individual\nRitmo direto, quase didático. \"Matemática pura\" deve ser dito com leveza — não é hipérbole, é literal.\n\n32–46s\nFio condutor — educação básica\n\nE aqui está o problema: a escola tradicional foi desenhada pra formar gente pro modelo antigo. Ela ensina a esperar instrução, dividir tarefa, ocupar um cargo dentro de uma hierarquia. Ela nunca treinou ninguém pra ser autossuficiente, multidisciplinar e dono do próprio processo desde criança.\n\nÉ a virada do vídeo — conecta o fenômeno adulto a uma falha de formação que começa na infância.\n\n46–54s\nClímax\n\nO HIC não nasceu pronto aos quarenta anos. Ele só teve, em algum momento da vida, a chance de aprender a pensar por conta própria. A pergunta é: sua escola está dando essa chance pro seu filho — ou está formando mais um número numa fila esperando ordem?\n\nÁpice emocional. Tom firme, pausa longa antes da pergunta final.\n\n54–60s\nFOMO\n\nEnquanto você decide se isso é exagero, em algum lugar uma criança de nove anos já está aprendendo a programar, criar e tomar decisão sozinha. Quando ela chegar ao mercado, o HIC não vai ser exceção. Vai ser o mínimo esperado."
+    },
+    {
+      "client": "pallefort",
+      "title": "POV VOCE TA MANDANDO AUDIO",
+      "pillar": "TREND",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DZQfTdrOyZx/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -835,5 +844,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T02:14:09.012Z"
+  "updatedAt": "2026-06-25T03:07:02.143Z"
 };
