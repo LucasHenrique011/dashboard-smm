@@ -1357,6 +1357,17 @@ function seedHistoricalFinance() {
 }
 seedHistoricalFinance();
 
+// Limpa meses futuros e chaves inválidas do financeiro (roda sempre)
+(function cleanFinance() {
+  const allFin = load('finance') || {};
+  const now = new Date().toISOString().slice(0, 7);
+  let changed = false;
+  Object.keys(allFin).forEach(k => {
+    if (!/^\d{4}-\d{2}$/.test(k) || k > now) { delete allFin[k]; changed = true; }
+  });
+  if (changed) save('finance', allFin);
+})();
+
 function getFinanceForMonth() {
   const allFin = load('finance') || {};
   if (!allFin[currentMonth]) {
