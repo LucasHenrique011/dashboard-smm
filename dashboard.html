@@ -1302,9 +1302,9 @@ function getDefaultFinance() {
 
 function seedHistoricalFinance() {
   const allFin = load('finance') || {};
-  if (localStorage.getItem('smm_fin_fixed_v4')) return;
-  localStorage.setItem('smm_fin_fixed_v4', '1');
-  delete allFin['_fixed_v2'];
+  // Limpa chaves inválidas e meses futuros
+  const now = new Date().toISOString().slice(0, 7);
+  Object.keys(allFin).forEach(k => { if (!/^\d{4}-\d{2}$/.test(k) || k > now) delete allFin[k]; });
   const custosAntigos = [
     { name: 'Transporte', value: 700 },
     { name: 'Claude AI', value: 109 },
@@ -1313,7 +1313,7 @@ function seedHistoricalFinance() {
     { name: 'Corte de cabelo', value: 90 },
     { name: 'Internet', value: 20 },
   ];
-  allFin['2026-04'] = {
+  if (!allFin['2026-04']) allFin['2026-04'] = {
     receitas: [
       { name: 'Cube Educacional', value: 950 },
       { name: 'Cube — VT', value: 220 },
@@ -1321,7 +1321,7 @@ function seedHistoricalFinance() {
     ],
     custos: JSON.parse(JSON.stringify(custosAntigos))
   };
-  allFin['2026-05'] = {
+  if (!allFin['2026-05']) allFin['2026-05'] = {
     receitas: [
       { name: 'Cube Educacional', value: 950 },
       { name: 'Cube — VT', value: 220 },
@@ -1331,7 +1331,7 @@ function seedHistoricalFinance() {
     ],
     custos: JSON.parse(JSON.stringify(custosAntigos))
   };
-  allFin['2026-06'] = {
+  if (!allFin['2026-06']) allFin['2026-06'] = {
     receitas: [
       { name: 'Cube Educacional', value: 1250 },
       { name: 'Cube — VT', value: 150 },
@@ -1350,23 +1350,9 @@ function seedHistoricalFinance() {
       { name: 'Internet', value: 20 },
     ]
   };
-  // Remove meses futuros criados por engano
-  const now = new Date().toISOString().slice(0, 7);
-  Object.keys(allFin).forEach(k => { if (!/^\d{4}-\d{2}$/.test(k) || k > now) delete allFin[k]; });
   save('finance', allFin);
 }
 seedHistoricalFinance();
-
-// Limpa meses futuros e chaves inválidas do financeiro (roda sempre)
-(function cleanFinance() {
-  const allFin = load('finance') || {};
-  const now = new Date().toISOString().slice(0, 7);
-  let changed = false;
-  Object.keys(allFin).forEach(k => {
-    if (!/^\d{4}-\d{2}$/.test(k) || k > now) { delete allFin[k]; changed = true; }
-  });
-  if (changed) save('finance', allFin);
-})();
 
 function getFinanceForMonth() {
   const allFin = load('finance') || {};
@@ -2222,18 +2208,16 @@ function loadAllMetricas() { return JSON.parse(localStorage.getItem('smm_metrica
 
 function seedMetricas() {
   const all = loadAllMetricas();
-  if (all['_seeded_v4']) return;
-  if (!all['mania']) all['mania'] = {};
-  // PALLEFORT
-  if (!all['pallefort']) all['pallefort'] = {};
-  all['pallefort']['2026-04'] = { seguidores:125, alcance:0, views:0, interacoes:0, engajados:0, visitas:0, linkbio:12, engajamento:0, novos:41, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:102, melhor:'Paleteira passando pela oficina — 28 curtidas.', obs:'Primeiro mês (3 semanas). 84→125 seg (+49%). De 2 pra 10 posts. Curtidas: 4-5 → média 12/post. Métricas de alcance/views não disponíveis neste período.' };
-  all['pallefort']['2026-05'] = { seguidores:168, alcance:3504, views:11114, interacoes:503, engajados:193, visitas:386, linkbio:9, engajamento:14.4, novos:43, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'Aquecimento pra bater a meta — 2.170 views, 106 interações, 1.330 contas alcançadas. Humor + contexto do vendedor.', obs:'55,9% das views de não seguidores. Reels = 89,9% das views. 27 publicações ativas. Top 3 vídeos concentraram 45% das views.' };
-
-  // MANIA
-  all['mania']['2026-05'] = { seguidores:561, alcance:1491, views:2480, interacoes:103, engajados:50, visitas:42, linkbio:5, engajamento:6.9, novos:14, perdidos:32, compartilhamentos:14, salvamentos:0, curtidas:0, melhor:'Dailus "Última Chamada" — 1.000+ views, 47 interações, 14 compartilhamentos. Lançamento de produto com visual forte.', obs:'Primeiro mês completo. 72% views de não seguidores. Reels = 90% das views. +14 novos seguidores, -32 deixaram (limpeza de base). Últimos 60 dias.' };
-  all['mania']['2026-06'] = { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' };
-  all['_seeded_v4'] = true;
-  localStorage.setItem('smm_metricas', JSON.stringify(all));
+  let changed = false;
+  function seedMet(client, month, data) {
+    if (!all[client]) all[client] = {};
+    if (!all[client][month]) { all[client][month] = data; changed = true; }
+  }
+  seedMet('pallefort', '2026-04', { seguidores:125, alcance:0, views:0, interacoes:0, engajados:0, visitas:0, linkbio:12, engajamento:0, novos:41, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:102, melhor:'Paleteira passando pela oficina — 28 curtidas.', obs:'Primeiro mês (3 semanas). 84→125 seg (+49%). Métricas de alcance/views não disponíveis.' });
+  seedMet('pallefort', '2026-05', { seguidores:168, alcance:3504, views:11114, interacoes:503, engajados:193, visitas:386, linkbio:9, engajamento:14.4, novos:43, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'Aquecimento pra bater a meta — 2.170 views, 106 interações.', obs:'55,9% views de não seguidores. Reels = 89,9%. Top 3 = 45% views.' });
+  seedMet('mania', '2026-05', { seguidores:561, alcance:1491, views:2480, interacoes:103, engajados:50, visitas:42, linkbio:5, engajamento:6.9, novos:14, perdidos:32, compartilhamentos:14, salvamentos:0, curtidas:0, melhor:'Dailus "Última Chamada" — 1.000+ views, 47 interações, 14 compartilhamentos.', obs:'Primeiro mês completo. 72% views de não seguidores. +14 novos, -32 saíram.' });
+  seedMet('mania', '2026-06', { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' });
+  if (changed) localStorage.setItem('smm_metricas', JSON.stringify(all));
 }
 seedMetricas();
 
