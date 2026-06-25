@@ -73,7 +73,7 @@ const PORTAL_DATA = {
       "client": "mania",
       "title": "GERENTE NAO ACREDITA NAS PROMOCOES",
       "pillar": "ATENÇÃO",
-      "date": "2026-06-22",
+      "date": "2026-06-25",
       "status": "editado",
       "ref": "",
       "roteiro": ""
@@ -739,7 +739,7 @@ const PORTAL_DATA = {
       "client": "mania",
       "title": "MARMITEX",
       "pillar": "ATENÇÃO",
-      "date": "2026-06-25",
+      "date": "2026-06-26",
       "status": "editado",
       "ref": "",
       "roteiro": ""
@@ -844,5 +844,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T03:26:35.292Z"
+  "updatedAt": "2026-06-25T03:26:59.873Z"
 };
