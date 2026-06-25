@@ -6,23 +6,23 @@ const PORTAL_DATA = {
       "pillars": [
         "PROJETO",
         "LIDERANÇA",
-        "DAILY"
+        "TREND"
       ],
       "cadencia": "3 reels por semana",
       "objetivo": "Fortalecer marca e atrair novos alunos com conteúdo que mistura educação e entretenimento.",
-      "icp": "Pais e mães de classe média-alta em São Paulo, com filhos entre 2 e 14 anos. Renda familiar a partir de R$15k/mês. Valorizam educação bilíngue, tecnologia na sala de aula, formação socioemocional e metodologias ativas. Buscam escola particular completa que prepare o filho pro futuro — não só vestibular. Pesquisam no Instagram antes de visitar."
+      "icp": "Pais com condições de pagar R$1.500/mês de mensalidade, que buscam escola completa (tecnologia, lifelong learning, inglês, sistema de avaliação diferenciado). Querem o melhor pro filho e valorizam inovação educacional."
     },
     "pallefort": {
       "name": "Pallefort",
       "valor": "R$ 700",
       "pillars": [
-        "TREND/MEME",
+        "TREND",
         "ANÁLISE",
         "AUTORIDADE"
       ],
       "cadencia": "3 reels por semana",
       "objetivo": "Posicionar Pallefort como referência no setor de empilhadeiras e movimentação de cargas. Reconhecimento de marca no B2B industrial.",
-      "icp": "Gestores de logística, operação e manutenção de empresas que usam empilhadeiras, paleteiras e transpaletes. Indústrias, centros de distribuição e atacadistas em SP e Grande SP. Tomador de decisão técnico — compra por confiança, prazo e qualidade da manutenção. Dor principal: equipamento parado = prejuízo. Buscam fornecedor confiável com atendimento rápido."
+      "icp": "Gestores de operação e donos de empresas que usam empilhadeiras e equipamentos de movimentação de carga. B2B industrial — decisão de compra baseada em confiança técnica."
     },
     "mania": {
       "name": "Mania da Web",
@@ -34,7 +34,7 @@ const PORTAL_DATA = {
       ],
       "cadencia": "3 reels por semana",
       "objetivo": "Gerar vendas via conteúdo orgânico e aumentar visibilidade nas plataformas (Instagram, TikTok, TikTok Shop, Shopee).",
-      "icp": "Mulheres de 20 a 50 anos, classes C e D, consumidora final em todo o Brasil. E-commerce especializado em cosméticos e maquiagem — batons, bases, paletas, cílios, esmaltes, skincare. Compram online por conveniência e preço acessível. Motivação: autoestima, praticidade e custo-benefício. Descobrem produtos pelo TikTok e Instagram — compra por impulso e indicação."
+      "icp": "Mulheres 25-50 anos, classes C/D, consumidora final. E-commerce — entrega pra todo o Brasil. Cosméticos, eletrodomésticos, brinquedos, ring lights. Compra por preço bom e praticidade."
     },
     "lucas": {
       "name": "Lucas SM (pessoal)",
@@ -53,28 +53,64 @@ const PORTAL_DATA = {
   "videos": [
     {
       "client": "cube",
-      "title": "cubelab",
+      "title": "CUBELAB",
       "pillar": "PROJETO",
-      "date": "2026-06-22",
+      "date": "2026-06-24",
       "status": "pendente",
       "ref": "",
-      "roteiro": ""
+      "roteiro": "## CENA 1 — ABERTURA (0s → 8s)\n\n**Gravar:** Guilherme deitado/recostado, ambiente escuro. Única fonte de luz é o celular no rosto. Scroll lento, expressão focada. Sem falar nada. Não olha pra câmera.\n\n**Edição — cards 3D saindo do celular com vozes em off:**\n\n- *\"Sistema de notas gera ansiedade crônica em estudantes\"*\n- *\"Nota numérica não mede aprendizado real\"*\n- *\"70% dos alunos associam avaliação ao medo de errar\"*\n\n**Estilo:** Barras pretas de letterbox · grain de filme · grid roxo no fundo\n\n**Texto na tela:**\n\n- Canto direito (fade in após 2s): *\"Guilherme Garcia\"* — itálico\n- Abaixo: `// Fundador · Cube Educacional` — pequeno, roxo claro\n\n---\n\n## ⚡ CENA 2 — VIRADA (8s → 12s)\n\n**Gravar:** Na mesma posição, ele para o scroll. Levanta o olhar do celular. Olha direto pra câmera.\n\n**Fala:**\n\n> *\"E se desse pra mudar isso?\"*\n> \n\n**Edição:** Tela preta. 1 segundo de silêncio. Corte seco.\n\n**Som:** bass hit no corte\n\n---\n\n## 💻 CENA 3 — CRIAÇÃO (12s → 22s)\n\n**Gravar:** B-roll de Guilherme no MacBook, mexendo em código. Ambiente diferente — mesa, luz de escritório. Ele não fala pra câmera, só trabalha.\n\n**Voz em off:**\n\n> *\"Fui pesquisar, estudar, entender onde o sistema quebrava. A questão não era a nota em si — era que ela não dizia nada. Não pra quem aprende, não pra quem ensina, não pra quem ama o aluno. Por isso eu desenvolvi o Cube Lab.\"*\n> \n\n---\n\n## 📱 CENA 4 — APRESENTAÇÃO DO APP (22s → 44s)\n\n**Gravar:** B-roll da tela do CubeLab — estilo tutorial, mostrando como funciona. Tela gravada limpa, sem mão na frente.\n\n**Sugestão de b-roll da tela:**\n\n- Tela inicial do app\n- Perfil de um aluno com registros\n- Um vídeo/foto sendo enviado como evidência\n- Painel do professor/pai mostrando o progresso\n\n**Voz em off:**\n\n> *\"O Cube Lab avalia por evidência — vídeo, foto, áudio. O aluno registra o que aprendeu de verdade. O professor acompanha com dados concretos. E o pai vê tudo em tempo real, sem esperar boletim, sem nota solta.\"*\n> \n\n---\n\n## 🎯 CENA 5 — CTA (44s → 55s)\n\n**Gravar:** Guilherme de frente pra câmera, bem iluminado. Tom direto, íntimo.\n\n**Fala:**\n\n> *\"Porque aprendizagem não cabe em número. Cabe em prova.*\n> \n\n> *Segue aqui pra acompanhar.\"* 💜\n> \n\n**Texto na tela:** `CubeLab — avaliação por evidência`\n\n---\n\n## 📋 O que gravar\n\n| Cena | O que gravar | Ambiente |\n| --- | --- | --- |\n| 1 | Guilherme no celular, olhar focado | Escuro, luz do celular |\n| 2 | Para, olha pra câmera, faz a pergunta | Mesmo plano da cena 1 |\n| 3 | B-roll no MacBook mexendo em código | Mesa, luz de escritório |\n| 4 | Gravação da tela do CubeLab estilo tutorial | Tela limpa |\n| 5 | Frontal iluminado, CTA | Bem iluminado |\n\nA voz em off das cenas 3 e 4 grava separado, em ambiente silencioso, e coloca por cima na edição.\n\n---\n\n## 📌 DADOS REAIS VERIFICADOS — CARDS DA CENA 1\n\n**CARD 1**\n\n`// Chamberlin, Yasué & Chiang · Sage Journals · 2023`\n\n**Notas não aumentam a motivação — aumentam a ansiedade**\n\nEstudo comparou alunos com notas numéricas vs. avaliação narrativa. Resultado: notas promoveram ansiedade, sensação de impotência e medo de falhar.\n\n**CARD 2**\n\n`// University of San Diego · LDC Scholarship · 2021`\n\n**Notas tradicionais levam alunos a evitar desafios**\n\nAlunos evitam disciplinas difíceis por medo de baixar a média. Sistemas com avaliação narrativa produziram maior motivação intrínseca.\n\n**CARD 3**\n\n`// Ryan & Deci · American Psychologist · 2000`\n\n**Nota é controle — e controle destrói aprendizado real**\n\nA Teoria da Autodeterminação demonstrou que atribuir nota a uma tarefa reduz a motivação intrínseca e o aprendizado conceitual.\n\n**CARD 4**\n\n`// Revista Educação em Questão · UFRN · 2021`\n\n**No Brasil: 80,2% dos alunos com ansiedade escolar**\n\n80,2% ansiedade leve · 11,2% moderada · 8,7% severa. A pressão de notas foi fator central em todos os casos.\n\n**CARD 5**\n\n`// Frontiers in Education · 2026`\n\n**Alunos percebem notas como punição — não como crescimento**\n\nAlunos percebem o sistema de notas como ameaça de punição, não como feedback de aprendizado.\n\n**CARD 6**\n\n`// Alfie Kohn · Punished by Rewards · 1993`\n\n**O sistema de notas foi criado para fábricas — não para mentes**\n\nO modelo de avaliação numérica surgiu no século XIX para classificar trabalhadores industriais.\n\n---\n\n## 🎵 TRILHA / ÁUDIO\n\n- **Estilo:** Ambient cinematográfico · dark piano + strings · crescente\n- **Cenas 1–2:** Volume baixo (~60%), construção lenta\n- **Cena 2 → 3:** Bass hit no corte + tela preta\n- **Cena 5:** Resolve suave, fade out nos últimos 3s\n\n---\n\n## ⚙️ SPECS TÉCNICOS (CapCut)\n\n| Configuração | Valor |\n| --- | --- |\n| Resolução | 1080 × 1920px (9:16) |\n| FPS | 30fps |\n| Filtro | Cinematic Dark |\n| Contraste | +15 |\n| Saturação | -10 |\n| Export | H.264 · Qualidade máxima · sem logo CapCut |\n\n---\n\n## 🎨 Cores\n\n| Nome | HEX |\n| --- | --- |\n| Fundo | #050508 |\n| Roxo principal | #5b1e8a |\n| Roxo destaque | #a855f7 |\n| Amarelo | #f39c12 |\n\n---\n\n*Roteiro com dados científicos verificados · Cube Educacional · 2025*"
     },
     {
       "client": "cube",
-      "title": "casio",
-      "pillar": "PROJETO",
-      "date": "2026-06-23",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
-      "client": "cube",
-      "title": "festa junina",
+      "title": "FESTA JUNINA",
       "pillar": "PROJETO",
       "date": "2026-06-27",
       "status": "pendente",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "GERENTE NAO ACREDITA NAS PROMOCOES",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-25",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "COM 18 ANOS SOU OPERADOR",
+      "pillar": "TREND/MEME (70%)",
+      "date": "2026-06-22",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "POV: VOCE ACEITOU GRAVAR MINHAS IDEIAS",
+      "pillar": "CONEXÃO",
+      "date": "2026-06-23",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "POV: voce me contratou para cuidar das suas redes sociais",
+      "pillar": "AUTORIDADE",
+      "date": "2026-06-24",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "CLAREOU",
+      "pillar": "EVOLUÇÃO",
+      "date": "2026-06-22",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -162,7 +198,7 @@ const PORTAL_DATA = {
     {
       "client": "cube",
       "title": "POV: Um dia com a Diretora",
-      "pillar": "LIDERANÇA",
+      "pillar": "TREND",
       "date": "2026-05-05",
       "status": "postado",
       "ref": "",
@@ -495,7 +531,7 @@ const PORTAL_DATA = {
     {
       "client": "cube",
       "title": "Acampadentro Cube 2026",
-      "pillar": "Daily",
+      "pillar": "PROJETO",
       "date": "2026-06-15",
       "status": "postado",
       "ref": "",
@@ -531,7 +567,7 @@ const PORTAL_DATA = {
     {
       "client": "pallefort",
       "title": "POV: o time de logística se preparando pra começar o dia",
-      "pillar": "AUTORIDADE",
+      "pillar": "TREND",
       "date": "2026-06-12",
       "status": "postado",
       "ref": "",
@@ -540,7 +576,7 @@ const PORTAL_DATA = {
     {
       "client": "pallefort",
       "title": "Quando recebo elogio do cliente",
-      "pillar": "AUTORIDADE",
+      "pillar": "TREND",
       "date": "2026-06-18",
       "status": "postado",
       "ref": "",
@@ -565,10 +601,19 @@ const PORTAL_DATA = {
       "roteiro": ""
     },
     {
+      "client": "cube",
+      "title": "um dia com aux de coordenação",
+      "pillar": "PROJETO",
+      "date": "2026-05-20",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
       "client": "pallefort",
       "title": "Sua paleteira não desce? Testa isso antes de chamar manutenção",
       "pillar": "ANÁLISE",
-      "date": "2026-06-24",
+      "date": "2026-06-30",
       "status": "pendente",
       "ref": "",
       "roteiro": "[0:00-0:03] HOOK — câmera no pistão travado\nFala: Sua paleteira não está descendo? Antes de ligar pra manutenção, faz esse teste aqui.\nVisual: Câmera próxima do pistão/êmbolo, garfos travados\n\n[0:03-0:15] PROBLEMA\nFala: O problema mais comum é esse: o pistão hidráulico fica travado porque o óleo está sujo ou com nível baixo.\nVisual: Mostrar reservatório de óleo, abrir tampa\nLegenda: Óleo baixo ou sujo = pistão travado\n\n[0:15-0:35] DIAGNÓSTICO\nFala: Primeira coisa: abre o reservatório e olha o nível. Se estiver abaixo da marca, esse é o seu problema. Segunda: olha a cor — se estiver escuro ou com espuma, tá contaminado.\nVisual: Mão apontando para marca de nível → close no óleo escuro → comparação com óleo limpo\nLegenda: 1. Nível baixo → completa / 2. Óleo escuro → troca\n\n[0:35-0:48] SOLUÇÃO\nFala: Se for nível baixo: completa com óleo hidráulico ISO 46. Se for contaminado: drena tudo e troca. Na maioria dos casos, volta a funcionar na hora.\nVisual: Mão colocando óleo novo → fechar tampa → acionar alavanca → garfos descendo\nLegenda: Óleo ISO 46 — resolve em 15 minutos\n\n[0:48-0:55] CTA\nFala: Testou e não resolveu? Aí é hora de chamar a Pallefort. Link na bio.\nVisual: Logo Pallefort + contato"
@@ -577,7 +622,7 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "Recebemos assim. Entregamos assim.",
       "pillar": "AUTORIDADE",
-      "date": "2026-06-25",
+      "date": "2026-06-30",
       "status": "pendente",
       "ref": "",
       "roteiro": "[0:00-0:03] HOOK — câmera na paleteira destruída (corte direto, sem intro)\nVisual: Paleteira enferrujada, garfos tortos, pistão vazando\nLegenda: Recebemos assim\n\n[0:03-0:12] PROCESSO — cortes rápidos (sem narração, só música)\nVisual: Desmontando pistão → peças enferrujadas → limpeza → peças novas → soldagem\nLegenda: Durante...\n\n[0:12-0:22] REVEAL — paleteira restaurada\nVisual: Câmera revela paleteira pintada, limpa, funcionando\nLegenda: Entregamos assim\n\n[0:22-0:28] CTA\nFala: Seu equipamento parado custa caro. A Pallefort resolve.\nLegenda: Orçamento → link na bio"
@@ -586,10 +631,118 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "Cada quantos meses trocar o óleo da paleteira? A maioria erra.",
       "pillar": "AUTORIDADE",
-      "date": "2026-06-26",
+      "date": "2026-06-30",
       "status": "pendente",
       "ref": "",
       "roteiro": "[0:00-0:03] HOOK\nFala: Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?\nVisual: Câmera no reservatório de óleo\nLegenda: Você sabe a resposta?\n\n[0:03-0:10] ERRO COMUM\nFala: A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais.\nVisual: Close no óleo escuro e com espuma\nLegenda: Nunca trocar = pistão travado + vedações destruídas\n\n[0:10-0:30] RESPOSTA\nFala: A frequência correta depende do uso:\n• Uso leve/moderado — troca a cada 12 meses\n• Uso intenso, turno duplo — a cada 6 meses\n• Óleo escuro ou com espuma — troca imediata\nVisual: Tabela escrita à mão ou impressa\n\n[0:30-0:38] DICA BÔNUS\nFala: Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações.\nVisual: Close na embalagem ISO 46\n\n[0:38-0:44] CTA\nFala: Salva esse vídeo pra mandar pro responsável pela manutenção.\nVisual: Ícone de salvar + logo Pallefort"
+    },
+    {
+      "client": "mania",
+      "title": "COMO ME SEQUESTRAR",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DTdvlz-ke5v/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "ARRUMANDO ESTOQUE COM SACO",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DYnRm7_Ml8A/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "DUBLAGEM MINHA MAE É UM PEÇA",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DVt-rn_ACoJ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "PRODUTOS QUE NAO INDICO A NINGUEM",
+      "pillar": "CONVERSÃO",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DZvsmn_BIz8/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "DICAS DE PRODUTOS",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DOuORHFj8B3/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "VENDEDOR INSISTENTE",
+      "pillar": "TREND",
+      "date": "2026-06-23",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "COMO CLIENTE ME VE",
+      "pillar": "TREND",
+      "date": "2026-06-23",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "MUITOS QUEREM CUIDAR DA SUA VIDA",
+      "pillar": "TREND",
+      "date": "2026-06-25",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DVOEyQtjbDE/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "VENDEDOR MODELO",
+      "pillar": "TREND",
+      "date": "2026-06-25",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DZqSF9oB0ST/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "EDUCAÇAO EM 60s",
+      "pillar": "LIDERANÇA",
+      "date": "2026-06-24",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "Intro\n\nTem uma categoria de profissional surgindo nos Estados Unidos que as empresas ainda não sabem nem quanto pagar. Chamam de HIC — High Individual Contributor. São executivos seniores que abriram mão deliberadamente de ter equipe.\n\nTendência reportada em 2026 — mercado tech americano\nTom: revelação, quase confidencial. Pausa antes de \"as empresas ainda não sabem quanto pagar.\"\n\n15–32s\nO conceito\n\nEles dominam IA a um nível em que entregam, sozinhos, o que antes exigia um time inteiro. E aí a lógica vira matemática pura: a empresa economiza em pessoas, estrutura, gestão — e parte dessa economia vira salário pra esse profissional. Um HIC pode ganhar mais que um diretor com vinte pessoas embaixo dele.\n\nEconomia de equipe → vira remuneração individual\nRitmo direto, quase didático. \"Matemática pura\" deve ser dito com leveza — não é hipérbole, é literal.\n\n32–46s\nFio condutor — educação básica\n\nE aqui está o problema: a escola tradicional foi desenhada pra formar gente pro modelo antigo. Ela ensina a esperar instrução, dividir tarefa, ocupar um cargo dentro de uma hierarquia. Ela nunca treinou ninguém pra ser autossuficiente, multidisciplinar e dono do próprio processo desde criança.\n\nÉ a virada do vídeo — conecta o fenômeno adulto a uma falha de formação que começa na infância.\n\n46–54s\nClímax\n\nO HIC não nasceu pronto aos quarenta anos. Ele só teve, em algum momento da vida, a chance de aprender a pensar por conta própria. A pergunta é: sua escola está dando essa chance pro seu filho — ou está formando mais um número numa fila esperando ordem?\n\nÁpice emocional. Tom firme, pausa longa antes da pergunta final.\n\n54–60s\nFOMO\n\nEnquanto você decide se isso é exagero, em algum lugar uma criança de nove anos já está aprendendo a programar, criar e tomar decisão sozinha. Quando ela chegar ao mercado, o HIC não vai ser exceção. Vai ser o mínimo esperado."
+    },
+    {
+      "client": "pallefort",
+      "title": "POV VOCE TA MANDANDO AUDIO",
+      "pillar": "TREND",
+      "date": "2026-06-30",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DZQfTdrOyZx/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "MARMITEX",
+      "pillar": "ATENÇÃO",
+      "date": "2026-06-26",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -662,8 +815,8 @@ const PORTAL_DATA = {
         "compartilhamentos": 0,
         "salvamentos": 0,
         "curtidas": 102,
-        "melhor": "Paleteira passando pela oficina — 28 curtidas.",
-        "obs": "Primeiro mês (3 semanas). 84→125 seg (+49%). De 2 pra 10 posts. Curtidas: 4-5 → média 12/post. Métricas de alcance/views não disponíveis neste período."
+        "melhor": "Paleteira passando pela oficina — 28 curtidas. Melhor reel do mês, mostrando o processo completo.",
+        "obs": "Início da gestão. Conta saiu de 84 pra 125 seguidores (+49%) em 3 semanas. De 2 posts pra 10 posts ativos. Curtidas subiram de 4-5 pra média de 12 por post."
       },
       "2026-05": {
         "seguidores": 168,
@@ -691,5 +844,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T03:30:54.875Z"
+  "updatedAt": "2026-06-25T03:31:05.739Z"
 };
