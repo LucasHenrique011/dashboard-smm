@@ -647,12 +647,12 @@ const PORTAL_DATA = {
     },
     {
       "client": "mania",
-      "title": "POV ESTAO TENTANDO ME SEQUESTRAR",
+      "title": "COMO ME SEQUESTRAR",
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
-      "roteiro": "roteiro teste"
+      "ref": "https://www.instagram.com/reel/DTdvlz-ke5v/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     },
     {
       "client": "mania",
@@ -835,5 +835,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T02:13:10.015Z"
+  "updatedAt": "2026-06-25T02:13:53.509Z"
 };
