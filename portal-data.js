@@ -74,7 +74,7 @@ const PORTAL_DATA = {
       "title": "GERENTE NAO ACREDITA NAS PROMOCOES",
       "pillar": "ATENÇÃO",
       "date": "2026-06-22",
-      "status": "postado",
+      "status": "editado",
       "ref": "",
       "roteiro": ""
     },
@@ -835,5 +835,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T03:24:51.156Z"
+  "updatedAt": "2026-06-25T03:25:36.222Z"
 };
