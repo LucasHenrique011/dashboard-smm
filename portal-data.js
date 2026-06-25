@@ -647,12 +647,12 @@ const PORTAL_DATA = {
     },
     {
       "client": "mania",
-      "title": "POV ESTAO TENTANDO ME SEQUESTRAR",
+      "title": "COMO ME SEQUESTRAR",
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
-      "roteiro": "roteiro teste"
+      "ref": "https://www.instagram.com/reel/DTdvlz-ke5v/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     },
     {
       "client": "mania",
@@ -660,7 +660,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
+      "ref": "https://www.instagram.com/reel/DYnRm7_Ml8A/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
     {
@@ -669,7 +669,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
+      "ref": "https://www.instagram.com/reel/DVt-rn_ACoJ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
     {
@@ -687,7 +687,7 @@ const PORTAL_DATA = {
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
       "status": "pendente",
-      "ref": "",
+      "ref": "https://www.instagram.com/reel/DOuORHFj8B3/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
     {
@@ -835,5 +835,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-25T02:08:58.071Z"
+  "updatedAt": "2026-06-25T02:14:09.012Z"
 };
