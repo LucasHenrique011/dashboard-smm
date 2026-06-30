@@ -306,8 +306,8 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   .stage-details { display: none !important; }
   #stage-info-panel { display: none !important; }
   .pipeline-bars { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .kanban { display: flex; flex-direction: column; gap: 12px; overflow-x: visible; }
-  .kanban-col { min-width: 100%; }
+  .kanban { display: flex; flex-direction: row; overflow-x: auto; -webkit-overflow-scrolling: touch; gap: 8px; }
+  .kanban-col { min-width: 200px; flex: 0 0 200px; }
   .kanban-col-body { min-height: 40px; }
 
   /* Filtros */
