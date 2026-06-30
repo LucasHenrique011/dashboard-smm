@@ -74,7 +74,7 @@ const PORTAL_DATA = {
       "title": "GERENTE NAO ACREDITA NAS PROMOCOES",
       "pillar": "ATENÇÃO",
       "date": "2026-06-25",
-      "status": "editado",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -686,7 +686,7 @@ const PORTAL_DATA = {
       "title": "VENDEDOR INSISTENTE",
       "pillar": "TREND",
       "date": "2026-06-23",
-      "status": "editado",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -695,7 +695,7 @@ const PORTAL_DATA = {
       "title": "COMO CLIENTE ME VE",
       "pillar": "TREND",
       "date": "2026-06-23",
-      "status": "editado",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -703,7 +703,7 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "MUITOS QUEREM CUIDAR DA SUA VIDA",
       "pillar": "TREND",
-      "date": "2026-06-25",
+      "date": "2026-06-29",
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DVOEyQtjbDE/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
@@ -712,7 +712,7 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "VENDEDOR MODELO",
       "pillar": "TREND",
-      "date": "2026-06-25",
+      "date": "2026-06-29",
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DZqSF9oB0ST/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
@@ -740,7 +740,7 @@ const PORTAL_DATA = {
       "title": "MARMITEX",
       "pillar": "ATENÇÃO",
       "date": "2026-06-26",
-      "status": "editado",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -853,5 +853,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-06-30T04:44:30.918Z"
+  "updatedAt": "2026-06-30T05:12:14.076Z"
 };
