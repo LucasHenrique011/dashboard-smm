@@ -703,8 +703,8 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "MUITOS QUEREM CUIDAR DA SUA VIDA",
       "pillar": "TREND",
-      "date": "2026-06-29",
-      "status": "pendente",
+      "date": "2026-06-30",
+      "status": "gravado",
       "ref": "https://www.instagram.com/reel/DVOEyQtjbDE/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -942,5 +942,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:50:49.693Z"
+  "updatedAt": "2026-07-02T10:51:05.891Z"
 };
