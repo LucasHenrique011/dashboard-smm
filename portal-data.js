@@ -640,7 +640,7 @@ const PORTAL_DATA = {
       "client": "mania",
       "title": "COMO ME SEQUESTRAR",
       "pillar": "ATENÇÃO",
-      "date": "2026-06-30",
+      "date": "2026-07-07",
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DTdvlz-ke5v/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
@@ -942,5 +942,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:46:43.313Z"
+  "updatedAt": "2026-07-02T10:47:07.560Z"
 };
