@@ -812,7 +812,7 @@ const PORTAL_DATA = {
       "title": "Talvez voce precise de mim",
       "pillar": "ATRAÇÃO",
       "date": "2026-07-02",
-      "status": "pendente",
+      "status": "editado",
       "ref": "https://www.instagram.com/reel/DZ5OOz-Ojnn/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -943,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T13:20:47.213Z"
+  "updatedAt": "2026-07-02T13:34:01.143Z"
 };
