@@ -788,6 +788,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "Sou empresario e hoje vou pra balada",
+      "pillar": "ATRAÇÃO",
+      "date": "2026-07-02",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -888,5 +897,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T09:34:33.290Z"
+  "updatedAt": "2026-07-02T09:42:29.763Z"
 };
