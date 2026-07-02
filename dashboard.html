@@ -2162,6 +2162,13 @@ function publicarPortal() {
   });
 }
 
+function strToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let bin = '';
+  bytes.forEach(b => bin += String.fromCharCode(b));
+  return btoa(bin);
+}
+
 async function pushFileToGithub(filename, content) {
   const ghToken = getGithubToken();
   if (!ghToken) return false;
@@ -2171,15 +2178,16 @@ async function pushFileToGithub(filename, content) {
     });
     let sha = '';
     if (getRes.ok) { sha = (await getRes.json()).sha; }
-    const body = { message: 'Atualiza ' + filename, content: btoa(unescape(encodeURIComponent(content))) };
+    const body = { message: 'Atualiza ' + filename, content: strToBase64(content) };
     if (sha) body.sha = sha;
     const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
       method: 'PUT',
       headers: { 'Authorization': 'token ' + ghToken, 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+    if (!putRes.ok) { const err = await putRes.json(); console.error(filename, err); }
     return putRes.ok;
-  } catch { return false; }
+  } catch(e) { console.error(filename, e); return false; }
 }
 
 async function publicarTudo() {
@@ -2198,18 +2206,16 @@ async function publicarTudo() {
       fetch('cliente.html?t=' + Date.now()).then(r => r.text())
     ]);
     const portalContent = buildPortalData();
-    const [ok1, ok2, ok3] = await Promise.all([
-      pushFileToGithub('dashboard.html', dashHtml),
-      pushFileToGithub('cliente.html', clienteHtml),
-      pushPortalToGithub(portalContent)
-    ]);
+    const ok1 = await pushFileToGithub('dashboard.html', dashHtml);
+    const ok2 = await pushFileToGithub('cliente.html', clienteHtml);
+    const ok3 = await pushPortalToGithub(portalContent);
     btn.disabled = false;
     if (ok1 && ok2 && ok3) {
       btn.textContent = '✅ Publicado!';
       setTimeout(() => { btn.textContent = '🚀 Publicar tudo'; }, 3000);
     } else {
       btn.textContent = '🚀 Publicar tudo';
-      alert('Erro ao publicar um ou mais arquivos. Verifique o token.');
+      alert(`Erro ao publicar:\ndashboard.html: ${ok1 ? '✅' : '❌'}\ncliente.html: ${ok2 ? '✅' : '❌'}\nportal-data.js: ${ok3 ? '✅' : '❌'}\n\nVerifique o console (F12) pra mais detalhes.`);
     }
   } catch(e) {
     btn.disabled = false;
