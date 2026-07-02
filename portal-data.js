@@ -803,7 +803,7 @@ const PORTAL_DATA = {
       "title": "e se eu errar a fala na hora",
       "pillar": "CONEXÃO",
       "date": "2026-07-02",
-      "status": "editado",
+      "status": "postado",
       "ref": "https://www.instagram.com/reel/DXaMEydCV1S/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -943,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T13:35:12.799Z"
+  "updatedAt": "2026-07-02T20:24:58.102Z"
 };
