@@ -101,7 +101,7 @@ const PORTAL_DATA = {
       "title": "POV: voce me contratou para cuidar das suas redes sociais",
       "pillar": "AUTORIDADE",
       "date": "2026-06-24",
-      "status": "editado",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -943,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T13:34:01.143Z"
+  "updatedAt": "2026-07-02T13:35:12.799Z"
 };
