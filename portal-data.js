@@ -749,7 +749,7 @@ const PORTAL_DATA = {
       "title": "2016 - 2026",
       "pillar": "ATRAÇÃO",
       "date": "2026-07-01",
-      "status": "pendente",
+      "status": "postado",
       "ref": "",
       "roteiro": "vitor roque errando gol - eu trabalhando"
     },
@@ -888,5 +888,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-01T20:10:38.227Z"
+  "updatedAt": "2026-07-02T09:34:33.290Z"
 };
