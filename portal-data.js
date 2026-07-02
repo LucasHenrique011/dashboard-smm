@@ -803,7 +803,7 @@ const PORTAL_DATA = {
       "title": "e se eu errar a fala na hora",
       "pillar": "CONEXÃO",
       "date": "2026-07-02",
-      "status": "pendente",
+      "status": "editado",
       "ref": "https://www.instagram.com/reel/DXaMEydCV1S/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -830,7 +830,7 @@ const PORTAL_DATA = {
       "title": "VOCE TRABALHA EM QUAL NICHO",
       "pillar": "ATRAÇÃO",
       "date": "2026-07-02",
-      "status": "pendente",
+      "status": "editado",
       "ref": "https://www.instagram.com/reel/DYUxCpEOegp/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -943,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T11:27:18.363Z"
+  "updatedAt": "2026-07-02T12:58:21.123Z"
 };
