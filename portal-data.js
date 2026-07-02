@@ -712,7 +712,7 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "VENDEDOR MODELO",
       "pillar": "TREND",
-      "date": "2026-06-29",
+      "date": "2026-06-30",
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DZqSF9oB0ST/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
@@ -942,5 +942,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:51:05.891Z"
+  "updatedAt": "2026-07-02T10:51:20.774Z"
 };
