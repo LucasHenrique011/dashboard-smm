@@ -246,7 +246,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 /* Mobile */
 @media (max-width: 768px) {
   body { overflow-x: hidden; }
-  .module { padding: 12px 8px; max-width: 100%; overflow-x: hidden; }
+  .module { padding: 12px 8px; max-width: 100%; }
   nav button { padding: 10px 4px; font-size: 12px; }
   .cards { grid-template-columns: 1fr; }
   .fin-grid { grid-template-columns: 1fr; }
@@ -331,6 +331,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
   <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
   <button class="btn-sm btn-primary" onclick="publicarPortal()">🔗 Publicar portal</button>
+  <button class="btn-sm btn-primary" onclick="publicarTudo()">🚀 Publicar tudo</button>
   <button class="btn-sm" onclick="publicarPortalLinks()">📋 Links clientes</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
@@ -2161,6 +2162,62 @@ function publicarPortal() {
   });
 }
 
+async function pushFileToGithub(filename, content) {
+  const ghToken = getGithubToken();
+  if (!ghToken) return false;
+  try {
+    const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
+      headers: { 'Authorization': 'token ' + ghToken }
+    });
+    let sha = '';
+    if (getRes.ok) { sha = (await getRes.json()).sha; }
+    const body = { message: 'Atualiza ' + filename, content: btoa(unescape(encodeURIComponent(content))) };
+    if (sha) body.sha = sha;
+    const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + ghToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    return putRes.ok;
+  } catch { return false; }
+}
+
+async function publicarTudo() {
+  const ghToken = getGithubToken();
+  if (!ghToken) {
+    const t = prompt('Cole seu GitHub Token:');
+    if (!t) return;
+    setGithubToken(t.trim());
+  }
+  const btn = document.querySelector('[onclick="publicarTudo()"]');
+  btn.textContent = '⏳ Publicando...';
+  btn.disabled = true;
+  try {
+    const [dashHtml, clienteHtml] = await Promise.all([
+      fetch('dashboard.html?t=' + Date.now()).then(r => r.text()),
+      fetch('cliente.html?t=' + Date.now()).then(r => r.text())
+    ]);
+    const portalContent = buildPortalData();
+    const [ok1, ok2, ok3] = await Promise.all([
+      pushFileToGithub('dashboard.html', dashHtml),
+      pushFileToGithub('cliente.html', clienteHtml),
+      pushPortalToGithub(portalContent)
+    ]);
+    btn.disabled = false;
+    if (ok1 && ok2 && ok3) {
+      btn.textContent = '✅ Publicado!';
+      setTimeout(() => { btn.textContent = '🚀 Publicar tudo'; }, 3000);
+    } else {
+      btn.textContent = '🚀 Publicar tudo';
+      alert('Erro ao publicar um ou mais arquivos. Verifique o token.');
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '🚀 Publicar tudo';
+    alert('Erro: ' + e.message);
+  }
+}
+
 // Auto-publish when data changes (debounced)
 var _autoPublishTimer = null;
 function scheduleAutoPublish() {
@@ -2213,8 +2270,15 @@ function seedMetricas() {
   seedMet('pallefort', '2026-04', { seguidores:125, alcance:0, views:0, interacoes:0, engajados:0, visitas:0, linkbio:12, engajamento:0, novos:41, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:102, melhor:'Paleteira passando pela oficina — 28 curtidas.', obs:'Primeiro mês (3 semanas). 84→125 seg (+49%). Métricas de alcance/views não disponíveis.' });
   seedMet('pallefort', '2026-05', { seguidores:168, alcance:3504, views:11114, interacoes:503, engajados:193, visitas:386, linkbio:9, engajamento:14.4, novos:43, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'Aquecimento pra bater a meta — 2.170 views, 106 interações.', obs:'55,9% views de não seguidores. Reels = 89,9%. Top 3 = 45% views.' });
   seedMet('mania', '2026-05', { seguidores:561, alcance:1491, views:2480, interacoes:103, engajados:50, visitas:42, linkbio:5, engajamento:6.9, novos:14, perdidos:32, compartilhamentos:14, salvamentos:0, curtidas:0, melhor:'Dailus "Última Chamada" — 1.000+ views, 47 interações, 14 compartilhamentos.', obs:'Primeiro mês completo. 72% views de não seguidores. +14 novos, -32 saíram.' });
-  seedMet('mania', '2026-06', { seguidores:561, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:7.0, novos:0, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:0, melhor:'', obs:'' });
+  seedMet('mania', '2026-06', { seguidores:560, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:1.1, novos:0, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:51, melhor:'Esmalte caiu no chão? Assista até o final (16/jun) — 13 curtidas, melhor post do mês. Funcionou porque usou formato problema → solução com CTA de salvamento: o espectador guarda pra usar quando precisar, o que sinaliza utilidade pro algoritmo e gera alcance orgânico.', obs:'8 posts publicados. 87% Reels. Score: Consistência B+ · Engajamento C+ · Qualidade Visual A.\n✅ Frequência mantida, autenticidade do conteúdo.\n🔴 Engajamento 1,1% (meta 3–5%). Sem Stories documentados.\n💡 Julho: incentivar comentários nas legendas, buscar parcerias/collabs com marcas, adicionar CTA de WhatsApp nos vídeos de produto, Stories diários.' });
   if (changed) localStorage.setItem('smm_metricas', JSON.stringify(all));
+  // force-update mania 2026-06 com dados reais de junho
+  (function(){
+    var _m = loadAllMetricas();
+    if (!_m.mania) _m.mania = {};
+    _m.mania['2026-06'] = { seguidores:560, alcance:1612, views:2612, interacoes:113, engajados:36, visitas:61, linkbio:9, engajamento:1.1, novos:0, perdidos:0, compartilhamentos:0, salvamentos:0, curtidas:51, melhor:'Esmalte caiu no chão? Assista até o final (16/jun) — 13 curtidas, melhor post do mês. Funcionou porque usou formato problema → solução com CTA de salvamento: o espectador guarda pra usar quando precisar, o que sinaliza utilidade pro algoritmo e gera alcance orgânico.', obs:'8 posts publicados. 87% Reels. Score: Consistência B+ · Engajamento C+ · Qualidade Visual A.\n✅ Frequência mantida, autenticidade do conteúdo.\n🔴 Engajamento 1,1% (meta 3–5%). Sem Stories documentados.\n💡 Julho: incentivar comentários nas legendas, buscar parcerias/collabs com marcas, adicionar CTA de WhatsApp nos vídeos de produto, Stories diários.' };
+    localStorage.setItem('smm_metricas', JSON.stringify(_m));
+  })();
 }
 seedMetricas();
 
