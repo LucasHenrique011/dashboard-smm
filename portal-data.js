@@ -65,7 +65,7 @@ const PORTAL_DATA = {
       "title": "FESTA JUNINA",
       "pillar": "PROJETO",
       "date": "2026-06-27",
-      "status": "pendente",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -942,5 +942,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:47:07.560Z"
+  "updatedAt": "2026-07-02T10:47:39.522Z"
 };
