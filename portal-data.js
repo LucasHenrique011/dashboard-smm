@@ -794,7 +794,7 @@ const PORTAL_DATA = {
       "title": "Sou empresario e hoje vou pra balada",
       "pillar": "ATRAÇÃO",
       "date": "2026-07-02",
-      "status": "pendente",
+      "status": "editado",
       "ref": "https://www.instagram.com/reel/DaDyzr8RmD0/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -943,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T12:58:21.123Z"
+  "updatedAt": "2026-07-02T13:20:47.213Z"
 };
