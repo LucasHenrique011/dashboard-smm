@@ -806,6 +806,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DXaMEydCV1S/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "Talvez voce precise de mim",
+      "pillar": "ATRAÇÃO",
+      "date": "2026-07-02",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DZ5OOz-Ojnn/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -906,5 +915,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T09:55:57.961Z"
+  "updatedAt": "2026-07-02T09:59:28.286Z"
 };
