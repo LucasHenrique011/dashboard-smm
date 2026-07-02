@@ -847,20 +847,21 @@ const PORTAL_DATA = {
   "metricas": {
     "mania": {
       "2026-06": {
-        "seguidores": 561,
+        "seguidores": 560,
         "alcance": 1612,
         "views": 2612,
         "interacoes": 113,
         "engajados": 36,
         "visitas": 61,
         "linkbio": 9,
-        "engajamento": 7,
+        "engajamento": 1.1,
         "novos": 0,
+        "perdidos": 0,
         "compartilhamentos": 0,
         "salvamentos": 0,
-        "curtidas": 0,
-        "melhor": "",
-        "obs": "O melhor vídeo foi"
+        "curtidas": 51,
+        "melhor": "Esmalte caiu no chão? Assista até o final (16/jun) — 13 curtidas, melhor post do mês. Funcionou porque usou formato problema → solução com CTA de salvamento: o espectador guarda pra usar quando precisar, o que sinaliza utilidade pro algoritmo e gera alcance orgânico.",
+        "obs": "8 posts publicados. 87% Reels. Score: Consistência B+ · Engajamento C+ · Qualidade Visual A.\n✅ Frequência mantida, autenticidade do conteúdo.\n🔴 Engajamento 1,1% (meta 3–5%). Sem Stories documentados.\n💡 Julho: incentivar comentários nas legendas, buscar parcerias/collabs com marcas, adicionar CTA de WhatsApp nos vídeos de produto, Stories diários."
       },
       "2026-04": {
         "seguidores": 520,
@@ -942,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T11:10:53.356Z"
+  "updatedAt": "2026-07-02T11:16:40.283Z"
 };
