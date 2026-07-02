@@ -815,6 +815,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DZ5OOz-Ojnn/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "o melhor investimento de uma empresa",
+      "pillar": "AUTORIDADE",
+      "date": "2026-07-02",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DWFLyhMvZzq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -915,5 +924,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:39:35.746Z"
+  "updatedAt": "2026-07-02T10:43:33.556Z"
 };
