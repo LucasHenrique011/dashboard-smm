@@ -652,9 +652,12 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <div id="stage-info-panel" class="stage-info-panel"></div>
 
   <!-- Kanban -->
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
     <h2 style="margin:0;">Kanban de Prospects</h2>
-    <button class="btn-primary" onclick="openProspectModal()">+ Novo prospect</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input id="pipeline-search" type="text" placeholder="🔍 Buscar prospect..." oninput="renderKanban()" style="padding:6px 10px;border-radius:8px;border:1px solid #333;background:#1a1a24;color:#fff;font-size:13px;width:200px;">
+      <button class="btn-primary" onclick="openProspectModal()">+ Novo prospect</button>
+    </div>
   </div>
   <div class="kanban" id="kanban"></div>
 </div>
@@ -1766,9 +1769,10 @@ function renderPipelineMetrics() {
 
 function renderKanban() {
   const prospects = getProspects();
+  const q = (document.getElementById('pipeline-search')?.value || '').toLowerCase().trim();
   const kanban = document.getElementById('kanban');
   kanban.innerHTML = PIPELINE_STAGES.map(stage => {
-    const cards = prospects.filter(p => p.stage === stage.id);
+    const cards = prospects.filter(p => p.stage === stage.id && (!q || p.name.toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q)));
     return `<div class="kanban-col">
       <div class="kanban-col-header" style="border-top:3px solid ${stage.color};">
         ${stage.name} <span class="count">${cards.length}</span>
