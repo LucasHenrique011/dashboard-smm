@@ -668,7 +668,7 @@ const PORTAL_DATA = {
       "title": "PRODUTOS QUE NAO INDICO A NINGUEM",
       "pillar": "CONVERSÃO",
       "date": "2026-06-30",
-      "status": "editado",
+      "status": "postado",
       "ref": "https://www.instagram.com/reel/DZvsmn_BIz8/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -731,7 +731,7 @@ const PORTAL_DATA = {
       "title": "POV VOCE TA MANDANDO AUDIO",
       "pillar": "TREND",
       "date": "2026-06-30",
-      "status": "editado",
+      "status": "postado",
       "ref": "https://www.instagram.com/reel/DZQfTdrOyZx/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -943,5 +943,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T20:24:58.102Z"
+  "updatedAt": "2026-07-02T20:25:18.495Z"
 };
