@@ -833,6 +833,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DYUxCpEOegp/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "porque investir em marketing",
+      "pillar": "CONEXÃO",
+      "date": "2026-07-02",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DaH_X8EB1pH/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -933,5 +942,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:45:07.417Z"
+  "updatedAt": "2026-07-02T10:46:43.313Z"
 };
