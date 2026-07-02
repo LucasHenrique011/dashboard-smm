@@ -824,6 +824,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DWFLyhMvZzq/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
+    },
+    {
+      "client": "lucas",
+      "title": "VOCE TRABALHA EM QUAL NICHO",
+      "pillar": "ATRAÇÃO",
+      "date": "2026-07-02",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DYUxCpEOegp/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -924,5 +933,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T10:43:33.556Z"
+  "updatedAt": "2026-07-02T10:45:07.417Z"
 };
