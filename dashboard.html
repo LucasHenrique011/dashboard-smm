@@ -1781,13 +1781,15 @@ function renderKanban() {
         ondragover="event.preventDefault(); this.classList.add('drag-over')"
         ondragleave="this.classList.remove('drag-over')"
         ondrop="dropProspect(event, '${stage.id}')">
-        ${cards.map(c => {
+        ${cards.map((c, idx) => {
           const lastLog = (c.notes || '').split('\n').filter(Boolean).pop();
           const daysSince = c.lastContact ? Math.floor((Date.now() - new Date(c.lastContact).getTime()) / 86400000) : null;
           const alertFollow = daysSince !== null && daysSince > 2 && ['diagnostico','proposta','fechamento'].includes(stage.id);
           const reactivateAlert = c.reactivate && new Date(c.reactivate) <= new Date() && stage.id === 'perdido';
           return `
-          <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}">
+          <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}" style="display:flex;gap:8px;align-items:flex-start;">
+            <div style="min-width:18px;font-size:10px;color:#555;font-weight:700;padding-top:2px;">${idx+1}</div>
+            <div style="flex:1;min-width:0;">
             <div class="kc-name">${c.name}</div>
             ${c.segment ? `<div class="kc-info">${c.segment}</div>` : ''}
             ${c.value ? `<div class="kc-value">R$ ${parseFloat(c.value).toLocaleString('pt-BR')}/mês</div>` : ''}
@@ -1802,6 +1804,7 @@ function renderKanban() {
               <button class="btn-sm" onclick="toggleMsgProspect('${c.id}')" title="Marcar mensagem enviada" style="${c.msgEnviada ? 'color:#4f9;border-color:#4f9;' : ''}">✉</button>
               <button class="btn-sm" onclick="editProspect('${c.id}')">✎</button>
               <button class="btn-sm btn-danger" onclick="deleteProspect('${c.id}')">✕</button>
+            </div>
             </div>
           </div>`;
         }).join('')}
