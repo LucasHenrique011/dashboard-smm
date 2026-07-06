@@ -842,6 +842,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.instagram.com/reel/DaH_X8EB1pH/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "TRANSIÇOES DE PRODUTOS",
+      "pillar": "DESEJO",
+      "date": "2026-07-14",
+      "status": "pendente",
+      "ref": "https://www.tiktok.com/@hellobossfilms/video/7431929201692806433?is_from_webapp=1&sender_device=pc",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -943,5 +952,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-02T23:45:18.433Z"
+  "updatedAt": "2026-07-06T17:39:53.614Z"
 };
