@@ -851,6 +851,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.tiktok.com/@hellobossfilms/video/7431929201692806433?is_from_webapp=1&sender_device=pc",
       "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "FOLGAR OU GRAVAR COMO O MARKETING",
+      "pillar": "ATENÇÃO",
+      "date": "2026-07-14",
+      "status": "pendente",
+      "ref": "https://www.tiktok.com/@nacionalgas22/video/7466448654082051334?is_from_webapp=1&sender_device=pc",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -952,5 +961,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-06T17:39:53.614Z"
+  "updatedAt": "2026-07-06T17:40:38.616Z"
 };
