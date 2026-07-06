@@ -650,7 +650,7 @@ const PORTAL_DATA = {
       "title": "ARRUMANDO ESTOQUE COM SACO",
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
-      "status": "editado",
+      "status": "postado",
       "ref": "https://www.instagram.com/reel/DYnRm7_Ml8A/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -979,5 +979,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-06T17:42:08.011Z"
+  "updatedAt": "2026-07-06T17:42:40.150Z"
 };
