@@ -860,6 +860,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "https://www.tiktok.com/@nacionalgas22/video/7466448654082051334?is_from_webapp=1&sender_device=pc",
       "roteiro": ""
+    },
+    {
+      "client": "mania",
+      "title": "BARULHO ESTRANHO",
+      "pillar": "ATENÇÃO",
+      "date": "2026-07-14",
+      "status": "pendente",
+      "ref": "https://www.instagram.com/reel/DYXJzh_ulgc/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -961,5 +970,5 @@ const PORTAL_DATA = {
     "mania": "mania2026ls",
     "lucas": "lucas2026ls"
   },
-  "updatedAt": "2026-07-06T17:40:38.616Z"
+  "updatedAt": "2026-07-06T17:41:10.610Z"
 };
