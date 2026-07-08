@@ -2558,9 +2558,21 @@ document.addEventListener('keydown', function(e) {
 const DEFAULT_PROCESSOS = [
   { id: 'onboarding', titulo: '🤝 Onboarding de Cliente Novo', conteudo: `1. Reunião inicial — entender o negócio, público e objetivo\n2. Pedir acesso ao Instagram/TikTok\n3. Definir pilares de conteúdo (3 pilares)\n4. Definir cadência (3 reels/semana)\n5. Criar pasta do cliente no Notion\n6. Primeiro lote de conteúdo (3-5 ideias)\n7. Aprovar com o cliente\n8. Começar produção` },
   { id: 'producao', titulo: '🎬 Produção Semanal', conteudo: `SEGUNDA\n• Revisar ideias aprovadas da semana\n• Preparar roteiros\n\nTERÇA-QUARTA\n• Gravar conteúdos\n• Editar vídeos\n\nQUINTA\n• Revisar edições\n• Enviar pra aprovação do cliente\n\nSEXTA\n• Postar conteúdos aprovados\n• Planejar próxima semana` },
-  { id: 'entrega', titulo: '📦 Entrega de Vídeo', conteudo: `1. Roteiro pronto → enviar pro cliente aprovar\n2. Gravar seguindo o roteiro\n3. Editar (cortes, legenda, música)\n4. Exportar no formato certo (9:16, 1080x1920)\n5. Enviar preview pro cliente\n6. Ajustes se necessário\n7. Postar na plataforma\n8. Marcar como postado no dashboard` },
+  { id: 'entrega', titulo: '📦 Entrega de Vídeo (Produção p/ Clientes)', conteudo: `1. ROTEIRO VIRAL\n• Revisar cliente ideal antes de gravar (nicho, dor, objetivo do vídeo)\n• Reaproveitar formatos que já validaram — não reinventar toda semana\n• Funil dentro do vídeo: todo roteiro precisa levar a uma ação (não é só entreter)\n\n2. CAPTAÇÃO PROFISSIONAL\n• Áudio limpo + luz lateral (padrão mínimo, mesmo em ambiente simples)\n• Plano fechado no rosto quando o objetivo é emoção/depoimento\n• Sempre gravar b-roll de apoio: mãos, olhares, rotina do negócio, produto/ambiente\n\n3. EDIÇÃO VIRAL\n• Gancho nos primeiros 3s (frase mais forte do vídeo abre o corte)\n• Trilha que cresce no meio, não estática\n• Texto na tela só em frases-chave (não legenda tudo)\n• Ajuste de cor pra separar contextos (ex: antes/depois)\n\n4. STORYTELLING (checklist por cliente)\n• Personagem definido + dor principal clara\n• História em 4 blocos: antes → queda → virada → depois → moral\n• Prova social embutida (print, depoimento, número)\n\n5. VÍDEO FOCADO EM VENDAS (estrutura fixa)\n1. Gancho — dor/desejo direto, 3s\n2. Empatia — mostrar que entende o problema\n3. Prova — print, número, depoimento, antes/depois\n4. Oferta clara em 1 frase\n5. CTA direto — 1 vídeo = 1 CTA só\n⚠ Regra de corte: se tirar o áudio e o vídeo não passar credibilidade sozinho, refazer\n\n6. ESTRATÉGIA DE REPETIÇÃO\n• Formato validado (bateu meta de views) → repetir até performance cair\n• Manter registro por cliente: qual formato/gancho já validou\n\n7. APLICAÇÃO PRÁTICA (4 clientes)\n• Ter 1 checklist de entrega por cliente (nicho, dor, formatos validados, cronograma)\n• Antes de gravar: o que vendo / pra quem / que dor resolve\n• Antes de postar: gancho ✓ empatia ✓ prova ✓ oferta ✓ CTA ✓ — 3 "nãos" = refazer` },
   { id: 'reuniao', titulo: '📞 Reunião Mensal com Cliente', conteudo: `1. Preparar relatório do mês (vídeos postados, alcance)\n2. Mostrar evolução (mês anterior vs atual)\n3. Discutir o que funcionou e o que não\n4. Apresentar ideias pro próximo mês\n5. Alinhar expectativas e metas\n6. Registrar feedback no dashboard` },
 ];
+
+// force-update entrega playbook
+(function(){
+  try {
+    var _p = JSON.parse(localStorage.getItem('smm_processos'));
+    if (_p) {
+      var _e = _p.find(function(x){ return x.id === 'entrega'; });
+      var _def = DEFAULT_PROCESSOS.find(function(x){ return x.id === 'entrega'; });
+      if (_e && _def) { _e.titulo = _def.titulo; _e.conteudo = _def.conteudo; localStorage.setItem('smm_processos', JSON.stringify(_p)); }
+    }
+  } catch(e) {}
+})();
 
 function loadProcessos() { try { return JSON.parse(localStorage.getItem('smm_processos')) || null; } catch { return null; } }
 function saveProcessos(d) { localStorage.setItem('smm_processos', JSON.stringify(d)); scheduleAutoBackup(); }
