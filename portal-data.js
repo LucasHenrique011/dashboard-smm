@@ -48,6 +48,14 @@ const PORTAL_DATA = {
       "cadencia": "3 reels por semana",
       "objetivo": "Posicionar como referência em social media para PMEs em SP. Gerar leads orgânicos via conteúdo e atrair clientes no ticket de R$1.300-R$1.500/mês.",
       "icp": "Empresário tradicional, dono de pequena/média empresa em SP capital. Negócio funcionando há 1+ ano, faturamento R$50k-R$500k/mês, vende bem offline mas é invisível online. Segmentos: clínicas/estética, escritórios de serviço, negócios locais premium, pequenas indústrias."
+    },
+    "pedroblackeguil": {
+      "name": "PEDRO BLACK e GUILHERME",
+      "valor": "A definir",
+      "pillars": [],
+      "cadencia": "reels por semana",
+      "objetivo": "",
+      "icp": ""
     }
   },
   "videos": [
@@ -986,7 +994,8 @@ const PORTAL_DATA = {
     "cube": "cube2026ls",
     "pallefort": "pall2026ls",
     "mania": "mania2026ls",
-    "lucas": "lucas2026ls"
+    "lucas": "lucas2026ls",
+    "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-08T20:11:54.651Z"
+  "updatedAt": "2026-07-09T20:56:14.949Z"
 };
