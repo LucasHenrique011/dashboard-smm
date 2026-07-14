@@ -904,6 +904,15 @@ const PORTAL_DATA = {
       "status": "postado",
       "ref": "",
       "roteiro": "**ROTEIRO DE NARRAÇÃO**\n\n**(Após o gancho da contramão – corte para a chegada no Mercadão)**\n\n\"Calma... deixa eu explicar como eu fui parar nessa situação.\"\n\n\"Ontem apareceu, do nada, a oportunidade de passar o dia gravando o Pedro Black. Nem deu tempo de pegar meus equipamentos... então esse vídeo inteiro foi gravado só com o celular.\"\n\n---\n\n**(Pedro chamando a galera da kombi)**\n\n\"E a partir daí eu só fui acompanhando a loucura.\"\n\n*(Se a cena estiver forte por si só, pode até cortar essa frase.)*\n\n---\n\n**(Av. do Estado + Tokyo Drift)**\n\n\"A gente saiu rumo ao show... e foi nessa hora que caiu a ficha de que esse ia ser o aniversário mais aleatório que eu já vivi.\"\n\n*(Deixa a música assumir os próximos takes.)*\n\n---\n\n**(Chegada ao local do show)**\n\n\"Chegando lá, já começou a aparecer gente pra falar com ele. E ainda contou pra todo mundo que era meu aniversário e brincou que minha mãe não ia deixar eu sair com ele de novo.\"\n\n---\n\n**(Brinde de gin)**\n\n\"Antes de subir no palco ainda rolou um brinde rápido...\"\n\n---\n\n**(Show)**\n\n*Sem narração. Deixa o áudio da música e as imagens do show conduzirem essa parte.*\n\n---\n\n**(Depois do show – pessoas pedindo foto)**\n\n\"Quando o show acabou, ficou fácil entender o carinho que a galera tem por ele. Era foto atrás de foto.\"\n\n---\n\n**(Estacionamento)**\n\n\"Quando eu achei que o dia tinha acabado, o manobrista pediu ajuda pro Pedro tirar o carro de um cara que ele nunca tinha visto na vida... só pra conseguir tirar o dele.\"\n\n\"E foi assim que eu comemorei meu aniversário.\""
+    },
+    {
+      "client": "mania",
+      "title": "ABRINDO CAIXA",
+      "pillar": "DESEJO",
+      "date": "2026-07-14",
+      "status": "pendente",
+      "ref": "https://www.tiktok.com/@onestopsocials/video/7558334893122440466?is_from_webapp=1&sender_device=pc&web_id=7655682300580496904",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -1005,5 +1014,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-14T16:51:53.414Z"
+  "updatedAt": "2026-07-14T17:07:03.488Z"
 };
