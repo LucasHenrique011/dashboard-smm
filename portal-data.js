@@ -854,7 +854,7 @@ const PORTAL_DATA = {
     {
       "client": "mania",
       "title": "TRANSIÇOES DE PRODUTOS",
-      "pillar": "DESEJO",
+      "pillar": "CONVERSÃO",
       "date": "2026-07-14",
       "status": "pendente",
       "ref": "https://www.tiktok.com/@hellobossfilms/video/7431929201692806433?is_from_webapp=1&sender_device=pc",
@@ -1006,5 +1006,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-14T02:55:36.271Z"
+  "updatedAt": "2026-07-14T02:55:57.608Z"
 };
