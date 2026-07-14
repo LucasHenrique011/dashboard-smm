@@ -683,7 +683,7 @@ const PORTAL_DATA = {
     {
       "client": "mania",
       "title": "KIT BASICO PARA INICIANTES",
-      "pillar": "ATENÇÃO",
+      "pillar": "DESEJO",
       "date": "2026-06-30",
       "status": "gravado",
       "ref": "https://www.instagram.com/reel/DUa_MmSEYKG/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
@@ -1014,5 +1014,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-14T17:07:03.488Z"
+  "updatedAt": "2026-07-14T17:07:29.383Z"
 };
