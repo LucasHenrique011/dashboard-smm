@@ -870,24 +870,6 @@ const PORTAL_DATA = {
       "roteiro": ""
     },
     {
-      "client": "mania",
-      "title": "BARULHO ESTRANHO",
-      "pillar": "ATENÇÃO",
-      "date": "2026-07-14",
-      "status": "pendente",
-      "ref": "https://www.instagram.com/reel/DYXJzh_ulgc/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
-      "roteiro": ""
-    },
-    {
-      "client": "mania",
-      "title": "SEM IDEIAS DE CONTEUDO",
-      "pillar": "ATENÇÃO",
-      "date": "2026-07-14",
-      "status": "pendente",
-      "ref": "https://www.instagram.com/reel/DTnloUYFevw/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
-      "roteiro": ""
-    },
-    {
       "client": "cube",
       "title": "CUBELAB(roteiro guilherme)",
       "pillar": "PROJETO",
@@ -936,11 +918,12 @@ const PORTAL_DATA = {
         "linkbio": 9,
         "engajamento": 1.1,
         "novos": 0,
+        "perdidos": 0,
         "compartilhamentos": 0,
         "salvamentos": 0,
         "curtidas": 51,
         "melhor": "Esmalte caiu no chão? Assista até o final (16/jun) — 13 curtidas, melhor post do mês. Funcionou porque usou formato problema → solução com CTA de salvamento: o espectador guarda pra usar quando precisar, o que sinaliza utilidade pro algoritmo e gera alcance orgânico.",
-        "obs": "8 posts publicados. 87% Reels. Score: Consistência B+ · Engajamento C+ · Qualidade Visual A.\n✅ Frequência mantida, autenticidade do conteúdo.\n🔴 Engajamento 1,1% (meta 3–5%). Sem Stories documentados."
+        "obs": "8 posts publicados. 87% Reels. Score: Consistência B+ · Engajamento C+ · Qualidade Visual A.\n✅ Frequência mantida, autenticidade do conteúdo.\n🔴 Engajamento 1,1% (meta 3–5%). Sem Stories documentados.\n💡 Julho: incentivar comentários nas legendas, buscar parcerias/collabs com marcas, adicionar CTA de WhatsApp nos vídeos de produto, Stories diários."
       },
       "2026-04": {
         "seguidores": 520,
@@ -1023,5 +1006,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-14T17:08:59.798Z"
+  "updatedAt": "2026-07-14T22:09:44.243Z"
 };
