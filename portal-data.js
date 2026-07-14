@@ -667,7 +667,7 @@ const PORTAL_DATA = {
       "title": "DUBLAGEM MINHA MAE É UM PEÇA",
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
-      "status": "editado",
+      "status": "postado",
       "ref": "https://www.instagram.com/reel/DVt-rn_ACoJ/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
       "roteiro": ""
     },
@@ -1005,5 +1005,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-14T16:08:04.410Z"
+  "updatedAt": "2026-07-14T16:51:53.414Z"
 };
