@@ -904,6 +904,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "OS ARTISTA - A ARTE",
+      "pillar": "TREND",
+      "date": "2026-07-15",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -1006,5 +1015,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-15T13:49:45.401Z"
+  "updatedAt": "2026-07-15T13:50:18.523Z"
 };
