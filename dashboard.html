@@ -407,6 +407,15 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 <!-- MODULE 2: FINANCEIRO -->
 <div id="mod-financeiro" class="module">
   <h2>Financeiro MEI</h2>
+
+  <!-- Sub-abas financeiro -->
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #2a2a3a;padding-bottom:0;">
+    <button id="fin-tab-mensal" onclick="showFinTab('mensal')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid #4f9;background:none;color:#4f9;cursor:pointer;margin-bottom:-1px;">Mensal</button>
+    <button id="fin-tab-ltv" onclick="showFinTab('ltv')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;color:#888;cursor:pointer;margin-bottom:-1px;">LTV por Cliente</button>
+  </div>
+
+  <!-- Conteúdo: Mensal -->
+  <div id="fin-content-mensal">
   <div class="week-nav" style="margin-bottom:16px;">
     <button class="btn-sm" onclick="changeMonth(-1)">← Anterior</button>
     <span id="month-label"></span>
@@ -448,6 +457,16 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <div class="fin-chart">
     <h3 style="margin:0 0 12px;color:#4f9;">Evolução Mensal</h3>
     <svg id="fin-chart-svg" viewBox="0 0 700 200" style="width:100%;height:200px;"></svg>
+  </div>
+  </div><!-- /fin-content-mensal -->
+
+  <!-- Conteúdo: LTV -->
+  <div id="fin-content-ltv" style="display:none;">
+    <div class="fin-grid" style="margin-bottom:24px;" id="ltv-summary"></div>
+    <div class="fin-table">
+      <h3 style="margin:0 0 16px;color:#4f9;">LTV por Cliente</h3>
+      <div id="ltv-table"></div>
+    </div>
   </div>
 </div>
 
@@ -1370,6 +1389,111 @@ function saveFinance(data) {
   const allFin = load('finance') || {};
   allFin[currentMonth] = data;
   save('finance', allFin);
+}
+
+function showFinTab(tab) {
+  document.getElementById('fin-content-mensal').style.display = tab === 'mensal' ? '' : 'none';
+  document.getElementById('fin-content-ltv').style.display = tab === 'ltv' ? '' : 'none';
+  document.getElementById('fin-tab-mensal').style.color = tab === 'mensal' ? '#4f9' : '#888';
+  document.getElementById('fin-tab-mensal').style.borderBottomColor = tab === 'mensal' ? '#4f9' : 'transparent';
+  document.getElementById('fin-tab-ltv').style.color = tab === 'ltv' ? '#4f9' : '#888';
+  document.getElementById('fin-tab-ltv').style.borderBottomColor = tab === 'ltv' ? '#4f9' : 'transparent';
+  if (tab === 'ltv') renderLTV();
+}
+
+function renderLTV() {
+  const today = new Date();
+
+  // Lê histórico financeiro real
+  const fin = JSON.parse(localStorage.getItem('smm_finance') || '{}');
+
+  // Agrupa receitas por cliente — usa o client key do CLIENTS pra matching
+  // Mapeia nome de receita → client key
+  function matchClientKey(receitaNome) {
+    const n = receitaNome.toLowerCase();
+    return Object.keys(CLIENTS).find(k => {
+      if (k === 'lucas') return false; // exclui perfil pessoal
+      const cl = CLIENTS[k];
+      const clientNome = (cl.name || '').toLowerCase();
+      // match se o nome do cliente contém o key, ou receita contém o key ou o nome
+      return n.includes(k) || n.includes(clientNome.split(' ')[0]) || clientNome.includes(n.split(' ')[0]);
+    });
+  }
+
+  // Acumula LTV por client key
+  const ltvMap = {}; // key → { name, total, meses: Set, porMes: {} }
+  Object.entries(fin).sort().forEach(([mes, data]) => {
+    (data.receitas || []).forEach(r => {
+      const key = matchClientKey(r.name);
+      if (!key) return;
+      if (!ltvMap[key]) ltvMap[key] = { name: CLIENTS[key].name, total: 0, meses: new Set(), porMes: {} };
+      ltvMap[key].total += r.value;
+      ltvMap[key].meses.add(mes);
+      ltvMap[key].porMes[mes] = (ltvMap[key].porMes[mes] || 0) + r.value;
+    });
+  });
+
+  const rows = Object.values(ltvMap).map(c => {
+    const mesesOrdenados = [...c.meses].sort();
+    const inicio = mesesOrdenados[0];
+    const ultimo = mesesOrdenados[mesesOrdenados.length - 1];
+    const qtdMeses = c.meses.size;
+    const mediaMensal = Math.round(c.total / qtdMeses);
+    return { name: c.name, total: c.total, qtdMeses, mediaMensal, inicio, ultimo };
+  }).sort((a, b) => b.total - a.total);
+
+  const totalLTV = rows.reduce((s, r) => s + r.total, 0);
+  const ticketMedio = rows.length ? Math.round(rows.reduce((s, r) => s + r.mediaMensal, 0) / rows.length) : 0;
+  const mesesMedios = rows.length ? Math.round(rows.reduce((s, r) => s + r.qtdMeses, 0) / rows.length) : 0;
+
+  function fmtMes(ym) {
+    if (!ym) return '—';
+    const [y, m] = ym.split('-');
+    const nomes = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+    return `${nomes[+m-1]}/${y.slice(2)}`;
+  }
+
+  document.getElementById('ltv-summary').innerHTML = `
+    <div class="fin-box"><div class="lbl">LTV Total acumulado</div><div class="val green">R$ ${totalLTV.toLocaleString('pt-BR')}</div></div>
+    <div class="fin-box"><div class="lbl">Média mensal por cliente</div><div class="val" style="color:#fc6;">R$ ${ticketMedio.toLocaleString('pt-BR')}</div></div>
+    <div class="fin-box"><div class="lbl">Tempo médio de cliente</div><div class="val blue">${mesesMedios} ${mesesMedios === 1 ? 'mês' : 'meses'}</div></div>
+  `;
+
+  if (!rows.length) {
+    document.getElementById('ltv-table').innerHTML = '<p style="color:#888;font-size:13px;">Nenhum dado financeiro encontrado. Adicione receitas no Mensal.</p>';
+    return;
+  }
+
+  document.getElementById('ltv-table').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr style="color:#888;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #2a2a3a;">
+          <th style="text-align:left;padding:8px 0;">Cliente</th>
+          <th style="text-align:right;padding:8px 0;">Média/mês</th>
+          <th style="text-align:right;padding:8px 0;">Início</th>
+          <th style="text-align:right;padding:8px 0;">Meses</th>
+          <th style="text-align:right;padding:8px 0;">LTV real</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map(r => `
+          <tr style="border-bottom:1px solid #1e1e2a;">
+            <td style="padding:12px 0;font-weight:600;">${r.name}</td>
+            <td style="padding:12px 0;text-align:right;color:#aaa;">R$ ${r.mediaMensal.toLocaleString('pt-BR')}</td>
+            <td style="padding:12px 0;text-align:right;color:#aaa;">${fmtMes(r.inicio)}</td>
+            <td style="padding:12px 0;text-align:right;color:#6cf;">${r.qtdMeses} ${r.qtdMeses === 1 ? 'mês' : 'meses'}</td>
+            <td style="padding:12px 0;text-align:right;font-weight:700;color:#4f9;">R$ ${r.total.toLocaleString('pt-BR')}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+      <tfoot>
+        <tr style="border-top:2px solid #2a2a3a;">
+          <td colspan="4" style="padding:12px 0;font-weight:700;color:#aaa;">Total</td>
+          <td style="padding:12px 0;text-align:right;font-weight:800;font-size:15px;color:#4f9;">R$ ${totalLTV.toLocaleString('pt-BR')}</td>
+        </tr>
+      </tfoot>
+    </table>
+  `;
 }
 
 function changeMonth(dir) {
