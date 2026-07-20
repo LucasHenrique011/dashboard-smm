@@ -2385,9 +2385,9 @@ function buildDashboardData() {
 
 // Publica dados no GitHub pra sincronizar com celular
 async function pushDashboardData(ghToken) {
-  const content = JSON.stringify(buildDashboardData(), null, 2);
+  const content = 'const DASHBOARD_SYNC = ' + JSON.stringify(buildDashboardData(), null, 2) + ';';
   const encoded = btoa(unescape(encodeURIComponent(content)));
-  const filename = 'dashboard-data.json';
+  const filename = 'dashboard-sync.js';
   const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
     headers: { 'Authorization': 'token ' + ghToken }
   });
@@ -2402,31 +2402,6 @@ async function pushDashboardData(ghToken) {
   return putRes.ok;
 }
 
-// Carrega dados do GitHub ao abrir no celular (se localStorage tiver vazio)
-async function syncFromGithubIfNeeded() {
-  const hasVideos = localStorage.getItem('smm_videos');
-  const hasClients = localStorage.getItem('smm_clients');
-  if (hasVideos && hasClients) return; // já tem dados locais, não precisa
-  try {
-    const url = `https://lucashenrique011.github.io/dashboard-smm/dashboard-data.json?t=${Date.now()}`;
-    const res = await fetch(url);
-    if (!res.ok) return;
-    const data = await res.json();
-    let loaded = false;
-    Object.entries(data).forEach(([k, v]) => {
-      if (k.startsWith('smm_') && v && !localStorage.getItem(k)) {
-        localStorage.setItem(k, v);
-        loaded = true;
-      }
-    });
-    if (loaded) {
-      // Reinicia o dashboard com os dados carregados
-      CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
-      renderAll();
-      showBanner('✅ Dados sincronizados do Mac!');
-    }
-  } catch(e) { /* sem internet ou arquivo não existe ainda */ }
-}
 
 function showBanner(msg) {
   const b = document.createElement('div');
@@ -3433,11 +3408,33 @@ function renderAll() {
     }
   }
 
-  const script = document.createElement('script');
-  script.src = 'portal-data.js?t=' + Date.now();
-  script.onload = function() { restoreFromPortal(); startApp(); syncFromGithubIfNeeded(); };
-  script.onerror = function() { startApp(); syncFromGithubIfNeeded(); };
-  document.head.appendChild(script);
+  // Carrega dados de sync (Mac → celular) como script, igual ao portal-data.js
+  const syncScript = document.createElement('script');
+  syncScript.src = 'dashboard-sync.js?t=' + Date.now();
+  syncScript.onload = function() { restoreFromSync(); loadPortal(); };
+  syncScript.onerror = function() { loadPortal(); };
+  document.head.appendChild(syncScript);
+
+  function loadPortal() {
+    const script = document.createElement('script');
+    script.src = 'portal-data.js?t=' + Date.now();
+    script.onload = function() { restoreFromPortal(); startApp(); };
+    script.onerror = function() { startApp(); };
+    document.head.appendChild(script);
+  }
+
+  function restoreFromSync() {
+    if (typeof DASHBOARD_SYNC === 'undefined') return;
+    // Só sobrescreve se o sync for mais recente que o que tem no celular
+    const localSavedAt = localStorage.getItem('smm_sync_savedAt') || '';
+    if (DASHBOARD_SYNC._savedAt <= localSavedAt) return;
+    Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
+      if (k.startsWith('smm_') && v) localStorage.setItem(k, v);
+    });
+    localStorage.setItem('smm_sync_savedAt', DASHBOARD_SYNC._savedAt);
+    CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+    showBanner('✅ Dados sincronizados!');
+  }
 })();
 
 // Notificação de relatório na última semana do mês
