@@ -913,6 +913,15 @@ const PORTAL_DATA = {
       "status": "postado",
       "ref": "",
       "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "DESCONTO",
+      "pillar": "TREND",
+      "date": "2026-07-10",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -1015,5 +1024,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:29:19.948Z"
+  "updatedAt": "2026-07-20T04:29:51.945Z"
 };
