@@ -685,7 +685,7 @@ const PORTAL_DATA = {
       "title": "KIT BASICO PARA INICIANTES",
       "pillar": "DESEJO",
       "date": "2026-07-14",
-      "status": "gravado",
+      "status": "editado",
       "ref": "https://www.instagram.com/reel/DUa_MmSEYKG/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
       "roteiro": "Kit Básico de Maquiagem para Iniciantes\n\n[Sweet Skin Ice Cream — Sérum Vitamina C]\n\n\"Ilumina, uniformiza e cuida da pele!\"\n\n\n[Sweet Skin Ice Cream — Gelado Hidratante]\n\n\"Hidrata e deixa a pele pronta pra make!\"\n\n\n[Dailus Base Ultra Cobertura Matte]\n\n\"Cobre tudo e dura 8 horas na pele!\"\n\n\n[Dailus Corretivo Líquido Eye Dye — Olheira]\n\n\"Apaga olheira e ilumina o olhar na hora!\"\n\n\n[Dailus Pó Translúcido Ultrafino]\n\n\"Fixa a make e deixa a pele sequinha!\"\n\n\n[Dailus Contorno & Iluminador & Blush — Pele de Milhões]\n\n\"Três em um: define, ilumina e dá cor!\"\n\n\n[Dailus Holo Blush]\n\n\"Blush holográfico pra um brilho diferenciado!\"\n\n\n[Dailus Lip Glossy Cake]\n\n\"Deixa o lábio hidratado, brilhoso e gostoso!\"\n\n\n rímel/máscara de cílios]\n\n\"Abre o olhar e finaliza qualquer make!\"\n\n\n[Dailus Fix Tudo — Bruma Facial Fixadora]\n\n\"Fixa tudo e aguenta o dia inteiro!\"\n\nVoce encontra todos os produtos aqui na MANIA DA WEB"
     },
@@ -780,15 +780,6 @@ const PORTAL_DATA = {
       "roteiro": ""
     },
     {
-      "client": "pallefort",
-      "title": "2016 - 2026",
-      "pillar": "TREND",
-      "date": "2026-07-15",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
       "client": "cube",
       "title": "COMPILADO DA SEMANA",
       "pillar": "PROJETO",
@@ -865,7 +856,7 @@ const PORTAL_DATA = {
       "title": "FOLGAR OU GRAVAR COMO O MARKETING",
       "pillar": "ATENÇÃO",
       "date": "2026-07-14",
-      "status": "pendente",
+      "status": "editado",
       "ref": "https://www.tiktok.com/@nacionalgas22/video/7466448654082051334?is_from_webapp=1&sender_device=pc",
       "roteiro": ""
     },
@@ -1033,5 +1024,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:17:31.665Z"
+  "updatedAt": "2026-07-20T04:18:03.975Z"
 };
