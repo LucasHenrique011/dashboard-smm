@@ -762,24 +762,6 @@ const PORTAL_DATA = {
       "roteiro": "vitor roque errando gol - eu trabalhando"
     },
     {
-      "client": "pallefort",
-      "title": "VENDEDOR FAZENDO PERGUNTAS",
-      "pillar": "TREND",
-      "date": "2026-07-07",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "meme falando sobre os vídeos",
-      "pillar": "TREND",
-      "date": "2026-07-07",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
       "client": "cube",
       "title": "COMPILADO DA SEMANA",
       "pillar": "PROJETO",
@@ -1042,5 +1024,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:25:34.522Z"
+  "updatedAt": "2026-07-20T04:27:48.946Z"
 };
