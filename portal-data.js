@@ -646,15 +646,6 @@ const PORTAL_DATA = {
     },
     {
       "client": "mania",
-      "title": "COMO ME SEQUESTRAR",
-      "pillar": "ATENÇÃO",
-      "date": "2026-07-07",
-      "status": "pendente",
-      "ref": "https://www.instagram.com/reel/DTdvlz-ke5v/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-      "roteiro": ""
-    },
-    {
-      "client": "mania",
       "title": "ARRUMANDO ESTOQUE COM SACO",
       "pillar": "ATENÇÃO",
       "date": "2026-06-30",
@@ -1024,5 +1015,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:31:00.571Z"
+  "updatedAt": "2026-07-20T04:31:21.451Z"
 };
