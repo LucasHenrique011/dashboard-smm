@@ -2352,19 +2352,88 @@ async function publicarTudo() {
     const ok1 = await pushFileToGithub('dashboard.html', dashHtml);
     const ok2 = await pushFileToGithub('cliente.html', clienteHtml);
     const ok3 = await pushPortalToGithub(portalContent);
+    const ok4 = await pushDashboardData(getGithubToken());
     btn.disabled = false;
-    if (ok1 && ok2 && ok3) {
+    if (ok1 && ok2 && ok3 && ok4) {
       btn.textContent = '✅ Publicado!';
       setTimeout(() => { btn.textContent = '🚀 Publicar tudo'; }, 3000);
     } else {
       btn.textContent = '🚀 Publicar tudo';
-      alert(`Erro ao publicar:\ndashboard.html: ${ok1 ? '✅' : '❌'}\ncliente.html: ${ok2 ? '✅' : '❌'}\nportal-data.js: ${ok3 ? '✅' : '❌'}\n\nVerifique o console (F12) pra mais detalhes.`);
+      alert(`Erro ao publicar:\ndashboard.html: ${ok1 ? '✅' : '❌'}\ncliente.html: ${ok2 ? '✅' : '❌'}\nportal-data.js: ${ok3 ? '✅' : '❌'}\ndados: ${ok4 ? '✅' : '❌'}\n\nVerifique o console (F12) pra mais detalhes.`);
     }
   } catch(e) {
     btn.disabled = false;
     btn.textContent = '🚀 Publicar tudo';
     alert('Erro: ' + e.message);
   }
+}
+
+// Monta snapshot de todos os dados pra sync entre dispositivos
+function buildDashboardData() {
+  return {
+    _savedAt: new Date().toISOString(),
+    smm_videos: localStorage.getItem('smm_videos'),
+    smm_clients: localStorage.getItem('smm_clients'),
+    smm_finance: localStorage.getItem('smm_finance'),
+    smm_prospects: localStorage.getItem('smm_prospects'),
+    smm_metricas: localStorage.getItem('smm_metricas'),
+    smm_metas: localStorage.getItem('smm_metas'),
+    smm_metas_mes: localStorage.getItem('smm_metas_mes'),
+    smm_processos: localStorage.getItem('smm_processos'),
+  };
+}
+
+// Publica dados no GitHub pra sincronizar com celular
+async function pushDashboardData(ghToken) {
+  const content = JSON.stringify(buildDashboardData(), null, 2);
+  const encoded = btoa(unescape(encodeURIComponent(content)));
+  const filename = 'dashboard-data.json';
+  const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
+    headers: { 'Authorization': 'token ' + ghToken }
+  });
+  const existing = getRes.ok ? await getRes.json() : null;
+  const body = { message: 'sync: atualiza dados do dashboard', content: encoded };
+  if (existing && existing.sha) body.sha = existing.sha;
+  const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
+    method: 'PUT',
+    headers: { 'Authorization': 'token ' + ghToken, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  return putRes.ok;
+}
+
+// Carrega dados do GitHub ao abrir no celular (se localStorage tiver vazio)
+async function syncFromGithubIfNeeded() {
+  const hasVideos = localStorage.getItem('smm_videos');
+  const hasClients = localStorage.getItem('smm_clients');
+  if (hasVideos && hasClients) return; // já tem dados locais, não precisa
+  try {
+    const url = `https://lucashenrique011.github.io/dashboard-smm/dashboard-data.json?t=${Date.now()}`;
+    const res = await fetch(url);
+    if (!res.ok) return;
+    const data = await res.json();
+    let loaded = false;
+    Object.entries(data).forEach(([k, v]) => {
+      if (k.startsWith('smm_') && v && !localStorage.getItem(k)) {
+        localStorage.setItem(k, v);
+        loaded = true;
+      }
+    });
+    if (loaded) {
+      // Reinicia o dashboard com os dados carregados
+      CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+      renderAll();
+      showBanner('✅ Dados sincronizados do Mac!');
+    }
+  } catch(e) { /* sem internet ou arquivo não existe ainda */ }
+}
+
+function showBanner(msg) {
+  const b = document.createElement('div');
+  b.style.cssText = 'position:fixed;top:70px;left:50%;transform:translateX(-50%);background:#1a3a2a;border:1px solid #4f9;color:#4f9;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:9999;transition:opacity .5s;';
+  b.textContent = msg;
+  document.body.appendChild(b);
+  setTimeout(() => { b.style.opacity = '0'; setTimeout(() => b.remove(), 500); }, 3000);
 }
 
 // Auto-publish when data changes (debounced)
@@ -2375,6 +2444,7 @@ function scheduleAutoPublish() {
   _autoPublishTimer = setTimeout(() => {
     const content = buildPortalData();
     pushPortalToGithub(content);
+    pushDashboardData(getGithubToken()); // sincroniza dados também
   }, 10000);
 }
 
@@ -3365,8 +3435,8 @@ function renderAll() {
 
   const script = document.createElement('script');
   script.src = 'portal-data.js?t=' + Date.now();
-  script.onload = function() { restoreFromPortal(); startApp(); };
-  script.onerror = function() { startApp(); };
+  script.onload = function() { restoreFromPortal(); startApp(); syncFromGithubIfNeeded(); };
+  script.onerror = function() { startApp(); syncFromGithubIfNeeded(); };
   document.head.appendChild(script);
 })();
 
