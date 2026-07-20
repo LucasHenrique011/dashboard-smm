@@ -913,6 +913,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": ""
+    },
+    {
+      "client": "cube",
+      "title": "compilados da semana",
+      "pillar": "PROJETO",
+      "date": "2026-07-24",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -1015,5 +1024,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:31:21.451Z"
+  "updatedAt": "2026-07-20T04:33:12.939Z"
 };
