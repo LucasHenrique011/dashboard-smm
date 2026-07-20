@@ -901,7 +901,7 @@ const PORTAL_DATA = {
       "title": "COMPILADOS DA SEMANA",
       "pillar": "PROJETO",
       "date": "2026-07-17",
-      "status": "pendente",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -910,7 +910,7 @@ const PORTAL_DATA = {
       "title": "OS ARTISTA - A ARTE",
       "pillar": "TREND",
       "date": "2026-07-15",
-      "status": "pendente",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -918,8 +918,8 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "vídeo estetico funcionarios trabalhando",
       "pillar": "AUTORIDADE",
-      "date": "2026-07-15",
-      "status": "pendente",
+      "date": "2026-07-20",
+      "status": "editado",
       "ref": "",
       "roteiro": ""
     },
@@ -927,8 +927,8 @@ const PORTAL_DATA = {
       "client": "pallefort",
       "title": "ligacao com motorista",
       "pillar": "TREND",
-      "date": "2026-07-15",
-      "status": "pendente",
+      "date": "2026-07-21",
+      "status": "editado",
       "ref": "",
       "roteiro": ""
     }
@@ -1033,5 +1033,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-15T13:51:19.497Z"
+  "updatedAt": "2026-07-20T04:17:31.665Z"
 };
