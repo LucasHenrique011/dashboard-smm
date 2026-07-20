@@ -864,7 +864,7 @@ const PORTAL_DATA = {
       "client": "cube",
       "title": "CUBELAB(roteiro guilherme)",
       "pillar": "PROJETO",
-      "date": "2026-07-15",
+      "date": "2026-07-20",
       "status": "gravado",
       "ref": "",
       "roteiro": "[0–8s]\n\n\"Durante décadas, a educação tentou responder uma única pergunta... 'Essa criança aprendeu?' Mas será que a gente realmente mede isso?\"\n\n(pausa)\n\n\"Porque decorar... nunca foi aprender.\"\n[8–18s]\n\n\"O sistema avalia notas. Acertos. Médias. Mas quase ninguém consegue medir aquilo que realmente importa.\"\n[18–28s]\n\n\"E criatividade? Pensamento crítico? Comunicação? Autonomia? Resolução de problemas? Como uma prova consegue medir tudo isso?\"\n[28–33s]\n\n\"E se desse pra resolver isso?\"\n\n(silêncio de meio segundo)\n[33–50s]\n\n\"Foi por isso que criamos o Cube Lab. Uma plataforma que transforma cada atividade da criança em evidências reais de aprendizagem. Não apenas o resultado. Mas o processo. Não apenas notas. Mas desenvolvimento.\"\n[50–57s]\n\n\"Porque uma criança não é um número. Ela é um conjunto único de habilidades, conquistas e potenciais.\"\n[57–60s]\n\n\"O futuro da educação não começa corrigindo provas. Começa entendendo pessoas. Cube Lab. Porque o futuro não pertence às crianças que tiram as melhores notas. Pertence às que desenvolvem as melhores habilidades.\""
@@ -1033,5 +1033,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:23:05.883Z"
+  "updatedAt": "2026-07-20T04:23:27.710Z"
 };
