@@ -883,7 +883,7 @@ const PORTAL_DATA = {
       "title": "ABRINDO CAIXA",
       "pillar": "DESEJO",
       "date": "2026-07-14",
-      "status": "pendente",
+      "status": "editado",
       "ref": "https://www.tiktok.com/@onestopsocials/video/7558334893122440466?is_from_webapp=1&sender_device=pc&web_id=7655682300580496904",
       "roteiro": ""
     },
@@ -1024,5 +1024,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:18:03.975Z"
+  "updatedAt": "2026-07-20T04:18:25.647Z"
 };
