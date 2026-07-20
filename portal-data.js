@@ -708,24 +708,6 @@ const PORTAL_DATA = {
       "roteiro": ""
     },
     {
-      "client": "pallefort",
-      "title": "MUITOS QUEREM CUIDAR DA SUA VIDA",
-      "pillar": "TREND",
-      "date": "2026-06-30",
-      "status": "gravado",
-      "ref": "https://www.instagram.com/reel/DVOEyQtjbDE/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "VENDEDOR MODELO",
-      "pillar": "TREND",
-      "date": "2026-06-30",
-      "status": "pendente",
-      "ref": "https://www.instagram.com/reel/DZqSF9oB0ST/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==",
-      "roteiro": ""
-    },
-    {
       "client": "cube",
       "title": "EDUCAÇAO EM 60s",
       "pillar": "LIDERANÇA",
@@ -1024,5 +1006,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-20T04:27:48.946Z"
+  "updatedAt": "2026-07-20T04:28:12.950Z"
 };
