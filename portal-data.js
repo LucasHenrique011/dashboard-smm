@@ -802,7 +802,7 @@ const PORTAL_DATA = {
       "title": "TRANSIÇOES DE PRODUTOS",
       "pillar": "CONVERSÃO",
       "date": "2026-07-21",
-      "status": "pendente",
+      "status": "gravado",
       "ref": "https://www.tiktok.com/@hellobossfilms/video/7431929201692806433?is_from_webapp=1&sender_device=pc",
       "roteiro": ""
     },
@@ -1033,5 +1033,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-22T13:58:46.260Z"
+  "updatedAt": "2026-07-22T13:59:13.446Z"
 };
