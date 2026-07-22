@@ -931,24 +931,6 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": ""
-    },
-    {
-      "client": "mania",
-      "title": "um produto pra cada ocasiao",
-      "pillar": "DESEJO",
-      "date": "2026-07-21",
-      "status": "pendente",
-      "ref": "https://www.instagram.com/reel/DT24vFtjQBc/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
-      "roteiro": ""
-    },
-    {
-      "client": "mania",
-      "title": "Dupla perfeita",
-      "pillar": "DESEJO",
-      "date": "2026-07-21",
-      "status": "pendente",
-      "ref": "https://www.instagram.com/reel/Daxym2tOJ1E/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
-      "roteiro": ""
     }
   ],
   "metricas": {
@@ -1051,5 +1033,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-21T00:00:31.376Z"
+  "updatedAt": "2026-07-22T13:58:46.260Z"
 };
