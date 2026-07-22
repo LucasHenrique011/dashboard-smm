@@ -937,9 +937,9 @@ const PORTAL_DATA = {
       "title": "importancia de peças originais",
       "pillar": "AUTORIDADE",
       "date": "2026-07-22",
-      "status": "pendente",
+      "status": "gravado",
       "ref": "",
-      "roteiro": "CENA 1 — GANCHO FORTE (0-6s)\n\n\"Se sua paleteira já tá precisando de manutenção de novo, talvez o problema seja esse aqui.\"\n\n(Mini-gancho: \"esse aqui\" sem mostrar nada ainda — obriga a pessoa a continuar pra descobrir o quê)\n\nCENA 2 — IDENTIFICAÇÃO (6-14s)\n\n\"Você já deve ter aceitado uma peça 'genérica' mais barata achando que ia resolver — e pouco tempo depois o problema voltou.\"\n\n(Mini-gancho: \"o problema voltou\" — levanta a pergunta \"por que voltou?\", que a cena 3 vai responder mostrando fisicamente)\n\nCENA 3 — APROFUNDAMENTO (14-26s)\nDono segura as duas peças, uma em cada mão, força o contraste físico na câmera.\n\n\"Olha a diferença na mão: essa aqui é original Paletrans — pesada, vedação firme, encaixe perfeito.\"\n\nEle aperta ou dobra a peça paralela pra mostrar fragilidade.\n\n\"Essa aqui é paralela. Olha como ela flexiona, o acabamento torto, o material fino. Isso aqui é o que tá dentro da sua paleteira toda vez que ela quebra de novo.\"\n\n(Mini-gancho: \"toda vez que ela quebra de novo\" — reconecta com a dor da cena 2 e empurra pra solução na cena 4)\n\nCENA 4 — CONCLUSÃO + CTA (26-33s)\n\n\"Por isso aqui a gente só trabalha com peça original — somos autorizados Paletrans. Chama nosso time comercial agora e garante que sua peça é genuína.\""
+      "roteiro": "Roteiro — \"A importância de peças originais\"\n\nCENA 1 — GANCHO\nFala: \"Se sua paleteira já tá precisando de manutenção de novo, talvez o problema seja esse aqui.\"\n\nCENA 2 — IDENTIFICAÇÃO\nFala: \"Você já deve ter aceitado uma peça 'genérica' mais barata achando que ia resolver — e pouco tempo depois o problema voltou.\"\n\nCENA 3 — APROFUNDAMENTO\nFala: \"Olha a diferença na mão: essa aqui é original Paletrans — pesada, vedação firme, encaixe perfeito.\"\nFala: \"Essa aqui é paralela. Olha como ela flexiona, o acabamento torto, o material fino. Isso aqui é o que tá dentro da sua paleteira toda vez que ela quebra de novo.\"\n\nCENA 4 — CONCLUSÃO + CTA\nFala: \"Por isso aqui a gente só trabalha com peça original — somos autorizados Paletrans. Chama nosso time comercial agora e garante que sua peça é genuína.\""
     }
   ],
   "metricas": {
@@ -1042,5 +1042,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-22T15:18:42.606Z"
+  "updatedAt": "2026-07-22T17:46:12.525Z"
 };
