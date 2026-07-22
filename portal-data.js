@@ -955,7 +955,16 @@ const PORTAL_DATA = {
       "title": "biblia",
       "pillar": "TREND",
       "date": "2026-07-22",
-      "status": "pendente",
+      "status": "editado",
+      "ref": "",
+      "roteiro": ""
+    },
+    {
+      "client": "pallefort",
+      "title": "menino do marketing",
+      "pillar": "TREND",
+      "date": "2026-07-22",
+      "status": "gravado",
       "ref": "",
       "roteiro": ""
     }
@@ -1060,5 +1069,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-22T17:46:53.033Z"
+  "updatedAt": "2026-07-22T17:47:40.468Z"
 };
