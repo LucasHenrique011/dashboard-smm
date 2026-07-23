@@ -976,6 +976,15 @@ const PORTAL_DATA = {
       "status": "pendente",
       "ref": "",
       "roteiro": "[0:00-0:03] HOOK\nFala: Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?\nVisual: Câmera no reservatório de óleo\nLegenda: Você sabe a resposta?\n\n[0:03-0:10] ERRO COMUM\nFala: A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais.\nVisual: Close no óleo escuro e com espuma\nLegenda: Nunca trocar = pistão travado + vedações destruídas\n\n[0:10-0:30] RESPOSTA\nFala: A frequência correta depende do uso:\n• Uso leve/moderado — troca a cada 12 meses\n• Uso intenso, turno duplo — a cada 6 meses\n• Óleo escuro ou com espuma — troca imediata\nVisual: Tabela escrita à mão ou impressa\n\n[0:30-0:38] DICA BÔNUS\nFala: Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações.\nVisual: Close na embalagem ISO 46\n\n[0:38-0:44] CTA\nFala: Salva esse vídeo pra mandar pro responsável pela manutenção.\nVisual: Ícone de salvar + logo Pallefort"
+    },
+    {
+      "client": "mania",
+      "title": "Lançamento lápis",
+      "pillar": "CONVERSÃO",
+      "date": "2026-07-23",
+      "status": "postado",
+      "ref": "",
+      "roteiro": ""
     }
   ],
   "metricas": {
@@ -1078,5 +1087,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-23T19:15:49.299Z"
+  "updatedAt": "2026-07-23T19:19:55.823Z"
 };
