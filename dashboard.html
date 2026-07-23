@@ -355,7 +355,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
   <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
-  <button class="btn-sm btn-primary" onclick="publicarPortal()">🔗 Publicar portal</button>
   <button class="btn-sm btn-primary" onclick="publicarTudo()">🚀 Publicar tudo</button>
   <button class="btn-sm" onclick="publicarPortalLinks()">📋 Links clientes</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
@@ -2359,32 +2358,27 @@ async function pushFileToGithub(filename, content) {
 }
 
 async function publicarTudo() {
-  const ghToken = getGithubToken();
+  let ghToken = getGithubToken();
   if (!ghToken) {
     const t = prompt('Cole seu GitHub Token:');
     if (!t) return;
-    setGithubToken(t.trim());
+    ghToken = t.trim();
+    setGithubToken(ghToken);
   }
   const btn = document.querySelector('[onclick="publicarTudo()"]');
   btn.textContent = '⏳ Publicando...';
   btn.disabled = true;
   try {
-    const [dashHtml, clienteHtml] = await Promise.all([
-      fetch('dashboard.html?t=' + Date.now()).then(r => r.text()),
-      fetch('cliente.html?t=' + Date.now()).then(r => r.text())
-    ]);
     const portalContent = buildPortalData();
-    const ok1 = await pushFileToGithub('dashboard.html', dashHtml);
-    const ok2 = await pushFileToGithub('cliente.html', clienteHtml);
-    const ok3 = await pushPortalToGithub(portalContent);
-    const ok4 = await pushDashboardData(getGithubToken());
+    const ok1 = await pushPortalToGithub(portalContent);
+    const ok2 = await pushDashboardData(ghToken);
     btn.disabled = false;
-    if (ok1 && ok2 && ok3 && ok4) {
+    if (ok1 && ok2) {
       btn.textContent = '✅ Publicado!';
       setTimeout(() => { btn.textContent = '🚀 Publicar tudo'; }, 3000);
     } else {
       btn.textContent = '🚀 Publicar tudo';
-      alert(`Erro ao publicar:\ndashboard.html: ${ok1 ? '✅' : '❌'}\ncliente.html: ${ok2 ? '✅' : '❌'}\nportal-data.js: ${ok3 ? '✅' : '❌'}\ndados: ${ok4 ? '✅' : '❌'}\n\nVerifique o console (F12) pra mais detalhes.`);
+      alert(`Erro ao publicar:\nPortal: ${ok1 ? '✅' : '❌'}\nDados sync: ${ok2 ? '✅' : '❌'}`);
     }
   } catch(e) {
     btn.disabled = false;
