@@ -3723,50 +3723,100 @@ function buildSystemPrompt() {
   const context = localStorage.getItem('smm_ai_context') || '';
   const today = new Date().toLocaleDateString('pt-BR');
 
-  // Dados dos vídeos
   const videos = JSON.parse(localStorage.getItem('smm_videos') || '[]');
-  const pendentes = videos.filter(v => v.status === 'pendente');
-  const gravados = videos.filter(v => v.status === 'gravado');
-  const editados = videos.filter(v => v.status === 'editado');
-  const postados = videos.filter(v => v.status === 'postado');
-
-  // Dados financeiros do mês atual
   const finAll = JSON.parse(localStorage.getItem('smm_finance') || '{}');
+  const metricas = JSON.parse(localStorage.getItem('smm_metricas') || '{}');
   const mesAtual = new Date().toISOString().slice(0,7);
+  const mesesOrdenados = Object.keys(finAll).sort();
+
+  // Vídeos por status
+  const pendentes = videos.filter(v => v.status === 'pendente');
+  const gravados  = videos.filter(v => v.status === 'gravado');
+  const editados  = videos.filter(v => v.status === 'editado');
+  const postados  = videos.filter(v => v.status === 'postado');
+
+  // Vídeos por cliente (todos os status)
+  const videosPorCliente = {};
+  videos.forEach(v => {
+    if (!videosPorCliente[v.client]) videosPorCliente[v.client] = { pendente:0, gravado:0, editado:0, postado:0 };
+    videosPorCliente[v.client][v.status] = (videosPorCliente[v.client][v.status]||0) + 1;
+  });
+
+  // Financeiro detalhado — mês atual e histórico
   const finMes = finAll[mesAtual] || {};
-  const totalReceita = (finMes.receitas || []).reduce((s,r) => s + r.value, 0);
-  const totalCusto = (finMes.custos || []).reduce((s,c) => s + c.value, 0);
+  const receitas = finMes.receitas || [];
+  const custos   = finMes.custos   || [];
+  const totalReceita = receitas.reduce((s,r) => s+r.value, 0);
+  const totalCusto   = custos.reduce((s,c)   => s+c.value, 0);
 
-  // Clientes ativos
-  const clients = Object.values(CLIENTS || {}).filter(c => c.name && c.name !== 'Lucas SM (pessoal)');
+  // Receita por item (detalhe completo)
+  const receitaDetalhe = receitas.map(r => `  • ${r.name}: R$ ${r.value.toLocaleString('pt-BR')}`).join('\n') || '  (sem receitas registradas)';
+  const custoDetalhe   = custos.map(c   => `  • ${c.name}: R$ ${c.value.toLocaleString('pt-BR')}`).join('\n') || '  (sem custos registrados)';
 
-  return `Você é o Lucas AI — assistente pessoal de ${context ? 'Lucas ('+context+')' : 'Lucas'}, Social Media Manager e Videomaker em São Paulo.
+  // Histórico financeiro (últimos 6 meses)
+  const historico = mesesOrdenados.slice(-6).map(mes => {
+    const rec = (finAll[mes].receitas||[]).reduce((s,r)=>s+r.value,0);
+    const cus = (finAll[mes].custos||[]).reduce((s,c)=>s+c.value,0);
+    return `  ${mes}: receita R$ ${rec.toLocaleString('pt-BR')} | custo R$ ${cus.toLocaleString('pt-BR')} | sobra R$ ${(rec-cus).toLocaleString('pt-BR')}`;
+  }).join('\n');
+
+  // Clientes detalhados (excluindo perfil pessoal)
+  const clients = Object.entries(CLIENTS||{})
+    .filter(([k,c]) => k !== 'lucas' && c.name)
+    .map(([k,c]) => {
+      const vc = videosPorCliente[k] || {};
+      const metCli = metricas[k] || {};
+      const ultimoMes = Object.keys(metCli).sort().pop();
+      const met = ultimoMes ? metCli[ultimoMes] : null;
+      return `- ${c.name}
+    Valor/mês: ${c.valor || 'não informado'}
+    Cadência: ${c.cadencia || 'não definida'}
+    Pilares: ${(c.pillars||[]).join(', ') || 'não definidos'}
+    Vídeos: ${vc.pendente||0} pendentes | ${vc.gravado||0} gravados | ${vc.editado||0} editados | ${vc.postado||0} postados
+    ${met ? `Métricas (${ultimoMes}): ${met.seguidores||0} seguidores | ${met.alcance||0} alcance | ${met.novos||0} novos` : 'Sem métricas registradas'}
+    Objetivo: ${c.objetivo || 'não definido'}`;
+    }).join('\n\n');
+
+  return `Você é o Lucas AI — assistente pessoal de Lucas, Social Media Manager e Videomaker em SP.${context ? '\n\nCONTEXTO DO NEGÓCIO: ' + context : ''}
 
 PERSONALIDADE: ${persona}
 
 DATA DE HOJE: ${today}
 
-DADOS DO SISTEMA (use para responder com precisão):
+═══════════════════════════════
+DADOS COMPLETOS DO SISTEMA
+═══════════════════════════════
 
-VÍDEOS:
-- Pendentes (${pendentes.length}): ${pendentes.map(v => `${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(', ') || 'nenhum'}
-- Gravados aguardando edição (${gravados.length}): ${gravados.map(v => `${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(', ') || 'nenhum'}
-- Editados aguardando postagem (${editados.length}): ${editados.map(v => `${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(', ') || 'nenhum'}
-- Postados este mês: ${postados.filter(v => v.date && v.date.startsWith(mesAtual)).length}
+▸ VÍDEOS (visão geral)
+- Pendentes (${pendentes.length}): ${pendentes.map(v=>`${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(' | ')||'nenhum'}
+- Gravados aguardando edição (${gravados.length}): ${gravados.map(v=>`${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(' | ')||'nenhum'}
+- Editados aguardando postagem (${editados.length}): ${editados.map(v=>`${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(' | ')||'nenhum'}
+- Postados este mês (${mesAtual}): ${postados.filter(v=>v.date&&v.date.startsWith(mesAtual)).length}
+- Total de vídeos no sistema: ${videos.length}
 
-FINANCEIRO (${mesAtual}):
-- Receita: R$ ${totalReceita.toLocaleString('pt-BR')}
-- Custos: R$ ${totalCusto.toLocaleString('pt-BR')}
-- Sobra: R$ ${(totalReceita - totalCusto).toLocaleString('pt-BR')}
+▸ FINANCEIRO — ${mesAtual}
+Receitas detalhadas:
+${receitaDetalhe}
+TOTAL RECEITA: R$ ${totalReceita.toLocaleString('pt-BR')}
 
-CLIENTES ATIVOS (${clients.length}):
-${clients.map(c => `- ${c.name}`).join('\n')}
+Custos detalhados:
+${custoDetalhe}
+TOTAL CUSTO: R$ ${totalCusto.toLocaleString('pt-BR')}
 
+SOBRA: R$ ${(totalReceita-totalCusto).toLocaleString('pt-BR')}
+
+▸ HISTÓRICO FINANCEIRO (últimos meses):
+${historico || '  (sem histórico)'}
+
+▸ CLIENTES DETALHADOS:
+${clients || '(nenhum cliente cadastrado)'}
+
+═══════════════════════════════
 REGRAS:
-- Responda sempre em português brasileiro
-- Seja conciso — máximo 3 parágrafos salvo se pedir relatório completo
-- Use os dados reais acima nas respostas
-- Quando não souber algo, diga que não tem esse dado no sistema`;
+- Responda SEMPRE em português brasileiro
+- Use os dados reais acima — nunca invente números
+- Seja conciso (máx 3 parágrafos) exceto se pedir relatório completo
+- Quando um dado não estiver no sistema, diga claramente`;
 }
 
 function addAIMsg(role, text) {
