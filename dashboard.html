@@ -3460,5 +3460,452 @@ function renderAll() {
   document.body.appendChild(banner);
 })();
 </script>
+
+<!-- ============ AGENTE IA ============ -->
+<style>
+#ai-btn {
+  position: fixed; bottom: 24px; right: 24px; z-index: 1000;
+  width: 56px; height: 56px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #4f9);
+  border: none; cursor: pointer; font-size: 24px;
+  box-shadow: 0 4px 20px rgba(79,255,153,0.3);
+  transition: transform .2s, box-shadow .2s;
+  display: flex; align-items: center; justify-content: center;
+}
+#ai-btn:hover { transform: scale(1.1); box-shadow: 0 6px 30px rgba(79,255,153,0.4); }
+#ai-btn .ai-badge {
+  position: absolute; top: -4px; right: -4px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: #f66; font-size: 9px; color: #fff;
+  display: none; align-items: center; justify-content: center; font-weight: 700;
+}
+
+#ai-panel {
+  position: fixed; bottom: 90px; right: 24px; z-index: 999;
+  width: 360px; max-width: calc(100vw - 32px);
+  background: #111118; border: 1px solid #2a2a3a;
+  border-radius: 20px; overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  display: none; flex-direction: column;
+  height: 520px; max-height: calc(100vh - 120px);
+}
+
+#ai-header {
+  padding: 16px 20px; border-bottom: 1px solid #1e1e2a;
+  display: flex; align-items: center; gap: 10px;
+  background: linear-gradient(135deg, #0f0f1a, #12121f);
+}
+#ai-header .ai-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #4f9);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+#ai-header .ai-info { flex: 1; }
+#ai-header .ai-name { font-weight: 700; font-size: 14px; color: #fff; }
+#ai-header .ai-status { font-size: 11px; color: #4f9; }
+#ai-tabs {
+  display: flex; border-bottom: 1px solid #1e1e2a;
+  background: #0d0d14;
+}
+#ai-tabs button {
+  flex: 1; padding: 10px; font-size: 12px; font-weight: 600;
+  background: none; border: none; color: #888; cursor: pointer;
+  border-bottom: 2px solid transparent; transition: color .2s;
+}
+#ai-tabs button.active { color: #4f9; border-bottom-color: #4f9; }
+
+#ai-messages {
+  flex: 1; overflow-y: auto; padding: 16px; display: flex;
+  flex-direction: column; gap: 12px;
+}
+#ai-messages::-webkit-scrollbar { width: 4px; }
+#ai-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+.ai-msg { display: flex; gap: 8px; align-items: flex-start; }
+.ai-msg.user { flex-direction: row-reverse; }
+.ai-msg .bubble {
+  max-width: 80%; padding: 10px 14px; border-radius: 14px;
+  font-size: 13px; line-height: 1.5;
+}
+.ai-msg.bot .bubble { background: #1a1a2a; color: #e0e0e0; border-radius: 4px 14px 14px 14px; }
+.ai-msg.user .bubble { background: linear-gradient(135deg, #7c3aed, #5b21b6); color: #fff; border-radius: 14px 4px 14px 14px; }
+.ai-msg .ai-mini-avatar {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #7c3aed, #4f9);
+  display: flex; align-items: center; justify-content: center; font-size: 12px;
+}
+
+#ai-input-area {
+  padding: 12px 16px; border-top: 1px solid #1e1e2a;
+  display: flex; gap: 8px; align-items: flex-end;
+  background: #0d0d14;
+}
+#ai-input {
+  flex: 1; background: #1a1a2a; border: 1px solid #2a2a3a;
+  border-radius: 12px; padding: 10px 14px; color: #fff;
+  font-size: 13px; resize: none; outline: none;
+  font-family: inherit; max-height: 80px; min-height: 40px;
+  line-height: 1.4;
+}
+#ai-input:focus { border-color: #4f9; }
+#ai-send {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, #7c3aed, #4f9);
+  border: none; cursor: pointer; font-size: 16px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: transform .2s;
+}
+#ai-send:hover { transform: scale(1.1); }
+#ai-send:disabled { opacity: .5; cursor: default; transform: none; }
+
+#ai-config-panel {
+  display: none; flex: 1; flex-direction: column; overflow-y: auto; padding: 16px; gap: 12px;
+}
+#ai-config-panel label { font-size: 11px; color: #888; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; }
+#ai-config-panel textarea {
+  background: #1a1a2a; border: 1px solid #2a2a3a; border-radius: 10px;
+  color: #e0e0e0; font-size: 12px; padding: 10px; resize: vertical;
+  font-family: inherit; line-height: 1.5; outline: none; min-height: 80px;
+}
+#ai-config-panel textarea:focus { border-color: #4f9; }
+#ai-config-panel input[type="password"] {
+  background: #1a1a2a; border: 1px solid #2a2a3a; border-radius: 10px;
+  color: #e0e0e0; font-size: 12px; padding: 10px; outline: none; width: 100%;
+  font-family: monospace;
+}
+#ai-config-panel input[type="password"]:focus { border-color: #4f9; }
+.ai-quick-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.ai-quick-btn {
+  padding: 6px 12px; background: #1a1a2a; border: 1px solid #2a2a3a;
+  border-radius: 20px; color: #aaa; font-size: 11px; cursor: pointer;
+  transition: border-color .2s, color .2s; white-space: nowrap;
+}
+.ai-quick-btn:hover { border-color: #4f9; color: #4f9; }
+
+.ai-typing { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+.ai-typing span {
+  width: 6px; height: 6px; border-radius: 50%; background: #4f9;
+  animation: typing-dot .8s infinite;
+}
+.ai-typing span:nth-child(2) { animation-delay: .15s; }
+.ai-typing span:nth-child(3) { animation-delay: .3s; }
+@keyframes typing-dot { 0%,60%,100% { opacity:.2; transform:scale(.8); } 30% { opacity:1; transform:scale(1); } }
+</style>
+
+<!-- Botão flutuante -->
+<button id="ai-btn" onclick="toggleAI()" title="Assistente IA">
+  🤖
+  <div class="ai-badge" id="ai-badge"></div>
+</button>
+
+<!-- Painel do agente -->
+<div id="ai-panel">
+  <div id="ai-header">
+    <div class="ai-avatar">🤖</div>
+    <div class="ai-info">
+      <div class="ai-name">Lucas AI</div>
+      <div class="ai-status" id="ai-status-text">● Online</div>
+    </div>
+    <button onclick="toggleAI()" style="background:none;border:none;color:#888;font-size:18px;cursor:pointer;">✕</button>
+  </div>
+  <div id="ai-tabs">
+    <button class="active" onclick="switchAITab('chat')">💬 Chat</button>
+    <button onclick="switchAITab('rapido')">⚡ Rápido</button>
+    <button onclick="switchAITab('config')">⚙️ Config</button>
+  </div>
+
+  <!-- Tab: Chat -->
+  <div id="ai-chat-tab" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+    <div id="ai-messages"></div>
+    <div id="ai-input-area">
+      <textarea id="ai-input" placeholder="Pergunte qualquer coisa..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendAI();}"
+        oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'"></textarea>
+      <button id="ai-send" onclick="sendAI()">➤</button>
+    </div>
+  </div>
+
+  <!-- Tab: Rápido -->
+  <div id="ai-rapido-tab" style="display:none;flex:1;overflow-y:auto;padding:16px;">
+    <p style="font-size:12px;color:#888;margin-bottom:12px;">Atalhos rápidos:</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <button class="ai-quick-btn" style="text-align:left;padding:12px 16px;border-radius:12px;" onclick="quickAsk('Quais vídeos estão pendentes agora?')">📋 Vídeos pendentes</button>
+      <button class="ai-quick-btn" style="text-align:left;padding:12px 16px;border-radius:12px;" onclick="quickAsk('Quais vídeos foram gravados mas ainda não editados?')">🎬 Gravados p/ editar</button>
+      <button class="ai-quick-btn" style="text-align:left;padding:12px 16px;border-radius:12px;" onclick="quickAsk('Como foi meu mês financeiro? Resumo rápido.')">💰 Resumo financeiro</button>
+      <button class="ai-quick-btn" style="text-align:left;padding:12px 16px;border-radius:12px;" onclick="quickAsk('Me dá um resumo geral de como estão todos os meus clientes.')">👥 Status dos clientes</button>
+      <button class="ai-quick-btn" style="text-align:left;padding:12px 16px;border-radius:12px;" onclick="quickAsk('No que eu deveria focar hoje no meu negócio?')">🎯 Foco do dia</button>
+      <button class="ai-quick-btn" style="text-align:left;padding:12px 16px;border-radius:12px;" onclick="gerarRelatorio()">📊 Gerar relatório de cliente</button>
+    </div>
+  </div>
+
+  <!-- Tab: Config -->
+  <div id="ai-config-tab" style="display:none;flex:1;overflow-y:auto;padding:16px;flex-direction:column;gap:14px;">
+    <div>
+      <label>Chave da API Anthropic</label>
+      <input type="password" id="ai-api-key" placeholder="sk-ant-api03-..." style="margin-top:6px;">
+      <button onclick="saveAIConfig()" style="margin-top:8px;width:100%;padding:10px;background:#4f9;color:#000;border:none;border-radius:10px;font-weight:700;cursor:pointer;font-size:13px;">Salvar chave</button>
+    </div>
+    <div>
+      <label>Como você quer que ele te trate / seu estilo de coaching</label>
+      <textarea id="ai-persona" placeholder="Ex: Seja direto e objetivo. Me cobra quando eu não tiver focado. Me ajuda a pensar em crescimento do negócio. Não use linguagem corporativa." style="margin-top:6px;width:100%;"></textarea>
+    </div>
+    <div>
+      <label>Contexto do seu negócio (ele vai usar isso pra te aconselhar)</label>
+      <textarea id="ai-context" placeholder="Ex: Sou SMM solo em SP, atendo 3 clientes, quero chegar em 5 clientes até dezembro, meu ticket é R$900-R$1.400." style="margin-top:6px;width:100%;"></textarea>
+    </div>
+    <button onclick="saveAIConfig()" style="padding:12px;background:linear-gradient(135deg,#7c3aed,#4f9);color:#fff;border:none;border-radius:12px;font-weight:700;cursor:pointer;font-size:14px;">💾 Salvar configurações</button>
+    <p style="font-size:11px;color:#555;text-align:center;">Tudo fica salvo só no seu dispositivo. Nada vai pro servidor.</p>
+  </div>
+</div>
+
+<script>
+// ── AI Agent ──
+var aiOpen = false;
+var aiHistory = [];
+
+function toggleAI() {
+  aiOpen = !aiOpen;
+  const panel = document.getElementById('ai-panel');
+  panel.style.display = aiOpen ? 'flex' : 'none';
+  panel.style.flexDirection = 'column';
+  if (aiOpen && aiHistory.length === 0) {
+    loadAIConfig();
+    const key = localStorage.getItem('smm_ai_key');
+    if (!key) {
+      switchAITab('config');
+      addAIMsg('bot', 'Oi! Sou o Lucas AI 👋\n\nPra começar, vai na aba ⚙️ Config e cola sua chave da API da Anthropic.');
+    } else {
+      addAIMsg('bot', 'Oi Lucas! O que você quer saber? Posso te contar sobre vídeos pendentes, finanças, clientes ou te ajudar a pensar no negócio.');
+    }
+  }
+}
+
+function switchAITab(tab) {
+  document.getElementById('ai-chat-tab').style.display = tab === 'chat' ? 'flex' : 'none';
+  document.getElementById('ai-chat-tab').style.flexDirection = tab === 'chat' ? 'column' : '';
+  document.getElementById('ai-rapido-tab').style.display = tab === 'rapido' ? 'block' : 'none';
+  document.getElementById('ai-config-tab').style.display = tab === 'config' ? 'flex' : 'none';
+  document.getElementById('ai-config-tab').style.flexDirection = tab === 'config' ? 'column' : '';
+  document.querySelectorAll('#ai-tabs button').forEach((b, i) => {
+    b.classList.toggle('active', ['chat','rapido','config'][i] === tab);
+  });
+}
+
+function loadAIConfig() {
+  const key = localStorage.getItem('smm_ai_key') || '';
+  const persona = localStorage.getItem('smm_ai_persona') || '';
+  const context = localStorage.getItem('smm_ai_context') || '';
+  if (document.getElementById('ai-api-key')) document.getElementById('ai-api-key').value = key;
+  if (document.getElementById('ai-persona')) document.getElementById('ai-persona').value = persona;
+  if (document.getElementById('ai-context')) document.getElementById('ai-context').value = context;
+}
+
+function saveAIConfig() {
+  const key = document.getElementById('ai-api-key').value.trim();
+  const persona = document.getElementById('ai-persona').value.trim();
+  const context = document.getElementById('ai-context').value.trim();
+  if (key) localStorage.setItem('smm_ai_key', key);
+  if (persona) localStorage.setItem('smm_ai_persona', persona);
+  if (context) localStorage.setItem('smm_ai_context', context);
+  showBanner('✅ Configurações salvas!');
+  switchAITab('chat');
+  if (aiHistory.length <= 1) {
+    aiHistory = [];
+    document.getElementById('ai-messages').innerHTML = '';
+    addAIMsg('bot', 'Pronto! Agora pode me perguntar qualquer coisa sobre seu negócio 🚀');
+  }
+}
+
+function buildSystemPrompt() {
+  const persona = localStorage.getItem('smm_ai_persona') || 'Seja direto, jovem e prático. Sem rodeios.';
+  const context = localStorage.getItem('smm_ai_context') || '';
+  const today = new Date().toLocaleDateString('pt-BR');
+
+  // Dados dos vídeos
+  const videos = JSON.parse(localStorage.getItem('smm_videos') || '[]');
+  const pendentes = videos.filter(v => v.status === 'pendente');
+  const gravados = videos.filter(v => v.status === 'gravado');
+  const editados = videos.filter(v => v.status === 'editado');
+  const postados = videos.filter(v => v.status === 'postado');
+
+  // Dados financeiros do mês atual
+  const finAll = JSON.parse(localStorage.getItem('smm_finance') || '{}');
+  const mesAtual = new Date().toISOString().slice(0,7);
+  const finMes = finAll[mesAtual] || {};
+  const totalReceita = (finMes.receitas || []).reduce((s,r) => s + r.value, 0);
+  const totalCusto = (finMes.custos || []).reduce((s,c) => s + c.value, 0);
+
+  // Clientes ativos
+  const clients = Object.values(CLIENTS || {}).filter(c => c.name && c.name !== 'Lucas SM (pessoal)');
+
+  return `Você é o Lucas AI — assistente pessoal de ${context ? 'Lucas ('+context+')' : 'Lucas'}, Social Media Manager e Videomaker em São Paulo.
+
+PERSONALIDADE: ${persona}
+
+DATA DE HOJE: ${today}
+
+DADOS DO SISTEMA (use para responder com precisão):
+
+VÍDEOS:
+- Pendentes (${pendentes.length}): ${pendentes.map(v => `${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(', ') || 'nenhum'}
+- Gravados aguardando edição (${gravados.length}): ${gravados.map(v => `${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(', ') || 'nenhum'}
+- Editados aguardando postagem (${editados.length}): ${editados.map(v => `${CLIENTS[v.client]?.name||v.client}: "${v.title}"`).join(', ') || 'nenhum'}
+- Postados este mês: ${postados.filter(v => v.date && v.date.startsWith(mesAtual)).length}
+
+FINANCEIRO (${mesAtual}):
+- Receita: R$ ${totalReceita.toLocaleString('pt-BR')}
+- Custos: R$ ${totalCusto.toLocaleString('pt-BR')}
+- Sobra: R$ ${(totalReceita - totalCusto).toLocaleString('pt-BR')}
+
+CLIENTES ATIVOS (${clients.length}):
+${clients.map(c => `- ${c.name}`).join('\n')}
+
+REGRAS:
+- Responda sempre em português brasileiro
+- Seja conciso — máximo 3 parágrafos salvo se pedir relatório completo
+- Use os dados reais acima nas respostas
+- Quando não souber algo, diga que não tem esse dado no sistema`;
+}
+
+function addAIMsg(role, text) {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  const isBot = role === 'bot';
+  div.innerHTML = isBot
+    ? `<div class="ai-mini-avatar">🤖</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div>`
+    : `<div class="bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg bot';
+  div.id = 'ai-typing';
+  div.innerHTML = `<div class="ai-mini-avatar">🤖</div><div class="bubble"><div class="ai-typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+async function sendAI(customMsg) {
+  const input = document.getElementById('ai-input');
+  const msg = customMsg || input.value.trim();
+  if (!msg) return;
+
+  const key = localStorage.getItem('smm_ai_key');
+  if (!key) { switchAITab('config'); return; }
+
+  if (!customMsg) { input.value = ''; input.style.height = 'auto'; }
+  if (!document.getElementById('ai-panel').style.display || document.getElementById('ai-panel').style.display === 'none') toggleAI();
+  switchAITab('chat');
+
+  addAIMsg('user', msg);
+  aiHistory.push({ role: 'user', content: msg });
+
+  document.getElementById('ai-send').disabled = true;
+  document.getElementById('ai-status-text').textContent = '● Pensando...';
+  addTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 800,
+        system: buildSystemPrompt(),
+        messages: aiHistory.slice(-10)
+      })
+    });
+
+    const data = await res.json();
+    document.getElementById('ai-typing')?.remove();
+
+    if (data.error) {
+      const errMsg = data.error.type === 'invalid_request_error' && data.error.message.includes('credit')
+        ? 'Sem crédito na conta Anthropic. Vai em console.anthropic.com → Billing e adiciona crédito.'
+        : 'Erro: ' + data.error.message;
+      addAIMsg('bot', errMsg);
+    } else {
+      const reply = data.content[0].text;
+      addAIMsg('bot', reply);
+      aiHistory.push({ role: 'assistant', content: reply });
+    }
+  } catch(e) {
+    document.getElementById('ai-typing')?.remove();
+    addAIMsg('bot', 'Não consegui conectar. Verifique sua internet e tente novamente.');
+  }
+
+  document.getElementById('ai-send').disabled = false;
+  document.getElementById('ai-status-text').textContent = '● Online';
+}
+
+function quickAsk(msg) {
+  switchAITab('chat');
+  sendAI(msg);
+}
+
+async function gerarRelatorio() {
+  const clientKeys = Object.keys(CLIENTS).filter(k => k !== 'lucas');
+  if (!clientKeys.length) { addAIMsg('bot', 'Nenhum cliente encontrado.'); return; }
+
+  const options = clientKeys.map(k => CLIENTS[k].name).join(', ');
+  const nome = prompt(`Para qual cliente gerar o relatório?\n\n${options}`);
+  if (!nome) return;
+
+  const key = Object.keys(CLIENTS).find(k => CLIENTS[k].name.toLowerCase().includes(nome.toLowerCase()));
+  if (!key) { alert('Cliente não encontrado.'); return; }
+
+  const cl = CLIENTS[key];
+  const mesAtual = new Date().toISOString().slice(0,7);
+  const videos = (JSON.parse(localStorage.getItem('smm_videos') || '[]')).filter(v => v.client === key && v.date && v.date.startsWith(mesAtual));
+  const postados = videos.filter(v => v.status === 'postado').length;
+  const total = videos.length;
+
+  const prompt_text = `Gere um relatório mensal profissional e humanizado para o cliente ${cl.name} referente a ${mesAtual}.
+
+Dados do mês:
+- Total de vídeos: ${total}
+- Vídeos postados: ${postados}
+- Títulos postados: ${videos.filter(v=>v.status==='postado').map(v=>v.title).join(', ') || 'nenhum registrado'}
+
+O relatório deve:
+1. Ser direto e mostrar valor entregue
+2. Destacar o que foi produzido
+3. Ter um tom profissional mas próximo
+4. Terminar com próximos passos
+5. Máximo 3 parágrafos curtos`;
+
+  switchAITab('chat');
+  sendAI(prompt_text);
+}
+
+// Salva chave de API fora do buildDashboardData (não vai pro sync)
+const _origBuildDashboardData = buildDashboardData;
+buildDashboardData = function() {
+  const d = _origBuildDashboardData();
+  delete d.smm_ai_key; // nunca sincroniza a chave da API
+  return d;
+};
+
+// Carrega config ao abrir
+document.addEventListener('DOMContentLoaded', () => {
+  loadAIConfig();
+  const key = localStorage.getItem('smm_ai_key');
+  if (key) {
+    document.getElementById('ai-badge').style.display = 'flex';
+    document.getElementById('ai-badge').textContent = '✓';
+  }
+});
+</script>
 </body>
 </html>
