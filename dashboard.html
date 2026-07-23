@@ -3425,9 +3425,10 @@ function renderAll() {
 
   function restoreFromSync() {
     if (typeof DASHBOARD_SYNC === 'undefined') return;
-    // Só sobrescreve se o sync for mais recente que o que tem no celular
-    const localSavedAt = localStorage.getItem('smm_sync_savedAt') || '';
-    if (DASHBOARD_SYNC._savedAt <= localSavedAt) return;
+    // Só sincroniza se o dispositivo não tiver dados próprios
+    const hasVideos = localStorage.getItem('smm_videos');
+    const hasClients = localStorage.getItem('smm_clients');
+    if (hasVideos || hasClients) return;
     Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
       if (k.startsWith('smm_') && v) localStorage.setItem(k, v);
     });
