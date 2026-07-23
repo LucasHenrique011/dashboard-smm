@@ -35,7 +35,9 @@
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 15% 40%, #1e0a4a 0%, transparent 55%), radial-gradient(ellipse at 85% 80%, #0d0628 0%, transparent 50%); pointer-events: none; z-index: 0; }
+nav, .toolbar, .module, .modal-overlay { position: relative; z-index: 1; }
 
 /* Nav */
 nav { display: flex; gap: 0; background: var(--bg2); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
