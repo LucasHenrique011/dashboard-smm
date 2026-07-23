@@ -618,6 +618,33 @@ const PORTAL_DATA = {
       "roteiro": ""
     },
     {
+      "client": "pallefort",
+      "title": "Sua paleteira não desce? Testa isso antes de chamar manutenção",
+      "pillar": "ANÁLISE",
+      "date": "2026-07-21",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "[0:00-0:03] HOOK — câmera no pistão travado\nFala: Sua paleteira não está descendo? Antes de ligar pra manutenção, faz esse teste aqui.\nVisual: Câmera próxima do pistão/êmbolo, garfos travados\n\n[0:03-0:15] PROBLEMA\nFala: O problema mais comum é esse: o pistão hidráulico fica travado porque o óleo está sujo ou com nível baixo.\nVisual: Mostrar reservatório de óleo, abrir tampa\nLegenda: Óleo baixo ou sujo = pistão travado\n\n[0:15-0:35] DIAGNÓSTICO\nFala: Primeira coisa: abre o reservatório e olha o nível. Se estiver abaixo da marca, esse é o seu problema. Segunda: olha a cor — se estiver escuro ou com espuma, tá contaminado.\nVisual: Mão apontando para marca de nível → close no óleo escuro → comparação com óleo limpo\nLegenda: 1. Nível baixo → completa / 2. Óleo escuro → troca\n\n[0:35-0:48] SOLUÇÃO\nFala: Se for nível baixo: completa com óleo hidráulico ISO 46. Se for contaminado: drena tudo e troca. Na maioria dos casos, volta a funcionar na hora.\nVisual: Mão colocando óleo novo → fechar tampa → acionar alavanca → garfos descendo\nLegenda: Óleo ISO 46 — resolve em 15 minutos\n\n[0:48-0:55] CTA\nFala: Testou e não resolveu? Aí é hora de chamar a Pallefort. Link na bio.\nVisual: Logo Pallefort + contato"
+    },
+    {
+      "client": "pallefort",
+      "title": "Recebemos assim. Entregamos assim.",
+      "pillar": "AUTORIDADE",
+      "date": "2026-07-21",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "[0:00-0:03] HOOK — câmera na paleteira destruída (corte direto, sem intro)\nVisual: Paleteira enferrujada, garfos tortos, pistão vazando\nLegenda: Recebemos assim\n\n[0:03-0:12] PROCESSO — cortes rápidos (sem narração, só música)\nVisual: Desmontando pistão → peças enferrujadas → limpeza → peças novas → soldagem\nLegenda: Durante...\n\n[0:12-0:22] REVEAL — paleteira restaurada\nVisual: Câmera revela paleteira pintada, limpa, funcionando\nLegenda: Entregamos assim\n\n[0:22-0:28] CTA\nFala: Seu equipamento parado custa caro. A Pallefort resolve.\nLegenda: Orçamento → link na bio"
+    },
+    {
+      "client": "pallefort",
+      "title": "Cada quantos meses trocar o óleo da paleteira? A maioria erra.",
+      "pillar": "AUTORIDADE",
+      "date": "2026-07-21",
+      "status": "pendente",
+      "ref": "",
+      "roteiro": "[0:00-0:03] HOOK\nFala: Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?\nVisual: Câmera no reservatório de óleo\nLegenda: Você sabe a resposta?\n\n[0:03-0:10] ERRO COMUM\nFala: A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais.\nVisual: Close no óleo escuro e com espuma\nLegenda: Nunca trocar = pistão travado + vedações destruídas\n\n[0:10-0:30] RESPOSTA\nFala: A frequência correta depende do uso:\n• Uso leve/moderado — troca a cada 12 meses\n• Uso intenso, turno duplo — a cada 6 meses\n• Óleo escuro ou com espuma — troca imediata\nVisual: Tabela escrita à mão ou impressa\n\n[0:30-0:38] DICA BÔNUS\nFala: Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações.\nVisual: Close na embalagem ISO 46\n\n[0:38-0:44] CTA\nFala: Salva esse vídeo pra mandar pro responsável pela manutenção.\nVisual: Ícone de salvar + logo Pallefort"
+    },
+    {
       "client": "mania",
       "title": "ARRUMANDO ESTOQUE COM SACO",
       "pillar": "ATENÇÃO",
@@ -649,7 +676,7 @@ const PORTAL_DATA = {
       "title": "KIT BASICO PARA INICIANTES",
       "pillar": "DESEJO",
       "date": "2026-07-20",
-      "status": "postado",
+      "status": "editado",
       "ref": "https://www.instagram.com/reel/DUa_MmSEYKG/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
       "roteiro": "Kit Básico de Maquiagem para Iniciantes\n\n[Sweet Skin Ice Cream — Sérum Vitamina C]\n\n\"Ilumina, uniformiza e cuida da pele!\"\n\n\n[Sweet Skin Ice Cream — Gelado Hidratante]\n\n\"Hidrata e deixa a pele pronta pra make!\"\n\n\n[Dailus Base Ultra Cobertura Matte]\n\n\"Cobre tudo e dura 8 horas na pele!\"\n\n\n[Dailus Corretivo Líquido Eye Dye — Olheira]\n\n\"Apaga olheira e ilumina o olhar na hora!\"\n\n\n[Dailus Pó Translúcido Ultrafino]\n\n\"Fixa a make e deixa a pele sequinha!\"\n\n\n[Dailus Contorno & Iluminador & Blush — Pele de Milhões]\n\n\"Três em um: define, ilumina e dá cor!\"\n\n\n[Dailus Holo Blush]\n\n\"Blush holográfico pra um brilho diferenciado!\"\n\n\n[Dailus Lip Glossy Cake]\n\n\"Deixa o lábio hidratado, brilhoso e gostoso!\"\n\n\n rímel/máscara de cílios]\n\n\"Abre o olhar e finaliza qualquer make!\"\n\n\n[Dailus Fix Tudo — Bruma Facial Fixadora]\n\n\"Fixa tudo e aguenta o dia inteiro!\"\n\nVoce encontra todos os produtos aqui na MANIA DA WEB"
     },
@@ -775,7 +802,7 @@ const PORTAL_DATA = {
       "title": "TRANSIÇOES DE PRODUTOS",
       "pillar": "CONVERSÃO",
       "date": "2026-07-21",
-      "status": "editado",
+      "status": "pendente",
       "ref": "https://www.tiktok.com/@hellobossfilms/video/7431929201692806433?is_from_webapp=1&sender_device=pc",
       "roteiro": ""
     },
@@ -784,7 +811,7 @@ const PORTAL_DATA = {
       "title": "FOLGAR OU GRAVAR COMO O MARKETING",
       "pillar": "ATENÇÃO",
       "date": "2026-07-22",
-      "status": "postado",
+      "status": "editado",
       "ref": "https://www.tiktok.com/@nacionalgas22/video/7466448654082051334?is_from_webapp=1&sender_device=pc",
       "roteiro": ""
     },
@@ -838,7 +865,7 @@ const PORTAL_DATA = {
       "title": "vídeo estetico funcionarios trabalhando",
       "pillar": "AUTORIDADE",
       "date": "2026-07-20",
-      "status": "postado",
+      "status": "editado",
       "ref": "",
       "roteiro": ""
     },
@@ -847,7 +874,7 @@ const PORTAL_DATA = {
       "title": "ligacao com motorista",
       "pillar": "TREND",
       "date": "2026-07-21",
-      "status": "postado",
+      "status": "editado",
       "ref": "",
       "roteiro": ""
     },
@@ -910,7 +937,7 @@ const PORTAL_DATA = {
       "title": "um produto pra cada ocasiao",
       "pillar": "DESEJO",
       "date": "2026-07-21",
-      "status": "editado",
+      "status": "pendente",
       "ref": "https://www.instagram.com/reel/DT24vFtjQBc/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
       "roteiro": ""
     },
@@ -919,63 +946,9 @@ const PORTAL_DATA = {
       "title": "Dupla perfeita",
       "pillar": "DESEJO",
       "date": "2026-07-21",
-      "status": "editado",
+      "status": "pendente",
       "ref": "https://www.instagram.com/reel/Daxym2tOJ1E/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
       "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "ORIGINAL X PARALELA",
-      "pillar": "AUTORIDADE",
-      "date": "2026-07-22",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "BÍBLIA",
-      "pillar": "TREND",
-      "date": "2026-07-22",
-      "status": "editado",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "MENINO DO MARKETING",
-      "pillar": "TREND",
-      "date": "2026-07-22",
-      "status": "editado",
-      "ref": "",
-      "roteiro": ""
-    },
-    {
-      "client": "pallefort",
-      "title": "Sua paleteira não desce? Testa isso antes de chamar manutenção",
-      "pillar": "ANÁLISE",
-      "date": "2026-06-24",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": "[0:00-0:03] HOOK — câmera no pistão travado\nFala: Sua paleteira não está descendo? Antes de ligar pra manutenção, faz esse teste aqui.\nVisual: Câmera próxima do pistão/êmbolo, garfos travados\n\n[0:03-0:15] PROBLEMA\nFala: O problema mais comum é esse: o pistão hidráulico fica travado porque o óleo está sujo ou com nível baixo.\nVisual: Mostrar reservatório de óleo, abrir tampa\nLegenda: Óleo baixo ou sujo = pistão travado\n\n[0:15-0:35] DIAGNÓSTICO\nFala: Primeira coisa: abre o reservatório e olha o nível. Se estiver abaixo da marca, esse é o seu problema. Segunda: olha a cor — se estiver escuro ou com espuma, tá contaminado.\nVisual: Mão apontando para marca de nível → close no óleo escuro → comparação com óleo limpo\nLegenda: 1. Nível baixo → completa / 2. Óleo escuro → troca\n\n[0:35-0:48] SOLUÇÃO\nFala: Se for nível baixo: completa com óleo hidráulico ISO 46. Se for contaminado: drena tudo e troca. Na maioria dos casos, volta a funcionar na hora.\nVisual: Mão colocando óleo novo → fechar tampa → acionar alavanca → garfos descendo\nLegenda: Óleo ISO 46 — resolve em 15 minutos\n\n[0:48-0:55] CTA\nFala: Testou e não resolveu? Aí é hora de chamar a Pallefort. Link na bio.\nVisual: Logo Pallefort + contato"
-    },
-    {
-      "client": "pallefort",
-      "title": "Recebemos assim. Entregamos assim.",
-      "pillar": "AUTORIDADE",
-      "date": "2026-06-25",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": "[0:00-0:03] HOOK — câmera na paleteira destruída (corte direto, sem intro)\nVisual: Paleteira enferrujada, garfos tortos, pistão vazando\nLegenda: Recebemos assim\n\n[0:03-0:12] PROCESSO — cortes rápidos (sem narração, só música)\nVisual: Desmontando pistão → peças enferrujadas → limpeza → peças novas → soldagem\nLegenda: Durante...\n\n[0:12-0:22] REVEAL — paleteira restaurada\nVisual: Câmera revela paleteira pintada, limpa, funcionando\nLegenda: Entregamos assim\n\n[0:22-0:28] CTA\nFala: Seu equipamento parado custa caro. A Pallefort resolve.\nLegenda: Orçamento → link na bio"
-    },
-    {
-      "client": "pallefort",
-      "title": "Cada quantos meses trocar o óleo da paleteira? A maioria erra.",
-      "pillar": "AUTORIDADE",
-      "date": "2026-06-26",
-      "status": "pendente",
-      "ref": "",
-      "roteiro": "[0:00-0:03] HOOK\nFala: Cada quantos meses você deve trocar o óleo da sua paleteira hidráulica?\nVisual: Câmera no reservatório de óleo\nLegenda: Você sabe a resposta?\n\n[0:03-0:10] ERRO COMUM\nFala: A maioria das empresas nunca troca. Só lembra quando o equipamento para — aí o conserto custa 5x mais.\nVisual: Close no óleo escuro e com espuma\nLegenda: Nunca trocar = pistão travado + vedações destruídas\n\n[0:10-0:30] RESPOSTA\nFala: A frequência correta depende do uso:\n• Uso leve/moderado — troca a cada 12 meses\n• Uso intenso, turno duplo — a cada 6 meses\n• Óleo escuro ou com espuma — troca imediata\nVisual: Tabela escrita à mão ou impressa\n\n[0:30-0:38] DICA BÔNUS\nFala: Sempre use óleo hidráulico ISO 46. Não mistura marcas e não usa óleo de motor — destrói as vedações.\nVisual: Close na embalagem ISO 46\n\n[0:38-0:44] CTA\nFala: Salva esse vídeo pra mandar pro responsável pela manutenção.\nVisual: Ícone de salvar + logo Pallefort"
     }
   ],
   "metricas": {
@@ -1078,5 +1051,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-23T05:46:55.269Z"
+  "updatedAt": "2026-07-23T05:59:10.410Z"
 };
