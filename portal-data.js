@@ -910,7 +910,7 @@ const PORTAL_DATA = {
       "title": "um produto pra cada ocasiao",
       "pillar": "DESEJO",
       "date": "2026-07-21",
-      "status": "editado",
+      "status": "postado",
       "ref": "https://www.instagram.com/reel/DT24vFtjQBc/?utm_source=ig_web_copy_link&igsh=NTc4MTIwNjQ2YQ==",
       "roteiro": ""
     },
@@ -928,7 +928,7 @@ const PORTAL_DATA = {
       "title": "ORIGINAL X PARALELA",
       "pillar": "AUTORIDADE",
       "date": "2026-07-22",
-      "status": "pendente",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -937,7 +937,7 @@ const PORTAL_DATA = {
       "title": "BÍBLIA",
       "pillar": "TREND",
       "date": "2026-07-22",
-      "status": "editado",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -1087,5 +1087,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-23T19:19:55.823Z"
+  "updatedAt": "2026-07-25T11:01:59.845Z"
 };
