@@ -772,15 +772,6 @@ const PORTAL_DATA = {
     },
     {
       "client": "mania",
-      "title": "TRANSIÇOES DE PRODUTOS",
-      "pillar": "CONVERSÃO",
-      "date": "2026-07-21",
-      "status": "editado",
-      "ref": "https://www.tiktok.com/@hellobossfilms/video/7431929201692806433?is_from_webapp=1&sender_device=pc",
-      "roteiro": ""
-    },
-    {
-      "client": "mania",
       "title": "FOLGAR OU GRAVAR COMO O MARKETING",
       "pillar": "ATENÇÃO",
       "date": "2026-07-22",
@@ -1087,5 +1078,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-25T11:03:04.331Z"
+  "updatedAt": "2026-07-25T11:03:23.991Z"
 };
