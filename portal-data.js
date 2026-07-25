@@ -892,7 +892,7 @@ const PORTAL_DATA = {
       "title": "compilados da semana",
       "pillar": "PROJETO",
       "date": "2026-07-24",
-      "status": "pendente",
+      "status": "postado",
       "ref": "",
       "roteiro": ""
     },
@@ -1087,5 +1087,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-25T11:02:13.879Z"
+  "updatedAt": "2026-07-25T11:02:51.046Z"
 };
