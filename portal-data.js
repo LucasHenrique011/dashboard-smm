@@ -1078,5 +1078,5 @@ const PORTAL_DATA = {
     "lucas": "lucas2026ls",
     "pedroblackeguil": "pedr2026ls"
   },
-  "updatedAt": "2026-07-25T11:03:23.991Z"
+  "updatedAt": "2026-07-25T23:59:37.306Z"
 };
