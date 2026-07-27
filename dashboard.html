@@ -380,6 +380,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   </div>
   <div class="cards" id="client-cards"></div>
 
+  <!-- MAPA DE CONTEÚDO -->
+  <h2>Mapa de Conteúdo</h2>
+  <div id="mapa-conteudo" style="margin-bottom:32px;overflow-x:auto;"></div>
+
   <h2>Calendário Semanal</h2>
   <div class="week-nav">
     <button class="btn-sm" onclick="changeWeek(-1)">← Anterior</button>
@@ -433,9 +437,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <h2>Financeiro MEI</h2>
 
   <!-- Sub-abas financeiro -->
-  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid #2a2a3a;padding-bottom:0;">
-    <button id="fin-tab-mensal" onclick="showFinTab('mensal')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid #4f9;background:none;color:#4f9;cursor:pointer;margin-bottom:-1px;">Mensal</button>
-    <button id="fin-tab-ltv" onclick="showFinTab('ltv')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;color:#888;cursor:pointer;margin-bottom:-1px;">LTV por Cliente</button>
+  <div style="display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--border);padding-bottom:0;">
+    <button id="fin-tab-mensal" onclick="showFinTab('mensal')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid var(--accent);background:none;color:var(--accent2);cursor:pointer;margin-bottom:-1px;font-family:inherit;">Mensal</button>
+    <button id="fin-tab-ltv" onclick="showFinTab('ltv')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;color:var(--text3);cursor:pointer;margin-bottom:-1px;font-family:inherit;">LTV por Cliente</button>
+    <button id="fin-tab-cobranca" onclick="showFinTab('cobranca')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;color:var(--text3);cursor:pointer;margin-bottom:-1px;font-family:inherit;">🔔 Cobranças</button>
   </div>
 
   <!-- Conteúdo: Mensal -->
@@ -488,9 +493,14 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <div id="fin-content-ltv" style="display:none;">
     <div class="fin-grid" style="margin-bottom:24px;" id="ltv-summary"></div>
     <div class="fin-table">
-      <h3 style="margin:0 0 16px;color:#4f9;">LTV por Cliente</h3>
+      <h3 style="margin:0 0 16px;color:var(--accent2);">LTV por Cliente</h3>
       <div id="ltv-table"></div>
     </div>
+  </div>
+
+  <!-- Conteúdo: Cobranças -->
+  <div id="fin-content-cobranca" style="display:none;">
+    <div id="cobranca-lista"></div>
   </div>
 </div>
 
@@ -640,30 +650,42 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <div id="templates-container"></div>
   </div>
 
-  <!-- CALCULADORA DE PROPOSTA -->
+  <!-- GERADOR DE PROPOSTA -->
   <div class="card" style="margin-bottom:16px;">
-    <h3 style="color:#4f9;margin:0 0 12px;">💰 Calculadora de Proposta</h3>
+    <h3 style="color:var(--accent2);margin:0 0 16px;">📄 Gerador de Proposta Comercial</h3>
     <div class="form-row">
       <div class="form-group">
-        <label>Vídeos por semana</label>
-        <input type="number" id="calc-videos" value="3" oninput="calcularProposta()">
+        <label>Nome do cliente / empresa</label>
+        <input type="text" id="prop-cliente" placeholder="Ex: Empresa XYZ">
       </div>
       <div class="form-group">
-        <label>Horas por vídeo (média)</label>
-        <input type="number" id="calc-horas-video" value="2" step="0.5" oninput="calcularProposta()">
+        <label>Segmento</label>
+        <input type="text" id="prop-segmento" placeholder="Ex: Educação, Moda, Gastronomia">
       </div>
     </div>
     <div class="form-row">
       <div class="form-group">
-        <label>Seu valor/hora desejado (R$)</label>
-        <input type="number" id="calc-valor-hora" value="50" oninput="calcularProposta()">
+        <label>Vídeos por mês</label>
+        <input type="number" id="prop-videos" value="12" oninput="calcularProposta()">
       </div>
       <div class="form-group">
-        <label>Custos extras do cliente (R$)</label>
-        <input type="number" id="calc-custos" value="100" oninput="calcularProposta()">
+        <label>Valor mensal (R$)</label>
+        <input type="number" id="prop-valor" value="1200" oninput="calcularProposta()">
       </div>
     </div>
-    <div id="calc-resultado" style="margin-top:12px;padding:16px;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;"></div>
+    <div class="form-group">
+      <label>Pilares de conteúdo (separados por vírgula)</label>
+      <input type="text" id="prop-pilares" placeholder="Ex: Tendência, Autoridade, Bastidores">
+    </div>
+    <div class="form-group">
+      <label>Diferencial / resultado que já entregou</label>
+      <input type="text" id="prop-resultado" placeholder="Ex: +100 seguidores em 2 meses, 18k impressões">
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn-primary" onclick="gerarProposta()">Gerar proposta</button>
+      <button class="btn-sm" onclick="copiarProposta()">📋 Copiar texto</button>
+    </div>
+    <div id="prop-resultado-box" style="display:none;margin-top:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:12px;padding:18px;white-space:pre-wrap;font-size:13px;line-height:1.7;color:var(--text);font-family:inherit;"></div>
   </div>
 
 
@@ -1058,6 +1080,62 @@ function changeWeek(dir) {
   renderWeeklySummary();
   renderCards();
   renderTracker();
+  renderMapaConteudo();
+}
+
+function renderMapaConteudo() {
+  const container = document.getElementById('mapa-conteudo');
+  if (!container) return;
+  const clients = loadClients().filter(c => c.key !== 'lucas');
+  const videos = load('videos') || [];
+  const mesAtual = new Date().toISOString().slice(0,7);
+
+  // Coleta todos os pilares únicos
+  const todosOsPilares = [...new Set(clients.flatMap(c => c.pillars || []))].sort();
+  if (!todosOsPilares.length) { container.innerHTML = '<p style="color:var(--text3);font-size:13px;">Nenhum pilar cadastrado nos clientes.</p>'; return; }
+
+  const rows = clients.map(c => {
+    const videosCliente = videos.filter(v => v.client === c.key && v.date && v.date.startsWith(mesAtual));
+    const porPilar = {};
+    todosOsPilares.forEach(p => {
+      const total = videosCliente.filter(v => v.pillar === p).length;
+      const postados = videosCliente.filter(v => v.pillar === p && v.status === 'postado').length;
+      porPilar[p] = { total, postados };
+    });
+    return { c, porPilar, total: videosCliente.length };
+  });
+
+  const thStyle = 'padding:10px 14px;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;text-align:center;border-bottom:1px solid var(--border);';
+  const tdStyle = 'padding:10px 14px;text-align:center;border-bottom:1px solid var(--border);';
+
+  container.innerHTML = `
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+      <table style="width:100%;border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="${thStyle}text-align:left;">Cliente</th>
+            ${todosOsPilares.map(p => `<th style="${thStyle}">${p}</th>`).join('')}
+            <th style="${thStyle}">Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(({c, porPilar, total}) => `
+            <tr>
+              <td style="${tdStyle}text-align:left;font-weight:600;color:var(--text);">${c.name.split(' ')[0]}</td>
+              ${todosOsPilares.map(p => {
+                const {total: t, postados} = porPilar[p];
+                const cor = t === 0 ? 'var(--text3)' : postados > 0 ? 'var(--green)' : 'var(--yellow)';
+                const bg = t === 0 ? 'transparent' : postados > 0 ? 'rgba(52,211,153,.08)' : 'rgba(251,191,36,.08)';
+                return `<td style="${tdStyle}background:${bg};"><span style="font-size:15px;font-weight:700;color:${cor};">${t}</span>${postados > 0 ? `<div style="font-size:10px;color:var(--text3);">${postados} post.</div>` : ''}</td>`;
+              }).join('')}
+              <td style="${tdStyle}font-weight:700;color:var(--accent2);">${total}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      <div style="padding:10px 14px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);">
+        🟡 Criado mas não postado &nbsp;&nbsp; 🟢 Postado &nbsp;&nbsp; — Sem vídeo neste mês
+      </div>
+    </div>`;
 }
 
 function renderCalendar() {
@@ -1416,13 +1494,65 @@ function saveFinance(data) {
 }
 
 function showFinTab(tab) {
-  document.getElementById('fin-content-mensal').style.display = tab === 'mensal' ? '' : 'none';
-  document.getElementById('fin-content-ltv').style.display = tab === 'ltv' ? '' : 'none';
-  document.getElementById('fin-tab-mensal').style.color = tab === 'mensal' ? '#4f9' : '#888';
-  document.getElementById('fin-tab-mensal').style.borderBottomColor = tab === 'mensal' ? '#4f9' : 'transparent';
-  document.getElementById('fin-tab-ltv').style.color = tab === 'ltv' ? '#4f9' : '#888';
-  document.getElementById('fin-tab-ltv').style.borderBottomColor = tab === 'ltv' ? '#4f9' : 'transparent';
+  ['mensal','ltv','cobranca'].forEach(t => {
+    document.getElementById('fin-content-' + t).style.display = tab === t ? '' : 'none';
+    const btn = document.getElementById('fin-tab-' + t);
+    btn.style.color = tab === t ? 'var(--accent2)' : 'var(--text3)';
+    btn.style.borderBottomColor = tab === t ? 'var(--accent)' : 'transparent';
+  });
   if (tab === 'ltv') renderLTV();
+  if (tab === 'cobranca') renderCobrancas();
+}
+
+function renderCobrancas() {
+  const clients = loadClients();
+  const fin = JSON.parse(localStorage.getItem('smm_finance') || '{}');
+  const mesAtual = new Date().toISOString().slice(0,7);
+  const receitas = (fin[mesAtual] || {}).receitas || [];
+  const container = document.getElementById('cobranca-lista');
+
+  const rows = clients.filter(c => c.key !== 'lucas').map(c => {
+    const valorMes = parseFloat(String(c.valor || '0').replace(/[^\d,]/g,'').replace(',','.')) || 0;
+    const pago = receitas.some(r => r.name.toLowerCase().includes(c.key) || r.name.toLowerCase().includes(c.name.toLowerCase().split(' ')[0]));
+    return { c, valorMes, pago };
+  });
+
+  const totalPendente = rows.filter(r => !r.pago).reduce((s,r) => s + r.valorMes, 0);
+
+  container.innerHTML = `
+    <div class="fin-grid" style="margin-bottom:24px;">
+      <div class="fin-box"><div class="lbl">Clientes ativos</div><div class="val blue">${rows.length}</div></div>
+      <div class="fin-box"><div class="lbl">Pagamentos recebidos</div><div class="val green">${rows.filter(r=>r.pago).length}</div></div>
+      <div class="fin-box"><div class="lbl">Pendente de cobrança</div><div class="val red">R$ ${totalPendente.toLocaleString('pt-BR')}</div></div>
+    </div>
+    <div class="fin-table">
+      <h3 style="margin:0 0 16px;color:var(--accent2);">Status de cobrança — ${mesAtual.slice(5,7)}/${mesAtual.slice(0,4)}</h3>
+      ${rows.map(({c, valorMes, pago}) => `
+        <div class="fin-row">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:18px;">${pago ? '✅' : '🔔'}</span>
+            <div>
+              <div style="font-weight:600;color:var(--text);">${c.name}</div>
+              <div style="font-size:11px;color:var(--text3);">${pago ? 'Pagamento registrado' : 'Aguardando pagamento'}</div>
+            </div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:700;color:${pago ? 'var(--green)' : 'var(--red)'};">R$ ${valorMes.toLocaleString('pt-BR')}</div>
+            ${!pago ? `<button class="btn-sm btn-primary" style="margin-top:4px;font-size:10px;" onclick="marcarPago('${c.key}','${c.name}',${valorMes})">Marcar como pago</button>` : ''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function marcarPago(key, nome, valor) {
+  const fin = JSON.parse(localStorage.getItem('smm_finance') || '{}');
+  const mes = new Date().toISOString().slice(0,7);
+  if (!fin[mes]) fin[mes] = { receitas: [], custos: [] };
+  fin[mes].receitas.push({ name: nome, value: valor });
+  localStorage.setItem('smm_finance', JSON.stringify(fin));
+  renderCobrancas();
+  renderFinanceiro();
+  showBanner('✅ Pagamento de ' + nome + ' registrado!');
 }
 
 function renderLTV() {
@@ -3036,28 +3166,49 @@ function renderTemplates() {
 }
 
 // -- Calculadora de Proposta --
-function calcularProposta() {
-  const videos = parseInt(document.getElementById('calc-videos').value) || 3;
-  const horasVideo = parseFloat(document.getElementById('calc-horas-video').value) || 2;
-  const valorHora = parseFloat(document.getElementById('calc-valor-hora').value) || 50;
-  const custos = parseFloat(document.getElementById('calc-custos').value) || 0;
+function calcularProposta() {}
 
-  const horasMes = videos * 4 * horasVideo;
-  const valorBase = horasMes * valorHora;
-  const valorTotal = valorBase + custos;
-  const valorArredondado = Math.ceil(valorTotal / 50) * 50;
+function gerarProposta() {
+  const cliente = document.getElementById('prop-cliente').value.trim() || 'Cliente';
+  const segmento = document.getElementById('prop-segmento').value.trim() || 'seu segmento';
+  const videos = parseInt(document.getElementById('prop-videos').value) || 12;
+  const valor = parseFloat(document.getElementById('prop-valor').value) || 1200;
+  const pilares = document.getElementById('prop-pilares').value.trim() || 'Tendência, Autoridade e Bastidores';
+  const resultado = document.getElementById('prop-resultado').value.trim();
 
-  document.getElementById('calc-resultado').innerHTML = `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-      <div style="text-align:center;padding:10px;background:#252530;border-radius:8px;"><div style="font-size:11px;color:#888;">Horas/mês</div><div style="font-size:18px;font-weight:700;color:#6cf;">${horasMes}h</div></div>
-      <div style="text-align:center;padding:10px;background:#252530;border-radius:8px;"><div style="font-size:11px;color:#888;">Vídeos/mês</div><div style="font-size:18px;font-weight:700;color:#fc6;">${videos * 4}</div></div>
-    </div>
-    <div style="text-align:center;padding:16px;background:#1a3a2a;border:1px solid #4f9;border-radius:10px;">
-      <div style="font-size:12px;color:#888;">Valor sugerido</div>
-      <div style="font-size:28px;font-weight:700;color:#4f9;">R$ ${valorArredondado.toLocaleString('pt-BR')}/mês</div>
-      <div style="font-size:11px;color:#666;margin-top:4px;">Base: R$ ${valorBase.toFixed(0)} + custos R$ ${custos.toFixed(0)}</div>
-    </div>
-  `;
+  const resultadoTexto = resultado ? `\n\nJá ajudei clientes do setor a alcançarem resultados como: ${resultado}.` : '';
+
+  const texto = `Olá, ${cliente}! 👋
+
+Segue a proposta de Social Media para ${segmento}:
+
+━━━━━━━━━━━━━━━━━━━━━━
+📦 O QUE ESTÁ INCLUSO
+━━━━━━━━━━━━━━━━━━━━━━
+✅ ${videos} vídeos por mês
+✅ Roteiro e direção de conteúdo
+✅ Edição profissional
+✅ Estratégia de pilares: ${pilares}
+✅ Relatório mensal de resultados
+
+━━━━━━━━━━━━━━━━━━━━━━
+💰 INVESTIMENTO
+━━━━━━━━━━━━━━━━━━━━━━
+R$ ${valor.toLocaleString('pt-BR')}/mês${resultadoTexto}
+
+Trabalho com foco em resultado real — não só em views, mas em crescimento de autoridade e geração de oportunidades para o negócio.
+
+Qualquer dúvida, é só chamar! 🚀`;
+
+  const box = document.getElementById('prop-resultado-box');
+  box.style.display = 'block';
+  box.textContent = texto;
+}
+
+function copiarProposta() {
+  const box = document.getElementById('prop-resultado-box');
+  if (!box.textContent) return;
+  navigator.clipboard.writeText(box.textContent).then(() => showBanner('✅ Proposta copiada!'));
 }
 
 // -- Checklist de Entrega --
