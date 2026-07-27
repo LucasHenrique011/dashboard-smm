@@ -3444,15 +3444,15 @@ function renderAll() {
 
   function restoreFromSync() {
     if (typeof DASHBOARD_SYNC === 'undefined') return;
-    const syncDate = new Date(DASHBOARD_SYNC._savedAt || 0);
-    const localDate = new Date(localStorage.getItem('smm_sync_savedAt') || 0);
-    if (syncDate <= localDate) return;
+    const hasVideos = localStorage.getItem('smm_videos');
+    const hasClients = localStorage.getItem('smm_clients');
+    if (hasVideos || hasClients) return;
     Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
       if (k.startsWith('smm_') && k !== 'smm_ai_key' && v) localStorage.setItem(k, v);
     });
     localStorage.setItem('smm_sync_savedAt', DASHBOARD_SYNC._savedAt);
     CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
-    showBanner('✅ Dados atualizados do Mac!');
+    showBanner('✅ Dados sincronizados!');
   }
 })();
 
