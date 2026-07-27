@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Meu Financeiro</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+:root {
+  --bg: #08080f;
+  --surface: #14141f;
+  --surface2: #1c1c2e;
+  --border: #1f1f35;
+  --border2: #282840;
+  --accent: #7c5cfc;
+  --accent2: #a78bfa;
+  --green: #34d399;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --yellow: #fbbf24;
+  --text: #e2e2f0;
+  --text2: #9090b0;
+  --text3: #50506a;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 15% 40%, #1e0a4a 0%, transparent 55%); pointer-events: none; z-index: 0; }
+
+.header { position: relative; z-index: 1; padding: 20px 20px 0; display: flex; align-items: center; gap: 12px; }
+.logo { width: 36px; height: 36px; border-radius: 10px; background: linear-gradient(135deg,#7c5cfc,#a78bfa); display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 800; color: #fff; flex-shrink: 0; }
+.header-title { font-size: 16px; font-weight: 700; letter-spacing: -.02em; }
+.header-sub { font-size: 12px; color: var(--text3); margin-top: 1px; }
+
+.nav { position: relative; z-index: 1; display: flex; border-bottom: 1px solid var(--border); margin-top: 16px; padding: 0 20px; }
+.nav button { padding: 10px 16px; background: none; border: none; color: var(--text3); font-size: 13px; font-weight: 600; cursor: pointer; border-bottom: 2px solid transparent; transition: all .2s; font-family: inherit; }
+.nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+
+.page { display: none; padding: 20px; max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
+.page.active { display: block; }
+
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.box { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px; text-align: center; }
+.box .lbl { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; }
+.box .val { font-size: 22px; font-weight: 800; margin-top: 6px; letter-spacing: -.03em; }
+.val.green { color: var(--green); }
+.val.red { color: var(--red); }
+.val.blue { color: var(--blue); }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 14px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.card-title { font-size: 13px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: .06em; }
+
+.row { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+.row:last-child { border: none; }
+.row-name { flex: 1; font-size: 13px; color: var(--text); }
+.row-val { font-size: 13px; font-weight: 600; }
+.row-val.green { color: var(--green); }
+.row-val.red { color: var(--red); }
+.row-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 16px; padding: 2px 6px; border-radius: 6px; transition: color .15s; font-family: inherit; }
+.row-del:hover { color: var(--red); }
+
+.form-row { display: flex; gap: 8px; margin-top: 4px; }
+input { background: var(--surface2); border: 1px solid var(--border2); color: var(--text); padding: 9px 12px; border-radius: 10px; font-size: 13px; font-family: inherit; outline: none; transition: border-color .2s; }
+input:focus { border-color: var(--accent); }
+input::placeholder { color: var(--text3); }
+.inp-name { flex: 1; }
+.inp-val { width: 120px; }
+button.add { background: var(--accent); border: none; color: #fff; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
+button.add:hover { background: #6d4ef0; }
+
+.month-nav { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.month-nav span { font-size: 15px; font-weight: 700; flex: 1; text-align: center; }
+.btn-nav { background: var(--surface2); border: 1px solid var(--border2); color: var(--text2); padding: 7px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-nav:hover { border-color: var(--accent); color: var(--accent2); }
+
+.bar-wrap { background: var(--surface2); border-radius: 6px; height: 8px; overflow: hidden; margin-top: 8px; }
+.bar-fill { height: 100%; border-radius: 6px; transition: width .5s; }
+
+.hist-month { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
+.hist-month-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.hist-month-title { font-size: 14px; font-weight: 600; color: var(--text); }
+.hist-month-balance { font-size: 14px; font-weight: 700; }
+.hist-month-body { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+.hist-month-body.open { display: block; }
+.hist-row { display: flex; justify-content: space-between; font-size: 12px; padding: 3px 0; color: var(--text2); }
+
+.empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; }
+
+@media(max-width:500px) {
+  .grid3 { grid-template-columns: 1fr; }
+  .form-row { flex-wrap: wrap; }
+  .inp-val { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">💰</div>
+  <div>
+    <div class="header-title">Meu Financeiro</div>
+    <div class="header-sub" id="header-mes"></div>
+  </div>
+</div>
+
+<div class="nav">
+  <button class="active" onclick="showPage('mensal')">Mensal</button>
+  <button onclick="showPage('historico')">Histórico</button>
+</div>
+
+<div id="page-mensal" class="page active">
+  <div class="month-nav" style="margin-top:20px;">
+    <button class="btn-nav" onclick="changeMonth(-1)">← Anterior</button>
+    <span id="mes-label"></span>
+    <button class="btn-nav" onclick="changeMonth(1)">Próximo →</button>
+    <button class="btn-nav" onclick="changeMonth(0)">Hoje</button>
+  </div>
+
+  <div class="grid3" id="resumo"></div>
+
+  <!-- Receitas -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title" style="color:var(--green);">Receitas</span>
+    </div>
+    <div id="lista-receitas"></div>
+    <div class="form-row" style="margin-top:12px;">
+      <input class="inp-name" id="rec-nome" placeholder="Descrição" onkeydown="if(event.key==='Enter')addItem('receitas')">
+      <input class="inp-val" id="rec-val" type="number" placeholder="R$ 0,00" onkeydown="if(event.key==='Enter')addItem('receitas')">
+      <button class="add" onclick="addItem('receitas')">+ Adicionar</button>
+    </div>
+  </div>
+
+  <!-- Gastos -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title" style="color:var(--red);">Gastos</span>
+    </div>
+    <div id="lista-gastos"></div>
+    <div class="form-row" style="margin-top:12px;">
+      <input class="inp-name" id="gas-nome" placeholder="Descrição" onkeydown="if(event.key==='Enter')addItem('gastos')">
+      <input class="inp-val" id="gas-val" type="number" placeholder="R$ 0,00" onkeydown="if(event.key==='Enter')addItem('gastos')">
+      <button class="add" onclick="addItem('gastos')">+ Adicionar</button>
+    </div>
+  </div>
+</div>
+
+<div id="page-historico" class="page">
+  <div style="margin-top:20px;" id="historico-lista"></div>
+</div>
+
+<script>
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+let currentDate = new Date();
+
+function getKey(date) { return date.toISOString().slice(0,7); }
+function getData() { try { return JSON.parse(localStorage.getItem('fin_pessoal') || '{}'); } catch { return {}; } }
+function saveData(d) { localStorage.setItem('fin_pessoal', JSON.stringify(d)); }
+
+function getMes(key) {
+  const d = getData();
+  if (!d[key]) d[key] = { receitas: [], gastos: [] };
+  return d[key];
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+  if (id === 'historico') renderHistorico();
+}
+
+function changeMonth(dir) {
+  if (dir === 0) currentDate = new Date();
+  else currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + dir, 1);
+  render();
+}
+
+function fmt(val) { return 'R$ ' + Number(val).toLocaleString('pt-BR', {minimumFractionDigits:2}); }
+
+function addItem(tipo) {
+  const nomeEl = document.getElementById(tipo === 'receitas' ? 'rec-nome' : 'gas-nome');
+  const valEl = document.getElementById(tipo === 'receitas' ? 'rec-val' : 'gas-val');
+  const nome = nomeEl.value.trim();
+  const val = parseFloat(valEl.value);
+  if (!nome || !val || val <= 0) return;
+
+  const key = getKey(currentDate);
+  const d = getData();
+  if (!d[key]) d[key] = { receitas: [], gastos: [] };
+  d[key][tipo].push({ id: Date.now(), name: nome, value: val });
+  saveData(d);
+  nomeEl.value = ''; valEl.value = '';
+  render();
+}
+
+function removeItem(tipo, id) {
+  const key = getKey(currentDate);
+  const d = getData();
+  if (!d[key]) return;
+  d[key][tipo] = d[key][tipo].filter(i => i.id !== id);
+  saveData(d);
+  render();
+}
+
+function render() {
+  const key = getKey(currentDate);
+  const mes = getMes(key);
+  const mesNome = MESES[currentDate.getMonth()] + ' ' + currentDate.getFullYear();
+
+  document.getElementById('mes-label').textContent = mesNome;
+  document.getElementById('header-mes').textContent = mesNome;
+
+  const totalRec = mes.receitas.reduce((s,i) => s + Number(i.value), 0);
+  const totalGas = mes.gastos.reduce((s,i) => s + Number(i.value), 0);
+  const saldo = totalRec - totalGas;
+
+  document.getElementById('resumo').innerHTML = `
+    <div class="box"><div class="lbl">Receitas</div><div class="val green">${fmt(totalRec)}</div></div>
+    <div class="box"><div class="lbl">Gastos</div><div class="val red">${fmt(totalGas)}</div></div>
+    <div class="box"><div class="lbl">Saldo</div><div class="val ${saldo >= 0 ? 'blue' : 'red'}">${fmt(saldo)}</div></div>`;
+
+  const listaRec = document.getElementById('lista-receitas');
+  listaRec.innerHTML = mes.receitas.length ? mes.receitas.map(i => `
+    <div class="row">
+      <span class="row-name">${i.name}</span>
+      <span class="row-val green">${fmt(i.value)}</span>
+      <button class="row-del" onclick="removeItem('receitas',${i.id})">×</button>
+    </div>`).join('') : '<div class="empty">Nenhuma receita ainda</div>';
+
+  const listaGas = document.getElementById('lista-gastos');
+  listaGas.innerHTML = mes.gastos.length ? mes.gastos.map(i => `
+    <div class="row">
+      <span class="row-name">${i.name}</span>
+      <span class="row-val red">${fmt(i.value)}</span>
+      <button class="row-del" onclick="removeItem('gastos',${i.id})">×</button>
+    </div>`).join('') : '<div class="empty">Nenhum gasto ainda</div>';
+}
+
+function renderHistorico() {
+  const d = getData();
+  const keys = Object.keys(d).sort().reverse();
+  const el = document.getElementById('historico-lista');
+  if (!keys.length) { el.innerHTML = '<div class="empty">Nenhum dado ainda</div>'; return; }
+
+  el.innerHTML = keys.map(key => {
+    const mes = d[key];
+    const rec = mes.receitas.reduce((s,i) => s + Number(i.value), 0);
+    const gas = mes.gastos.reduce((s,i) => s + Number(i.value), 0);
+    const saldo = rec - gas;
+    const [ano, m] = key.split('-');
+    const nome = MESES[parseInt(m)-1] + ' ' + ano;
+    return `
+      <div class="hist-month">
+        <div class="hist-month-header" onclick="this.nextElementSibling.classList.toggle('open')">
+          <span class="hist-month-title">${nome}</span>
+          <span class="hist-month-balance" style="color:${saldo>=0?'var(--green)':'var(--red)'}">${fmt(saldo)}</span>
+        </div>
+        <div class="hist-month-body">
+          <div class="hist-row"><span style="color:var(--text3)">Receitas</span><span style="color:var(--green)">${fmt(rec)}</span></div>
+          <div class="hist-row"><span style="color:var(--text3)">Gastos</span><span style="color:var(--red)">${fmt(gas)}</span></div>
+          ${mes.receitas.map(i=>`<div class="hist-row"><span>↑ ${i.name}</span><span style="color:var(--green)">${fmt(i.value)}</span></div>`).join('')}
+          ${mes.gastos.map(i=>`<div class="hist-row"><span>↓ ${i.name}</span><span style="color:var(--red)">${fmt(i.value)}</span></div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
