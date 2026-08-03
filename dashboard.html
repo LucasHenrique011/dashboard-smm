@@ -380,14 +380,33 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   </div>
   <div class="cards" id="client-cards"></div>
 
-  <h2>Calendário Semanal</h2>
-  <div class="week-nav">
-    <button class="btn-sm" onclick="changeWeek(-1)">← Anterior</button>
-    <span id="week-label"></span>
-    <button class="btn-sm" onclick="changeWeek(1)">Próxima →</button>
-    <button class="btn-sm" onclick="changeWeek(0)">Hoje</button>
+  <!-- Tabs calendário -->
+  <div style="display:flex;gap:0;margin-bottom:16px;border-bottom:1px solid var(--border);">
+    <button id="cal-tab-semana" onclick="showCalTab('semana')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid var(--accent);background:none;color:var(--accent2);cursor:pointer;margin-bottom:-1px;font-family:inherit;">Semana</button>
+    <button id="cal-tab-mes" onclick="showCalTab('mes')" style="padding:8px 18px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;color:var(--text3);cursor:pointer;margin-bottom:-1px;font-family:inherit;">Mês completo</button>
   </div>
-  <div class="calendar-week" id="calendar"></div>
+
+  <!-- Calendário semanal -->
+  <div id="cal-content-semana">
+    <div class="week-nav">
+      <button class="btn-sm" onclick="changeWeek(-1)">← Anterior</button>
+      <span id="week-label"></span>
+      <button class="btn-sm" onclick="changeWeek(1)">Próxima →</button>
+      <button class="btn-sm" onclick="changeWeek(0)">Hoje</button>
+    </div>
+    <div class="calendar-week" id="calendar"></div>
+  </div>
+
+  <!-- Calendário mensal -->
+  <div id="cal-content-mes" style="display:none;">
+    <div class="week-nav">
+      <button class="btn-sm" onclick="changeMonthCal(-1)">← Anterior</button>
+      <span id="month-cal-label"></span>
+      <button class="btn-sm" onclick="changeMonthCal(1)">Próximo →</button>
+      <button class="btn-sm" onclick="changeMonthCal(0)">Hoje</button>
+    </div>
+    <div id="calendar-month"></div>
+  </div>
 
   <h2>Tracker da Semana</h2>
   <div class="filter-bar" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
@@ -1017,6 +1036,71 @@ function renderCards() {
 
 // -- Calendar --
 var currentWeekStart = getMonday(new Date());
+var currentMonthCal = new Date();
+
+function showCalTab(tab) {
+  document.getElementById('cal-content-semana').style.display = tab === 'semana' ? '' : 'none';
+  document.getElementById('cal-content-mes').style.display = tab === 'mes' ? '' : 'none';
+  document.getElementById('cal-tab-semana').style.color = tab === 'semana' ? 'var(--accent2)' : 'var(--text3)';
+  document.getElementById('cal-tab-semana').style.borderBottomColor = tab === 'semana' ? 'var(--accent)' : 'transparent';
+  document.getElementById('cal-tab-mes').style.color = tab === 'mes' ? 'var(--accent2)' : 'var(--text3)';
+  document.getElementById('cal-tab-mes').style.borderBottomColor = tab === 'mes' ? 'var(--accent)' : 'transparent';
+  if (tab === 'mes') renderMonthCalendar();
+}
+
+function changeMonthCal(dir) {
+  if (dir === 0) currentMonthCal = new Date();
+  else currentMonthCal = new Date(currentMonthCal.getFullYear(), currentMonthCal.getMonth() + dir, 1);
+  renderMonthCalendar();
+}
+
+function renderMonthCalendar() {
+  const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  const videos = load('videos') || [];
+  const ano = currentMonthCal.getFullYear();
+  const mes = currentMonthCal.getMonth();
+  const label = MESES[mes] + ' ' + ano;
+  document.getElementById('month-cal-label').textContent = label;
+
+  const primeiroDia = new Date(ano, mes, 1);
+  const ultimoDia = new Date(ano, mes + 1, 0);
+  const inicioGrid = new Date(primeiroDia);
+  const diaSemana = primeiroDia.getDay();
+  inicioGrid.setDate(inicioGrid.getDate() - (diaSemana === 0 ? 6 : diaSemana - 1));
+
+  const mesStr = `${ano}-${String(mes+1).padStart(2,'0')}`;
+  const videosMes = videos.filter(v => v.date && v.date.startsWith(mesStr));
+  const porDia = {};
+  videosMes.forEach(v => {
+    if (!porDia[v.date]) porDia[v.date] = [];
+    porDia[v.date].push(v);
+  });
+
+  const dias = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+  const statusColor = { pendente:'var(--red)', gravado:'var(--yellow)', editado:'var(--blue)', postado:'var(--green)' };
+  const clientColors = { cube:'var(--accent2)', pallefort:'var(--red)', mania:'var(--yellow)', pedroblackeguil:'var(--green)', lucas:'var(--green)' };
+
+  let html = `<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;">
+    ${dias.map(d => `<div style="text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:4px;text-transform:uppercase;letter-spacing:.05em;">${d}</div>`).join('')}
+  </div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;">`;
+
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const cur = new Date(inicioGrid);
+  for (let i = 0; i < 42; i++) {
+    const dateStr = cur.toISOString().slice(0,10);
+    const isOutro = cur.getMonth() !== mes;
+    const isHoje = cur.getTime() === hoje.getTime();
+    const vids = porDia[dateStr] || [];
+    html += `<div style="background:${isHoje ? 'rgba(124,92,252,.15)' : 'var(--surface)'};border:1px solid ${isHoje ? 'var(--accent)' : 'var(--border)'};border-radius:10px;padding:6px;min-height:80px;opacity:${isOutro ? '.35' : '1'};">
+      <div style="font-size:12px;font-weight:${isHoje?'700':'500'};color:${isHoje?'var(--accent2)':'var(--text2)'};margin-bottom:4px;">${cur.getDate()}</div>
+      ${vids.map(v => `<div style="font-size:10px;padding:2px 5px;margin:2px 0;border-radius:4px;background:rgba(255,255,255,.04);border-left:2px solid ${statusColor[v.status]||'var(--border2)'};color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${v.title}">${v.title||'Sem título'}</div>`).join('')}
+    </div>`;
+    cur.setDate(cur.getDate() + 1);
+    if (i === 34 && cur.getMonth() !== mes) break;
+  }
+  html += '</div>';
+  document.getElementById('calendar-month').innerHTML = html;
+}
 
 function getMonday(d) {
   const dt = new Date(d);
