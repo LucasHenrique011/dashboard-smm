@@ -367,6 +367,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button onclick="showModule('ferramentas')">Ferramentas</button>
   <button onclick="showModule('playbook')">Playbook</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
+  <button onclick="showModule('mapas')">Mapas</button>
 </nav>
 
 <!-- MODULE 1: CLIENTES -->
@@ -700,6 +701,86 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <div class="kanban" id="kanban"></div>
 </div>
 
+<!-- MODULE: MAPAS -->
+<div id="mod-mapas" class="module">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+    <h2 style="margin:0;">Mapas Mentais</h2>
+    <button class="btn-primary btn-sm" onclick="novoMapa()">+ Novo mapa</button>
+  </div>
+  <p style="color:var(--text2);font-size:13px;margin:10px 0 20px;line-height:1.6;">
+    Duplo clique no vazio cria um card. Arraste da bolinha da direita pra ligar dois cards.
+    Duplo clique no card pra escrever.
+  </p>
+  <div class="cards" id="mapas-cards"></div>
+</div>
+
+<style>
+#mm-editor { display:none; position:fixed; inset:0; z-index:300; background:var(--bg); flex-direction:column; }
+#mm-editor.open { display:flex; }
+#mm-bar { display:flex; align-items:center; gap:8px; padding:10px 14px; border-bottom:1px solid var(--border); background:var(--bg2); flex-wrap:wrap; flex-shrink:0; }
+#mm-bar .sep { width:1px; height:22px; background:var(--border2); margin:0 2px; }
+#mm-name { width:190px; font-weight:600; }
+#mm-bar select { width:auto; }
+.mm-sw { width:22px; height:22px; border-radius:7px; border:1px solid var(--border2); cursor:pointer; padding:0; flex-shrink:0; }
+.mm-sw:hover { transform:translateY(-1px); }
+#mm-viewport { flex:1; position:relative; overflow:hidden; touch-action:none; cursor:grab; background:
+  radial-gradient(circle at 1px 1px, rgba(255,255,255,.07) 1px, transparent 0) 0 0/22px 22px; }
+#mm-viewport.panning { cursor:grabbing; }
+#mm-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#mm-world { position:absolute; top:0; left:0; transform-origin:0 0; }
+.mm-node { position:absolute; width:180px; min-height:52px; background:var(--surface2); border:1.5px solid var(--border2);
+  border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.45; color:var(--text); cursor:grab;
+  word-wrap:break-word; white-space:pre-wrap; user-select:none; transition:box-shadow .15s, border-color .15s; }
+.mm-node:hover { border-color:var(--accent); }
+.mm-node.sel { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+.mm-node.edit { cursor:text; user-select:text; outline:none; }
+.mm-node.empty::before { content:'Escreva aqui...'; color:var(--text3); }
+.mm-handle { position:absolute; right:-7px; top:50%; margin-top:-7px; width:14px; height:14px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--bg); opacity:0; transition:opacity .15s; cursor:crosshair; }
+.mm-node:hover .mm-handle, .mm-node.sel .mm-handle { opacity:1; }
+#mm-hint { position:absolute; left:14px; bottom:12px; font-size:11px; color:var(--text3); pointer-events:none; }
+#mm-editor.open ~ #ai-btn, #mm-editor.open ~ #ai-panel { display:none !important; }
+#mm-zoom { position:absolute; right:14px; bottom:12px; display:flex; gap:6px; align-items:center;
+  background:var(--surface); border:1px solid var(--border2); border-radius:10px; padding:5px 8px; }
+#mm-zoom button { padding:2px 9px; font-size:13px; border-radius:7px; }
+#mm-zoom span { font-size:11px; color:var(--text2); min-width:38px; text-align:center; }
+.mm-empty { text-align:center; padding:40px 20px; color:var(--text3); font-size:13px; grid-column:1/-1; }
+@media(max-width:768px){ #mm-name{width:120px;} #mm-hint{display:none;} }
+</style>
+
+<div id="mm-editor">
+  <div id="mm-bar">
+    <button class="btn-sm" onclick="fecharMapa()">← Voltar</button>
+    <input id="mm-name" class="btn-sm" placeholder="Nome do mapa" oninput="mmRenomear(this.value)">
+    <select id="mm-client" class="btn-sm" onchange="mmSetCliente(this.value)"></select>
+    <div class="sep"></div>
+    <button class="btn-sm btn-primary" onclick="mmAddNode()">+ Card</button>
+    <div class="sep"></div>
+    <div id="mm-swatches" style="display:flex;gap:5px;"></div>
+    <div class="sep"></div>
+    <button class="btn-sm" onclick="mmExportPNG()">Baixar imagem</button>
+    <button class="btn-sm btn-danger" onclick="mmExcluir()">Excluir</button>
+  </div>
+  <div id="mm-viewport">
+    <svg id="mm-svg">
+      <defs>
+        <marker id="mm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 z" fill="#6b6b8a"/>
+        </marker>
+      </defs>
+      <g id="mm-edges"></g>
+    </svg>
+    <div id="mm-world"></div>
+    <div id="mm-hint">Duplo clique no vazio = novo card · Arraste a bolinha = ligar · Delete = apagar</div>
+    <div id="mm-zoom">
+      <button onclick="mmZoom(-1)">−</button>
+      <span id="mm-zoom-lbl">100%</span>
+      <button onclick="mmZoom(1)">+</button>
+      <button onclick="mmFit()" style="font-size:11px;">Centralizar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: Novo Prospect -->
 <div class="modal-overlay" id="prospect-modal">
   <div class="modal">
@@ -986,6 +1067,7 @@ function showModule(id) {
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('mod-' + id).classList.add('active');
   document.querySelector(`nav button[onclick="showModule('${id}')"]`).classList.add('active');
+  if (id === 'mapas') renderMapas();
 }
 
 // ============ MODULE 1: CLIENTES ============
@@ -4013,6 +4095,429 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('ai-badge').textContent = '✓';
   }
 });
+
+// ============ MAPAS MENTAIS ============
+const MM_CORES = {
+  roxo:   { bg:'#241a4d', bd:'#7c5cfc' },
+  verde:  { bg:'#123528', bd:'#34d399' },
+  amarelo:{ bg:'#3a2c0d', bd:'#fbbf24' },
+  vermelho:{ bg:'#3a1717', bd:'#f87171' },
+  azul:   { bg:'#12263f', bd:'#60a5fa' },
+  cinza:  { bg:'#1c1c2e', bd:'#3a3a55' }
+};
+const MM_W = 180;
+
+function mmLoad() { try { return JSON.parse(localStorage.getItem('smm_mapas')) || []; } catch { return []; } }
+function mmSave(d) { localStorage.setItem('smm_mapas', JSON.stringify(d)); if (typeof scheduleAutoBackup === 'function') scheduleAutoBackup(); }
+function mmUid() { return Math.random().toString(36).slice(2, 10); }
+
+let mmAtual = null, mmSel = null, mmSelEdge = null;
+let mmTx = 0, mmTy = 0, mmSc = 1;
+let mmSaveTimer = null;
+
+function mmPersist() {
+  if (!mmAtual) return;
+  clearTimeout(mmSaveTimer);
+  mmSaveTimer = setTimeout(() => {
+    const all = mmLoad();
+    const i = all.findIndex(m => m.id === mmAtual.id);
+    mmAtual.updatedAt = new Date().toISOString();
+    if (i >= 0) all[i] = mmAtual; else all.push(mmAtual);
+    mmSave(all);
+  }, 400);
+}
+
+function renderMapas() {
+  const all = mmLoad().sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  const el = document.getElementById('mapas-cards');
+  if (!all.length) {
+    el.innerHTML = '<div class="mm-empty">Nenhum mapa ainda. Clique em <strong>+ Novo mapa</strong> pra começar.</div>';
+    return;
+  }
+  el.innerHTML = all.map(m => {
+    const cl = CLIENTS[m.client];
+    const quando = m.updatedAt ? new Date(m.updatedAt).toLocaleDateString('pt-BR') : '—';
+    return `<div class="card" style="cursor:pointer;" onclick="abrirMapa('${m.id}')">
+      <div class="card-header">
+        <h3>${escapeHtml(m.name || 'Sem nome')}</h3>
+        <span class="card-valor" style="font-size:12px;">${m.nodes.length} ${m.nodes.length === 1 ? 'card' : 'cards'}</span>
+      </div>
+      ${cl ? `<div class="pillars"><span class="pill pill-${m.client}">${escapeHtml(cl.name)}</span></div>` : ''}
+      <p style="font-size:11px;color:var(--text3);margin-top:8px;">Editado em ${quando}</p>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+function novoMapa() {
+  const m = { id: mmUid(), name: 'Novo mapa', client: '', nodes: [], edges: [], updatedAt: new Date().toISOString() };
+  const all = mmLoad(); all.push(m); mmSave(all);
+  abrirMapa(m.id);
+}
+
+function abrirMapa(id) {
+  const m = mmLoad().find(x => x.id === id);
+  if (!m) return;
+  mmAtual = m; mmSel = null; mmSelEdge = null;
+  document.getElementById('mm-name').value = m.name || '';
+  const sel = document.getElementById('mm-client');
+  sel.innerHTML = '<option value="">Sem cliente</option>' +
+    Object.entries(CLIENTS).map(([k, c]) => `<option value="${k}">${escapeHtml(c.name)}</option>`).join('');
+  sel.value = m.client || '';
+  document.getElementById('mm-swatches').innerHTML = Object.entries(MM_CORES).map(([k, c]) =>
+    `<button class="mm-sw" style="background:${c.bg};border-color:${c.bd};" title="${k}" onclick="mmPintar('${k}')"></button>`).join('');
+  document.getElementById('mm-editor').classList.add('open');
+  // espera o editor ganhar tamanho na tela antes de medir/centralizar
+  requestAnimationFrame(() => { mmDraw(); mmFit(); });
+}
+
+function fecharMapa() {
+  clearTimeout(mmSaveTimer);
+  if (mmAtual) {
+    const all = mmLoad();
+    const i = all.findIndex(m => m.id === mmAtual.id);
+    mmAtual.updatedAt = new Date().toISOString();
+    if (i >= 0) all[i] = mmAtual; else all.push(mmAtual);
+    mmSave(all);
+  }
+  document.getElementById('mm-editor').classList.remove('open');
+  mmAtual = null;
+  renderMapas();
+}
+
+function mmRenomear(v) { if (mmAtual) { mmAtual.name = v; mmPersist(); } }
+function mmSetCliente(v) { if (mmAtual) { mmAtual.client = v; mmPersist(); } }
+
+function mmExcluir() {
+  if (!mmAtual || !confirm('Excluir este mapa? Não dá pra desfazer.')) return;
+  mmSave(mmLoad().filter(m => m.id !== mmAtual.id));
+  clearTimeout(mmSaveTimer);
+  document.getElementById('mm-editor').classList.remove('open');
+  mmAtual = null;
+  renderMapas();
+}
+
+// -- transform helpers --
+function mmApply() {
+  const t = `translate(${mmTx}px,${mmTy}px) scale(${mmSc})`;
+  document.getElementById('mm-world').style.transform = t;
+  document.getElementById('mm-edges').setAttribute('transform', `translate(${mmTx},${mmTy}) scale(${mmSc})`);
+  document.getElementById('mm-zoom-lbl').textContent = Math.round(mmSc * 100) + '%';
+}
+function mmToWorld(sx, sy) {
+  const r = document.getElementById('mm-viewport').getBoundingClientRect();
+  return { x: (sx - r.left - mmTx) / mmSc, y: (sy - r.top - mmTy) / mmSc };
+}
+function mmZoomAt(factor, sx, sy) {
+  const r = document.getElementById('mm-viewport').getBoundingClientRect();
+  const mx = sx - r.left, my = sy - r.top;
+  const ns = Math.min(2.5, Math.max(0.2, mmSc * factor));
+  const k = ns / mmSc;
+  mmTx = mx - (mx - mmTx) * k;
+  mmTy = my - (my - mmTy) * k;
+  mmSc = ns;
+  mmApply();
+}
+function mmZoom(dir) {
+  const r = document.getElementById('mm-viewport').getBoundingClientRect();
+  mmZoomAt(dir > 0 ? 1.2 : 1 / 1.2, r.left + r.width / 2, r.top + r.height / 2);
+}
+function mmFit() {
+  if (!mmAtual) return;
+  const vp = document.getElementById('mm-viewport').getBoundingClientRect();
+  if (vp.width < 50 || vp.height < 50) return; // ainda sem tamanho na tela
+  if (!mmAtual.nodes.length) {
+    mmSc = 1; mmTx = vp.width / 2 - MM_W / 2; mmTy = vp.height / 2 - 40; mmApply(); return;
+  }
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  mmAtual.nodes.forEach(n => {
+    x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y);
+    x1 = Math.max(x1, n.x + MM_W); y1 = Math.max(y1, n.y + (n.h || 52));
+  });
+  const pad = 60;
+  mmSc = Math.min(1.2, Math.max(0.2, Math.min((vp.width - pad * 2) / (x1 - x0), (vp.height - pad * 2) / (y1 - y0))));
+  mmTx = vp.width / 2 - ((x0 + x1) / 2) * mmSc;
+  mmTy = vp.height / 2 - ((y0 + y1) / 2) * mmSc;
+  mmApply();
+}
+
+// -- render --
+function mmDraw() {
+  if (!mmAtual) return;
+  const world = document.getElementById('mm-world');
+  world.innerHTML = mmAtual.nodes.map(n => {
+    const c = MM_CORES[n.color] || MM_CORES.roxo;
+    return `<div class="mm-node${mmSel === n.id ? ' sel' : ''}${n.text ? '' : ' empty'}" data-id="${n.id}"
+      style="left:${n.x}px;top:${n.y}px;background:${c.bg};border-color:${c.bd};">${escapeHtml(n.text)}<div class="mm-handle" data-handle="${n.id}"></div></div>`;
+  }).join('');
+  // mede altura real pra ancorar as setas
+  world.querySelectorAll('.mm-node').forEach(el => {
+    const n = mmAtual.nodes.find(x => x.id === el.dataset.id);
+    if (n) n.h = el.offsetHeight;
+  });
+  mmApply();
+  mmDrawEdges();
+}
+
+function mmAnchor(a, b) {
+  const cx = a.x + MM_W / 2, cy = a.y + (a.h || 52) / 2;
+  const tx = b.x + MM_W / 2, ty = b.y + (b.h || 52) / 2;
+  const dx = tx - cx, dy = ty - cy;
+  if (!dx && !dy) return { x: cx, y: cy };
+  const hw = MM_W / 2 + 4, hh = (a.h || 52) / 2 + 4;
+  const s = Math.min(dx ? hw / Math.abs(dx) : Infinity, dy ? hh / Math.abs(dy) : Infinity);
+  return { x: cx + dx * s, y: cy + dy * s };
+}
+
+function mmDrawEdges(temp) {
+  if (!mmAtual) return;
+  const g = document.getElementById('mm-edges');
+  const byId = {}; mmAtual.nodes.forEach(n => byId[n.id] = n);
+  let out = mmAtual.edges.map(e => {
+    const a = byId[e.from], b = byId[e.to];
+    if (!a || !b) return '';
+    const p = mmAnchor(a, b), q = mmAnchor(b, a);
+    const on = mmSelEdge === e.id;
+    return `<g><line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer;" data-edge="${e.id}"/>
+      <line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="${on ? '#a78bfa' : '#6b6b8a'}" stroke-width="${on ? 2.5 : 1.8}" marker-end="url(#mm-arrow)" style="pointer-events:none;"/></g>`;
+  }).join('');
+  if (temp) out += `<line x1="${temp.x1}" y1="${temp.y1}" x2="${temp.x2}" y2="${temp.y2}" stroke="#7c5cfc" stroke-width="2" stroke-dasharray="6 4" style="pointer-events:none;"/>`;
+  g.innerHTML = out;
+  document.getElementById('mm-svg').style.pointerEvents = 'none';
+  g.querySelectorAll('[data-edge]').forEach(l => { l.style.pointerEvents = 'stroke'; });
+  document.getElementById('mm-svg').style.pointerEvents = 'auto';
+}
+
+function mmAddNode(wx, wy) {
+  if (!mmAtual) return;
+  const vp = document.getElementById('mm-viewport').getBoundingClientRect();
+  if (wx == null) { const c = mmToWorld(vp.left + vp.width / 2, vp.top + vp.height / 2); wx = c.x - MM_W / 2; wy = c.y - 26; }
+  const n = { id: mmUid(), x: Math.round(wx), y: Math.round(wy), text: '', color: 'roxo', h: 52 };
+  mmAtual.nodes.push(n);
+  mmSel = n.id;
+  mmDraw(); mmPersist();
+  mmEditar(n.id);
+}
+
+function mmPintar(cor) {
+  if (!mmAtual || !mmSel) { showBanner('Selecione um card primeiro'); return; }
+  const n = mmAtual.nodes.find(x => x.id === mmSel);
+  if (n) { n.color = cor; mmDraw(); mmPersist(); }
+}
+
+function mmEditar(id) {
+  const el = document.querySelector(`.mm-node[data-id="${id}"]`);
+  if (!el) return;
+  const n = mmAtual.nodes.find(x => x.id === id);
+  el.classList.add('edit'); el.classList.remove('empty');
+  el.contentEditable = 'true';
+  el.textContent = n.text;
+  el.focus();
+  document.execCommand('selectAll', false, null);
+  const fim = () => {
+    el.contentEditable = 'false';
+    el.classList.remove('edit');
+    n.text = el.textContent.trim();
+    mmDraw(); mmPersist();
+  };
+  el.addEventListener('blur', fim, { once: true });
+  el.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape' || (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey))) { ev.preventDefault(); el.blur(); }
+    ev.stopPropagation();
+  });
+}
+
+function mmDelSel() {
+  if (!mmAtual) return;
+  if (mmSel) {
+    mmAtual.nodes = mmAtual.nodes.filter(n => n.id !== mmSel);
+    mmAtual.edges = mmAtual.edges.filter(e => e.from !== mmSel && e.to !== mmSel);
+    mmSel = null;
+  } else if (mmSelEdge) {
+    mmAtual.edges = mmAtual.edges.filter(e => e.id !== mmSelEdge);
+    mmSelEdge = null;
+  } else return;
+  mmDraw(); mmPersist();
+}
+
+// -- interações --
+(function mmBind() {
+  const vp = document.getElementById('mm-viewport');
+  if (!vp) return;
+  let mode = null, start = null, dragNode = null, linkFrom = null;
+  const pointers = new Map();
+  let pinchDist = 0;
+  const mmCap = id => { try { vp.setPointerCapture(id); } catch (_) {} };
+
+  vp.addEventListener('pointerdown', e => {
+    if (!mmAtual) return;
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      pinchDist = Math.hypot(a.x - b.x, a.y - b.y);
+      mode = 'pinch'; return;
+    }
+    const handle = e.target.closest('.mm-handle');
+    const node = e.target.closest('.mm-node');
+    const edge = e.target.closest('[data-edge]');
+
+    if (handle) {
+      linkFrom = handle.dataset.handle; mode = 'link';
+      mmCap(e.pointerId); e.preventDefault(); return;
+    }
+    if (node) {
+      if (node.classList.contains('edit')) return;
+      mmSel = node.dataset.id; mmSelEdge = null;
+      const n = mmAtual.nodes.find(x => x.id === mmSel);
+      const w = mmToWorld(e.clientX, e.clientY);
+      dragNode = { n, ox: w.x - n.x, oy: w.y - n.y, moved: false };
+      mode = 'node';
+      mmDraw();
+      mmCap(e.pointerId); e.preventDefault(); return;
+    }
+    if (edge) { mmSelEdge = edge.dataset.edge; mmSel = null; mmDraw(); return; }
+
+    mmSel = null; mmSelEdge = null; mmDraw();
+    mode = 'pan'; start = { x: e.clientX, y: e.clientY, tx: mmTx, ty: mmTy };
+    vp.classList.add('panning');
+    mmCap(e.pointerId);
+  });
+
+  vp.addEventListener('pointermove', e => {
+    if (!mmAtual || !mode) return;
+    if (pointers.has(e.pointerId)) pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (mode === 'pinch' && pointers.size === 2) {
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a.x - b.x, a.y - b.y);
+      if (pinchDist) mmZoomAt(d / pinchDist, (a.x + b.x) / 2, (a.y + b.y) / 2);
+      pinchDist = d; return;
+    }
+    if (mode === 'pan') {
+      mmTx = start.tx + (e.clientX - start.x);
+      mmTy = start.ty + (e.clientY - start.y);
+      mmApply(); return;
+    }
+    if (mode === 'node' && dragNode) {
+      const w = mmToWorld(e.clientX, e.clientY);
+      dragNode.n.x = Math.round(w.x - dragNode.ox);
+      dragNode.n.y = Math.round(w.y - dragNode.oy);
+      dragNode.moved = true;
+      const el = document.querySelector(`.mm-node[data-id="${dragNode.n.id}"]`);
+      if (el) { el.style.left = dragNode.n.x + 'px'; el.style.top = dragNode.n.y + 'px'; }
+      mmDrawEdges(); return;
+    }
+    if (mode === 'link' && linkFrom) {
+      const a = mmAtual.nodes.find(x => x.id === linkFrom);
+      const w = mmToWorld(e.clientX, e.clientY);
+      mmDrawEdges({ x1: a.x + MM_W, y1: a.y + (a.h || 52) / 2, x2: w.x, y2: w.y });
+    }
+  });
+
+  vp.addEventListener('pointerup', e => {
+    pointers.delete(e.pointerId);
+    if (!mmAtual) { mode = null; return; }
+    if (mode === 'link' && linkFrom) {
+      const alvo = document.elementFromPoint(e.clientX, e.clientY)?.closest('.mm-node');
+      if (alvo && alvo.dataset.id !== linkFrom) {
+        const to = alvo.dataset.id;
+        const existe = mmAtual.edges.some(x => (x.from === linkFrom && x.to === to) || (x.from === to && x.to === linkFrom));
+        if (!existe) mmAtual.edges.push({ id: mmUid(), from: linkFrom, to });
+      }
+      linkFrom = null; mmDraw(); mmPersist();
+    }
+    if (mode === 'node' && dragNode?.moved) mmPersist();
+    vp.classList.remove('panning');
+    mode = pointers.size ? mode : null;
+    dragNode = null;
+  });
+
+  vp.addEventListener('dblclick', e => {
+    if (!mmAtual) return;
+    const node = e.target.closest('.mm-node');
+    if (node) { mmEditar(node.dataset.id); return; }
+    const w = mmToWorld(e.clientX, e.clientY);
+    mmAddNode(w.x - MM_W / 2, w.y - 26);
+  });
+
+  vp.addEventListener('wheel', e => {
+    if (!mmAtual) return;
+    e.preventDefault();
+    if (e.ctrlKey || e.metaKey) mmZoomAt(e.deltaY < 0 ? 1.08 : 1 / 1.08, e.clientX, e.clientY);
+    else { mmTx -= e.deltaX; mmTy -= e.deltaY; mmApply(); }
+  }, { passive: false });
+
+  document.addEventListener('keydown', e => {
+    if (!mmAtual || !document.getElementById('mm-editor').classList.contains('open')) return;
+    if (document.querySelector('.mm-node.edit')) return;
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); mmDelSel(); }
+    else if (e.key === 'Escape') { mmSel = null; mmSelEdge = null; mmDraw(); }
+    else if (e.key === 'Enter' && mmSel) { e.preventDefault(); mmEditar(mmSel); }
+  });
+})();
+
+// -- exportar imagem --
+function mmExportPNG() {
+  if (!mmAtual || !mmAtual.nodes.length) { showBanner('Mapa vazio'); return; }
+  const P = 50, LH = 18, CPL = 22;
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  mmAtual.nodes.forEach(n => {
+    x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y);
+    x1 = Math.max(x1, n.x + MM_W); y1 = Math.max(y1, n.y + (n.h || 52));
+  });
+  const W = x1 - x0 + P * 2, H = y1 - y0 + P * 2;
+  const byId = {}; mmAtual.nodes.forEach(n => byId[n.id] = n);
+
+  const linhas = mmAtual.edges.map(e => {
+    const a = byId[e.from], b = byId[e.to];
+    if (!a || !b) return '';
+    const p = mmAnchor(a, b), q = mmAnchor(b, a);
+    return `<line x1="${p.x - x0 + P}" y1="${p.y - y0 + P}" x2="${q.x - x0 + P}" y2="${q.y - y0 + P}" stroke="#6b6b8a" stroke-width="1.8" marker-end="url(#ar)"/>`;
+  }).join('');
+
+  const caixas = mmAtual.nodes.map(n => {
+    const c = MM_CORES[n.color] || MM_CORES.roxo;
+    const h = n.h || 52;
+    const palavras = String(n.text || '').split(/\s+/).filter(Boolean);
+    const ls = []; let cur = '';
+    palavras.forEach(p => {
+      if ((cur + ' ' + p).trim().length > CPL) { if (cur) ls.push(cur); cur = p; } else cur = (cur + ' ' + p).trim();
+    });
+    if (cur) ls.push(cur);
+    const tx = n.x - x0 + P + 12;
+    const ty = n.y - y0 + P + (h - (ls.length - 1) * LH) / 2 + 4;
+    return `<rect x="${n.x - x0 + P}" y="${n.y - y0 + P}" width="${MM_W}" height="${h}" rx="12" fill="${c.bg}" stroke="${c.bd}" stroke-width="1.5"/>
+      <text x="${tx}" y="${ty}" fill="#e2e2f0" font-family="Inter,-apple-system,sans-serif" font-size="13">${ls.map((l, i) =>
+        `<tspan x="${tx}" dy="${i ? LH : 0}">${escapeHtml(l)}</tspan>`).join('')}</text>`;
+  }).join('');
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b6b8a"/></marker></defs>
+    <rect width="${W}" height="${H}" fill="#0d0d18"/>${linhas}${caixas}</svg>`;
+
+  const img = new Image();
+  img.onload = () => {
+    const cv = document.createElement('canvas');
+    cv.width = W * 2; cv.height = H * 2;
+    const ctx = cv.getContext('2d');
+    ctx.scale(2, 2); ctx.drawImage(img, 0, 0);
+    cv.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = (mmAtual.name || 'mapa').replace(/[^\w\s-]/g, '') + '.png';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      showBanner('✅ Imagem baixada!');
+    });
+  };
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
 </script>
 </body>
 </html>
