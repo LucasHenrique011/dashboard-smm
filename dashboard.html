@@ -703,15 +703,34 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 
 <!-- MODULE: MAPAS -->
 <div id="mod-mapas" class="module">
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
-    <h2 style="margin:0;">Mapas Mentais</h2>
-    <button class="btn-primary btn-sm" onclick="novoMapa()">+ Novo mapa</button>
+  <!-- Nível 1: lista de projetos -->
+  <div id="mm-nivel-projetos">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h2 style="margin:0;">Projetos</h2>
+      <button class="btn-primary btn-sm" onclick="novoProjeto()">+ Novo projeto</button>
+    </div>
+    <p style="color:var(--text2);font-size:13px;margin:10px 0 20px;line-height:1.6;">
+      Cada projeto guarda vários mapas. Ex: um projeto por cliente, ou um por campanha.
+    </p>
+    <div class="cards" id="projetos-cards"></div>
   </div>
-  <p style="color:var(--text2);font-size:13px;margin:10px 0 20px;line-height:1.6;">
-    Duplo clique no vazio cria um card. Arraste da bolinha da direita pra ligar dois cards.
-    Duplo clique no card pra escrever.
-  </p>
-  <div class="cards" id="mapas-cards"></div>
+
+  <!-- Nível 2: mapas dentro do projeto -->
+  <div id="mm-nivel-mapas" style="display:none;">
+    <button class="btn-sm" onclick="voltarProjetos()" style="margin-bottom:14px;">← Todos os projetos</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <h2 style="margin:0;" id="mm-projeto-titulo"></h2>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">
+        <button class="btn-sm" onclick="renomearProjeto()">Renomear</button>
+        <button class="btn-sm btn-danger" onclick="excluirProjeto()">Excluir projeto</button>
+        <button class="btn-primary btn-sm" onclick="novoMapa()">+ Novo mapa</button>
+      </div>
+    </div>
+    <p style="color:var(--text2);font-size:13px;margin:10px 0 20px;line-height:1.6;">
+      Duplo clique no vazio cria um card. Arraste a bolinha pro vazio pra já criar o próximo card ligado.
+    </p>
+    <div class="cards" id="mapas-cards"></div>
+  </div>
 </div>
 
 <style>
@@ -723,38 +742,45 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 #mm-bar select { width:auto; }
 .mm-sw { width:22px; height:22px; border-radius:7px; border:1px solid var(--border2); cursor:pointer; padding:0; flex-shrink:0; }
 .mm-sw:hover { transform:translateY(-1px); }
-#mm-viewport { flex:1; position:relative; overflow:hidden; touch-action:none; cursor:grab; background:
-  radial-gradient(circle at 1px 1px, rgba(255,255,255,.07) 1px, transparent 0) 0 0/22px 22px; }
+#mm-viewport { flex:1; position:relative; overflow:hidden; touch-action:none; cursor:grab;
+  background:#ffffff radial-gradient(circle at 1px 1px, rgba(20,20,45,.16) 1px, transparent 0) 0 0/22px 22px; }
 #mm-viewport.panning { cursor:grabbing; }
 #mm-svg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 #mm-world { position:absolute; top:0; left:0; transform-origin:0 0; }
-.mm-node { position:absolute; width:180px; min-height:52px; background:var(--surface2); border:1.5px solid var(--border2);
-  border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.45; color:var(--text); cursor:grab;
+.mm-node { position:absolute; width:180px; min-height:52px; background:#fff; border:1.5px solid #c9c9d9;
+  border-radius:12px; padding:10px 12px; font-size:13px; line-height:1.45; color:#23233a; cursor:grab;
   word-wrap:break-word; white-space:pre-wrap; user-select:none; transition:box-shadow .15s, border-color .15s; }
-.mm-node:hover { border-color:var(--accent); }
-.mm-node.sel { border-color:var(--accent); box-shadow:0 0 0 3px var(--accent-glow); }
+.mm-node:hover { box-shadow:0 2px 10px rgba(20,20,45,.12); }
+.mm-node.sel { box-shadow:0 0 0 3px rgba(124,92,252,.35); }
 .mm-node.edit { cursor:text; user-select:text; outline:none; }
-.mm-node.empty::before { content:'Escreva aqui...'; color:var(--text3); }
+.mm-node.empty::before { content:'Escreva aqui...'; color:#a0a0b4; }
 .mm-handle { position:absolute; right:-7px; top:50%; margin-top:-7px; width:14px; height:14px; border-radius:50%;
-  background:var(--accent); border:2px solid var(--bg); opacity:0; transition:opacity .15s; cursor:crosshair; }
+  background:var(--accent); border:2px solid #fff; opacity:0; transition:opacity .15s; cursor:crosshair;
+  box-shadow:0 1px 4px rgba(20,20,45,.3); }
 .mm-node:hover .mm-handle, .mm-node.sel .mm-handle { opacity:1; }
-#mm-hint { position:absolute; left:14px; bottom:12px; font-size:11px; color:var(--text3); pointer-events:none; }
+#mm-hint { position:absolute; left:14px; bottom:12px; font-size:11px; color:#8a8a9e; pointer-events:none; }
 #mm-editor.open ~ #ai-btn, #mm-editor.open ~ #ai-panel { display:none !important; }
 #mm-zoom { position:absolute; right:14px; bottom:12px; display:flex; gap:6px; align-items:center;
-  background:var(--surface); border:1px solid var(--border2); border-radius:10px; padding:5px 8px; }
-#mm-zoom button { padding:2px 9px; font-size:13px; border-radius:7px; }
-#mm-zoom span { font-size:11px; color:var(--text2); min-width:38px; text-align:center; }
+  background:#fff; border:1px solid #d8d8e4; border-radius:10px; padding:5px 8px; box-shadow:0 2px 8px rgba(20,20,45,.1); }
+#mm-zoom button { padding:2px 9px; font-size:13px; border-radius:7px; background:#f2f2f7; border:1px solid #dcdce6; color:#43435c; }
+#mm-zoom button:hover { background:#e8e6ff; border-color:var(--accent); color:#4a3ab0; transform:none; }
+#mm-zoom span { font-size:11px; color:#6a6a84; min-width:38px; text-align:center; }
 .mm-empty { text-align:center; padding:40px 20px; color:var(--text3); font-size:13px; grid-column:1/-1; }
-@media(max-width:768px){ #mm-name{width:120px;} #mm-hint{display:none;} }
+.mm-crumb { font-size:12px; color:var(--text3); white-space:nowrap; }
+#mm-bar button:disabled { opacity:.35; cursor:default; }
+#mm-bar button:disabled:hover { background:var(--surface2); border-color:var(--border2); color:var(--text); transform:none; }
+@media(max-width:768px){ #mm-name{width:120px;} #mm-hint{display:none;} .mm-crumb{display:none;} }
 </style>
 
 <div id="mm-editor">
   <div id="mm-bar">
     <button class="btn-sm" onclick="fecharMapa()">← Voltar</button>
     <input id="mm-name" class="btn-sm" placeholder="Nome do mapa" oninput="mmRenomear(this.value)">
-    <select id="mm-client" class="btn-sm" onchange="mmSetCliente(this.value)"></select>
+    <span class="mm-crumb" id="mm-crumb"></span>
     <div class="sep"></div>
     <button class="btn-sm btn-primary" onclick="mmAddNode()">+ Card</button>
+    <button class="btn-sm" id="mm-btn-undo" onclick="mmDesfazer()" title="Desfazer (Ctrl+Z)">↩ Desfazer</button>
+    <button class="btn-sm" id="mm-btn-redo" onclick="mmRefazer()" title="Refazer (Ctrl+Shift+Z)">↪ Refazer</button>
     <div class="sep"></div>
     <div id="mm-swatches" style="display:flex;gap:5px;"></div>
     <div class="sep"></div>
@@ -765,13 +791,13 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <svg id="mm-svg">
       <defs>
         <marker id="mm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-          <path d="M0,0 L10,5 L0,10 z" fill="#6b6b8a"/>
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8fa6"/>
         </marker>
       </defs>
       <g id="mm-edges"></g>
     </svg>
     <div id="mm-world"></div>
-    <div id="mm-hint">Duplo clique no vazio = novo card · Arraste a bolinha = ligar · Delete = apagar</div>
+    <div id="mm-hint">Duplo clique no vazio = novo card · Arraste a bolinha pro vazio = card já ligado · Ctrl+Z = desfazer</div>
     <div id="mm-zoom">
       <button onclick="mmZoom(-1)">−</button>
       <span id="mm-zoom-lbl">100%</span>
@@ -4098,22 +4124,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ============ MAPAS MENTAIS ============
 const MM_CORES = {
-  roxo:   { bg:'#241a4d', bd:'#7c5cfc' },
-  verde:  { bg:'#123528', bd:'#34d399' },
-  amarelo:{ bg:'#3a2c0d', bd:'#fbbf24' },
-  vermelho:{ bg:'#3a1717', bd:'#f87171' },
-  azul:   { bg:'#12263f', bd:'#60a5fa' },
-  cinza:  { bg:'#1c1c2e', bd:'#3a3a55' }
+  roxo:   { bg:'#EEEDFE', bd:'#7F77DD', tx:'#2E2870' },
+  verde:  { bg:'#E1F5EE', bd:'#1D9E75', tx:'#0F5E48' },
+  amarelo:{ bg:'#FAEEDA', bd:'#EF9F27', tx:'#7A4A0A' },
+  vermelho:{ bg:'#FAECE7', bd:'#D85A30', tx:'#8A3517' },
+  azul:   { bg:'#E6F1FB', bd:'#378ADD', tx:'#14548F' },
+  cinza:  { bg:'#F2F1EC', bd:'#A8A69C', tx:'#4A4945' }
 };
 const MM_W = 180;
 
 function mmLoad() { try { return JSON.parse(localStorage.getItem('smm_mapas')) || []; } catch { return []; } }
 function mmSave(d) { localStorage.setItem('smm_mapas', JSON.stringify(d)); if (typeof scheduleAutoBackup === 'function') scheduleAutoBackup(); }
 function mmUid() { return Math.random().toString(36).slice(2, 10); }
+function projLoad() { try { return JSON.parse(localStorage.getItem('smm_mm_projetos')) || []; } catch { return []; } }
+function projSave(d) { localStorage.setItem('smm_mm_projetos', JSON.stringify(d)); if (typeof scheduleAutoBackup === 'function') scheduleAutoBackup(); }
 
 let mmAtual = null, mmSel = null, mmSelEdge = null;
+let mmProjAtual = null;
 let mmTx = 0, mmTy = 0, mmSc = 1;
 let mmSaveTimer = null;
+let mmUndoPilha = [], mmRedoPilha = [];
+
+// -- desfazer / refazer --
+function mmSnap() {
+  if (!mmAtual) return;
+  mmUndoPilha.push(JSON.stringify({ nodes: mmAtual.nodes, edges: mmAtual.edges }));
+  if (mmUndoPilha.length > 60) mmUndoPilha.shift();
+  mmRedoPilha = [];
+  mmBotoesHist();
+}
+function mmRestaurar(json) {
+  const s = JSON.parse(json);
+  mmAtual.nodes = s.nodes; mmAtual.edges = s.edges;
+  mmSel = null; mmSelEdge = null;
+  mmDraw(); mmPersist(); mmBotoesHist();
+}
+function mmDesfazer() {
+  if (!mmAtual || !mmUndoPilha.length) return;
+  mmRedoPilha.push(JSON.stringify({ nodes: mmAtual.nodes, edges: mmAtual.edges }));
+  mmRestaurar(mmUndoPilha.pop());
+}
+function mmRefazer() {
+  if (!mmAtual || !mmRedoPilha.length) return;
+  mmUndoPilha.push(JSON.stringify({ nodes: mmAtual.nodes, edges: mmAtual.edges }));
+  mmRestaurar(mmRedoPilha.pop());
+}
+function mmBotoesHist() {
+  const u = document.getElementById('mm-btn-undo'), r = document.getElementById('mm-btn-redo');
+  if (u) u.disabled = !mmUndoPilha.length;
+  if (r) r.disabled = !mmRedoPilha.length;
+}
 
 function mmPersist() {
   if (!mmAtual) return;
@@ -4127,34 +4187,118 @@ function mmPersist() {
   }, 400);
 }
 
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+}
+
+// Mapas antigos (sem projeto) vão pra um projeto "Geral" na primeira vez
+function mmMigrar() {
+  const mapas = mmLoad();
+  const soltos = mapas.filter(m => !m.projeto);
+  if (!soltos.length) return;
+  const projs = projLoad();
+  let geral = projs.find(p => p.name === 'Geral');
+  if (!geral) { geral = { id: mmUid(), name: 'Geral', createdAt: new Date().toISOString() }; projs.push(geral); projSave(projs); }
+  soltos.forEach(m => m.projeto = geral.id);
+  mmSave(mapas);
+}
+
 function renderMapas() {
-  const all = mmLoad().sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
-  const el = document.getElementById('mapas-cards');
-  if (!all.length) {
-    el.innerHTML = '<div class="mm-empty">Nenhum mapa ainda. Clique em <strong>+ Novo mapa</strong> pra começar.</div>';
+  mmMigrar();
+  const nivelP = document.getElementById('mm-nivel-projetos');
+  const nivelM = document.getElementById('mm-nivel-mapas');
+  if (mmProjAtual) { nivelP.style.display = 'none'; nivelM.style.display = ''; renderMapasDoProjeto(); }
+  else { nivelP.style.display = ''; nivelM.style.display = 'none'; renderProjetos(); }
+}
+
+function renderProjetos() {
+  const projs = projLoad();
+  const mapas = mmLoad();
+  const el = document.getElementById('projetos-cards');
+  if (!projs.length) {
+    el.innerHTML = '<div class="mm-empty">Nenhum projeto ainda. Clique em <strong>+ Novo projeto</strong> pra começar.</div>';
     return;
   }
-  el.innerHTML = all.map(m => {
-    const cl = CLIENTS[m.client];
+  const comData = projs.map(p => {
+    const meus = mapas.filter(m => m.projeto === p.id);
+    const ult = meus.map(m => m.updatedAt || '').sort().pop() || p.createdAt || '';
+    return { p, qtd: meus.length, ult };
+  }).sort((a, b) => (b.ult || '').localeCompare(a.ult || ''));
+
+  el.innerHTML = comData.map(({ p, qtd, ult }) => `
+    <div class="card" style="cursor:pointer;" onclick="abrirProjeto('${p.id}')">
+      <div class="card-header">
+        <h3>📁 ${escapeHtml(p.name)}</h3>
+        <span class="card-valor" style="font-size:12px;">${qtd} ${qtd === 1 ? 'mapa' : 'mapas'}</span>
+      </div>
+      <p style="font-size:11px;color:var(--text3);margin-top:8px;">
+        ${ult ? 'Mexido em ' + new Date(ult).toLocaleDateString('pt-BR') : 'Vazio'}
+      </p>
+    </div>`).join('');
+}
+
+function renderMapasDoProjeto() {
+  const proj = projLoad().find(p => p.id === mmProjAtual);
+  if (!proj) { mmProjAtual = null; renderMapas(); return; }
+  document.getElementById('mm-projeto-titulo').textContent = '📁 ' + proj.name;
+  const meus = mmLoad().filter(m => m.projeto === mmProjAtual)
+    .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+  const el = document.getElementById('mapas-cards');
+  if (!meus.length) {
+    el.innerHTML = '<div class="mm-empty">Nenhum mapa neste projeto. Clique em <strong>+ Novo mapa</strong>.</div>';
+    return;
+  }
+  el.innerHTML = meus.map(m => {
     const quando = m.updatedAt ? new Date(m.updatedAt).toLocaleDateString('pt-BR') : '—';
     return `<div class="card" style="cursor:pointer;" onclick="abrirMapa('${m.id}')">
       <div class="card-header">
         <h3>${escapeHtml(m.name || 'Sem nome')}</h3>
         <span class="card-valor" style="font-size:12px;">${m.nodes.length} ${m.nodes.length === 1 ? 'card' : 'cards'}</span>
       </div>
-      ${cl ? `<div class="pillars"><span class="pill pill-${m.client}">${escapeHtml(cl.name)}</span></div>` : ''}
       <p style="font-size:11px;color:var(--text3);margin-top:8px;">Editado em ${quando}</p>
     </div>`;
   }).join('');
 }
 
-function escapeHtml(s) {
-  return String(s == null ? '' : s).replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function novoProjeto() {
+  const nome = prompt('Nome do projeto:');
+  if (!nome || !nome.trim()) return;
+  const projs = projLoad();
+  const p = { id: mmUid(), name: nome.trim(), createdAt: new Date().toISOString() };
+  projs.push(p); projSave(projs);
+  abrirProjeto(p.id);
+}
+
+function abrirProjeto(id) { mmProjAtual = id; renderMapas(); }
+function voltarProjetos() { mmProjAtual = null; renderMapas(); }
+
+function renomearProjeto() {
+  const projs = projLoad();
+  const p = projs.find(x => x.id === mmProjAtual);
+  if (!p) return;
+  const nome = prompt('Novo nome do projeto:', p.name);
+  if (!nome || !nome.trim()) return;
+  p.name = nome.trim(); projSave(projs); renderMapas();
+}
+
+function excluirProjeto() {
+  const projs = projLoad();
+  const p = projs.find(x => x.id === mmProjAtual);
+  if (!p) return;
+  const qtd = mmLoad().filter(m => m.projeto === p.id).length;
+  const aviso = qtd
+    ? `Excluir o projeto "${p.name}" e os ${qtd} ${qtd === 1 ? 'mapa' : 'mapas'} dentro dele? Não dá pra desfazer.`
+    : `Excluir o projeto "${p.name}"?`;
+  if (!confirm(aviso)) return;
+  mmSave(mmLoad().filter(m => m.projeto !== p.id));
+  projSave(projs.filter(x => x.id !== p.id));
+  mmProjAtual = null; renderMapas();
 }
 
 function novoMapa() {
-  const m = { id: mmUid(), name: 'Novo mapa', client: '', nodes: [], edges: [], updatedAt: new Date().toISOString() };
+  if (!mmProjAtual) return;
+  const m = { id: mmUid(), projeto: mmProjAtual, name: 'Novo mapa', nodes: [], edges: [], updatedAt: new Date().toISOString() };
   const all = mmLoad(); all.push(m); mmSave(all);
   abrirMapa(m.id);
 }
@@ -4163,11 +4307,10 @@ function abrirMapa(id) {
   const m = mmLoad().find(x => x.id === id);
   if (!m) return;
   mmAtual = m; mmSel = null; mmSelEdge = null;
+  mmUndoPilha = []; mmRedoPilha = []; mmBotoesHist();
   document.getElementById('mm-name').value = m.name || '';
-  const sel = document.getElementById('mm-client');
-  sel.innerHTML = '<option value="">Sem cliente</option>' +
-    Object.entries(CLIENTS).map(([k, c]) => `<option value="${k}">${escapeHtml(c.name)}</option>`).join('');
-  sel.value = m.client || '';
+  const proj = projLoad().find(p => p.id === m.projeto);
+  document.getElementById('mm-crumb').textContent = proj ? '📁 ' + proj.name : '';
   document.getElementById('mm-swatches').innerHTML = Object.entries(MM_CORES).map(([k, c]) =>
     `<button class="mm-sw" style="background:${c.bg};border-color:${c.bd};" title="${k}" onclick="mmPintar('${k}')"></button>`).join('');
   document.getElementById('mm-editor').classList.add('open');
@@ -4190,7 +4333,6 @@ function fecharMapa() {
 }
 
 function mmRenomear(v) { if (mmAtual) { mmAtual.name = v; mmPersist(); } }
-function mmSetCliente(v) { if (mmAtual) { mmAtual.client = v; mmPersist(); } }
 
 function mmExcluir() {
   if (!mmAtual || !confirm('Excluir este mapa? Não dá pra desfazer.')) return;
@@ -4252,7 +4394,7 @@ function mmDraw() {
   world.innerHTML = mmAtual.nodes.map(n => {
     const c = MM_CORES[n.color] || MM_CORES.roxo;
     return `<div class="mm-node${mmSel === n.id ? ' sel' : ''}${n.text ? '' : ' empty'}" data-id="${n.id}"
-      style="left:${n.x}px;top:${n.y}px;background:${c.bg};border-color:${c.bd};">${escapeHtml(n.text)}<div class="mm-handle" data-handle="${n.id}"></div></div>`;
+      style="left:${n.x}px;top:${n.y}px;background:${c.bg};border-color:${c.bd};color:${c.tx};">${escapeHtml(n.text)}<div class="mm-handle" data-handle="${n.id}"></div></div>`;
   }).join('');
   // mede altura real pra ancorar as setas
   world.querySelectorAll('.mm-node').forEach(el => {
@@ -4283,7 +4425,7 @@ function mmDrawEdges(temp) {
     const p = mmAnchor(a, b), q = mmAnchor(b, a);
     const on = mmSelEdge === e.id;
     return `<g><line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="transparent" stroke-width="14" style="pointer-events:stroke;cursor:pointer;" data-edge="${e.id}"/>
-      <line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="${on ? '#a78bfa' : '#6b6b8a'}" stroke-width="${on ? 2.5 : 1.8}" marker-end="url(#mm-arrow)" style="pointer-events:none;"/></g>`;
+      <line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}" stroke="${on ? '#7c5cfc' : '#8a8fa6'}" stroke-width="${on ? 2.5 : 1.8}" marker-end="url(#mm-arrow)" style="pointer-events:none;"/></g>`;
   }).join('');
   if (temp) out += `<line x1="${temp.x1}" y1="${temp.y1}" x2="${temp.x2}" y2="${temp.y2}" stroke="#7c5cfc" stroke-width="2" stroke-dasharray="6 4" style="pointer-events:none;"/>`;
   g.innerHTML = out;
@@ -4292,8 +4434,9 @@ function mmDrawEdges(temp) {
   document.getElementById('mm-svg').style.pointerEvents = 'auto';
 }
 
-function mmAddNode(wx, wy) {
-  if (!mmAtual) return;
+function mmAddNode(wx, wy, semSnap) {
+  if (!mmAtual) return null;
+  if (!semSnap) mmSnap();
   const vp = document.getElementById('mm-viewport').getBoundingClientRect();
   if (wx == null) { const c = mmToWorld(vp.left + vp.width / 2, vp.top + vp.height / 2); wx = c.x - MM_W / 2; wy = c.y - 26; }
   const n = { id: mmUid(), x: Math.round(wx), y: Math.round(wy), text: '', color: 'roxo', h: 52 };
@@ -4301,12 +4444,13 @@ function mmAddNode(wx, wy) {
   mmSel = n.id;
   mmDraw(); mmPersist();
   mmEditar(n.id);
+  return n;
 }
 
 function mmPintar(cor) {
   if (!mmAtual || !mmSel) { showBanner('Selecione um card primeiro'); return; }
   const n = mmAtual.nodes.find(x => x.id === mmSel);
-  if (n) { n.color = cor; mmDraw(); mmPersist(); }
+  if (n) { mmSnap(); n.color = cor; mmDraw(); mmPersist(); }
 }
 
 function mmEditar(id) {
@@ -4318,10 +4462,12 @@ function mmEditar(id) {
   el.textContent = n.text;
   el.focus();
   document.execCommand('selectAll', false, null);
+  const antes = n.text;
   const fim = () => {
     el.contentEditable = 'false';
     el.classList.remove('edit');
-    n.text = el.textContent.trim();
+    const novo = el.textContent.trim();
+    if (novo !== antes) { n.text = antes; mmSnap(); n.text = novo; }
     mmDraw(); mmPersist();
   };
   el.addEventListener('blur', fim, { once: true });
@@ -4333,6 +4479,7 @@ function mmEditar(id) {
 
 function mmDelSel() {
   if (!mmAtual) return;
+  if (mmSel || mmSelEdge) mmSnap();
   if (mmSel) {
     mmAtual.nodes = mmAtual.nodes.filter(n => n.id !== mmSel);
     mmAtual.edges = mmAtual.edges.filter(e => e.from !== mmSel && e.to !== mmSel);
@@ -4374,6 +4521,7 @@ function mmDelSel() {
       mmSel = node.dataset.id; mmSelEdge = null;
       const n = mmAtual.nodes.find(x => x.id === mmSel);
       const w = mmToWorld(e.clientX, e.clientY);
+      mmSnap(); // guarda a posição antes de arrastar (desfeito no pointerup se não moveu)
       dragNode = { n, ox: w.x - n.x, oy: w.y - n.y, moved: false };
       mode = 'node';
       mmDraw();
@@ -4424,13 +4572,27 @@ function mmDelSel() {
     if (mode === 'link' && linkFrom) {
       const alvo = document.elementFromPoint(e.clientX, e.clientY)?.closest('.mm-node');
       if (alvo && alvo.dataset.id !== linkFrom) {
+        // soltou em cima de outro card: só liga
         const to = alvo.dataset.id;
         const existe = mmAtual.edges.some(x => (x.from === linkFrom && x.to === to) || (x.from === to && x.to === linkFrom));
-        if (!existe) mmAtual.edges.push({ id: mmUid(), from: linkFrom, to });
+        if (!existe) { mmSnap(); mmAtual.edges.push({ id: mmUid(), from: linkFrom, to }); }
+        linkFrom = null; mmDraw(); mmPersist();
+      } else if (!alvo) {
+        // soltou no vazio: cria um card novo já ligado
+        const de = linkFrom;
+        const w = mmToWorld(e.clientX, e.clientY);
+        mmSnap();
+        const novo = mmAddNode(w.x - MM_W / 2, w.y - 26, true);
+        if (novo) mmAtual.edges.push({ id: mmUid(), from: de, to: novo.id });
+        linkFrom = null; mmDrawEdges(); mmPersist();
+      } else {
+        linkFrom = null; mmDraw();
       }
-      linkFrom = null; mmDraw(); mmPersist();
     }
-    if (mode === 'node' && dragNode?.moved) mmPersist();
+    if (mode === 'node' && dragNode) {
+      if (dragNode.moved) mmPersist();
+      else { mmUndoPilha.pop(); mmBotoesHist(); } // não moveu: descarta o snapshot
+    }
     vp.classList.remove('panning');
     mode = pointers.size ? mode : null;
     dragNode = null;
@@ -4456,6 +4618,13 @@ function mmDelSel() {
     if (document.querySelector('.mm-node.edit')) return;
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    const cmd = e.ctrlKey || e.metaKey;
+    if (cmd && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) mmRefazer(); else mmDesfazer();
+      return;
+    }
+    if (cmd && e.key.toLowerCase() === 'y') { e.preventDefault(); mmRefazer(); return; }
     if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); mmDelSel(); }
     else if (e.key === 'Escape') { mmSel = null; mmSelEdge = null; mmDraw(); }
     else if (e.key === 'Enter' && mmSel) { e.preventDefault(); mmEditar(mmSel); }
@@ -4478,7 +4647,7 @@ function mmExportPNG() {
     const a = byId[e.from], b = byId[e.to];
     if (!a || !b) return '';
     const p = mmAnchor(a, b), q = mmAnchor(b, a);
-    return `<line x1="${p.x - x0 + P}" y1="${p.y - y0 + P}" x2="${q.x - x0 + P}" y2="${q.y - y0 + P}" stroke="#6b6b8a" stroke-width="1.8" marker-end="url(#ar)"/>`;
+    return `<line x1="${p.x - x0 + P}" y1="${p.y - y0 + P}" x2="${q.x - x0 + P}" y2="${q.y - y0 + P}" stroke="#8a8fa6" stroke-width="1.8" marker-end="url(#ar)"/>`;
   }).join('');
 
   const caixas = mmAtual.nodes.map(n => {
@@ -4493,13 +4662,13 @@ function mmExportPNG() {
     const tx = n.x - x0 + P + 12;
     const ty = n.y - y0 + P + (h - (ls.length - 1) * LH) / 2 + 4;
     return `<rect x="${n.x - x0 + P}" y="${n.y - y0 + P}" width="${MM_W}" height="${h}" rx="12" fill="${c.bg}" stroke="${c.bd}" stroke-width="1.5"/>
-      <text x="${tx}" y="${ty}" fill="#e2e2f0" font-family="Inter,-apple-system,sans-serif" font-size="13">${ls.map((l, i) =>
+      <text x="${tx}" y="${ty}" fill="${c.tx}" font-family="Inter,-apple-system,sans-serif" font-size="13">${ls.map((l, i) =>
         `<tspan x="${tx}" dy="${i ? LH : 0}">${escapeHtml(l)}</tspan>`).join('')}</text>`;
   }).join('');
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b6b8a"/></marker></defs>
-    <rect width="${W}" height="${H}" fill="#0d0d18"/>${linhas}${caixas}</svg>`;
+    <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8fa6"/></marker></defs>
+    <rect width="${W}" height="${H}" fill="#ffffff"/>${linhas}${caixas}</svg>`;
 
   const img = new Image();
   img.onload = () => {
