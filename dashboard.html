@@ -728,7 +728,9 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button class="btn-sm" onclick="renomearProjeto()">Renomear</button>
         <button class="btn-sm btn-danger" onclick="excluirProjeto()">Excluir projeto</button>
+        <button class="btn-sm" onclick="document.getElementById('mm-import-file').click()">↑ Importar mapa</button>
         <button class="btn-primary btn-sm" onclick="novoMapa()">+ Novo mapa</button>
+        <input type="file" id="mm-import-file" accept=".json" style="display:none" onchange="mmImportarArquivo(event)">
       </div>
     </div>
     <p style="color:var(--text2);font-size:13px;margin:10px 0 20px;line-height:1.6;">
@@ -802,6 +804,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <div id="mm-swatches" style="display:flex;gap:5px;"></div>
     <div class="sep"></div>
     <button class="btn-sm" onclick="mmExportPNG()">Baixar imagem</button>
+    <button class="btn-sm" onclick="mmExportarJSON()" title="Salva o mapa num arquivo pra guardar ou reusar">↓ Salvar arquivo</button>
     <button class="btn-sm btn-danger" onclick="mmExcluir()">Excluir</button>
   </div>
   <div id="mm-viewport">
@@ -4958,33 +4961,39 @@ Regras:
 
 // desenha a árvore de cima pra baixo, sem sobrepor
 function mmMontarArvore(plano) {
-  const GAP_X = 40, GAP_Y = 130, ALT = 60;
+  const GAP_X = 70, GAP_Y = 26, ALT = 64;
   const novos = [], novasSetas = [];
 
-  // 1. transforma o JSON numa árvore simples
-  const raiz = { texto: plano.titulo || 'Mapa', cor: 'roxo', filhos: [] };
-  (plano.ramos || []).slice(0, 6).forEach(r => {
-    raiz.filhos.push({
-      texto: r.texto || '', cor: MM_CORES[r.cor] ? r.cor : 'azul',
-      filhos: (r.filhos || []).slice(0, 5).map(f => ({ texto: f.texto || '', cor: MM_CORES[r.cor] ? r.cor : 'azul', filhos: [] }))
-    });
-  });
+  // 1. transforma o JSON numa árvore — aceita quantos níveis vierem
+  function normalizar(n, corPai) {
+    const cor = MM_CORES[n.cor] ? n.cor : (corPai || 'azul');
+    return {
+      texto: n.texto || n.titulo || '',
+      cor,
+      filhos: (n.filhos || n.ramos || []).slice(0, 10).map(f => normalizar(f, cor))
+    };
+  }
+  const raiz = {
+    texto: plano.titulo || plano.texto || 'Mapa',
+    cor: MM_CORES[plano.cor] ? plano.cor : 'roxo',
+    filhos: (plano.ramos || plano.filhos || []).slice(0, 10).map(r => normalizar(r, null))
+  };
 
-  // 2. largura que cada galho ocupa
-  function largura(n) {
-    if (!n.filhos.length) return MM_W + GAP_X;
-    return Math.max(MM_W + GAP_X, n.filhos.reduce((s, f) => s + largura(f), 0));
+  // 2. altura que cada galho ocupa (cresce pra direita, como no Miro)
+  function altura(n) {
+    if (!n.filhos.length) return ALT + GAP_Y;
+    return Math.max(ALT + GAP_Y, n.filhos.reduce((s, f) => s + altura(f), 0));
   }
 
-  // 3. posiciona: pai fica centralizado sobre os filhos
-  function posicionar(n, esq, nivel) {
-    const w = largura(n);
+  // 3. posiciona: pai fica centralizado na vertical em relação aos filhos
+  function posicionar(n, topo, nivel) {
+    const h = altura(n);
     if (n.filhos.length) {
-      let x = esq;
-      n.filhos.forEach(f => { posicionar(f, x, nivel + 1); x += largura(f); });
+      let y = topo;
+      n.filhos.forEach(f => { posicionar(f, y, nivel + 1); y += altura(f); });
     }
-    n.x = Math.round(esq + w / 2 - MM_W / 2);
-    n.y = nivel * GAP_Y;
+    n.x = nivel * (MM_W + GAP_X);
+    n.y = Math.round(topo + h / 2 - ALT / 2);
     const id = mmUid();
     n.id = id;
     novos.push({ id, x: n.x, y: n.y, text: n.texto, color: n.cor, h: ALT });
@@ -5001,6 +5010,56 @@ function mmMontarArvore(plano) {
 
   mmAtual.nodes.push(...novos);
   mmAtual.edges.push(...novasSetas);
+}
+
+// -- importar / exportar mapa em arquivo --
+function mmImportarArquivo(ev) {
+  const arq = ev.target.files && ev.target.files[0];
+  ev.target.value = '';
+  if (!arq || !mmProjAtual) return;
+  const leitor = new FileReader();
+  leitor.onload = () => {
+    let plano;
+    try { plano = JSON.parse(leitor.result); }
+    catch { alert('Esse arquivo não é um mapa válido.'); return; }
+
+    const nome = plano.name || plano.titulo || 'Mapa importado';
+    const novo = { id: mmUid(), projeto: mmProjAtual, name: nome, nodes: [], edges: [], updatedAt: new Date().toISOString() };
+    const todos = mmLoad(); todos.push(novo); mmSave(todos);
+
+    mmAtual = novo; mmSel = null; mmSelEdge = null;
+    mmUndoPilha = []; mmRedoPilha = [];
+
+    if (Array.isArray(plano.nodes)) {
+      // arquivo salvo por aqui: mantém posições exatas
+      mmAtual.nodes = plano.nodes;
+      mmAtual.edges = Array.isArray(plano.edges) ? plano.edges : [];
+    } else {
+      // estrutura em árvore: monta e organiza sozinho
+      mmMontarArvore(plano);
+    }
+
+    const todos2 = mmLoad();
+    const i = todos2.findIndex(m => m.id === novo.id);
+    if (i >= 0) todos2[i] = mmAtual;
+    mmSave(todos2);
+
+    abrirMapa(novo.id);
+    showBanner('✅ Mapa "' + nome + '" importado!');
+  };
+  leitor.readAsText(arq);
+}
+
+function mmExportarJSON() {
+  if (!mmAtual) return;
+  const dados = { name: mmAtual.name, nodes: mmAtual.nodes, edges: mmAtual.edges };
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (mmAtual.name || 'mapa').replace(/[^\w\s-]/g, '').trim() + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  showBanner('✅ Arquivo do mapa salvo!');
 }
 
 // -- exportar imagem --
