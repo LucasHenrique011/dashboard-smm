@@ -264,17 +264,18 @@ let currentWeekStart = getMonday(new Date());
 // ============ INIT ============
 function init() {
   const params = new URLSearchParams(window.location.search);
-  clientKey = params.get('c');
   const token = params.get('k');
-  if (!clientKey || !token) { showError(); return; }
+  if (!token || !/^[a-z0-9-]{10,60}$/i.test(token)) { showError(); return; }
 
+  // Cada cliente tem o próprio arquivo, com o código secreto no nome.
+  // Sem o código certo, o arquivo simplesmente não existe.
   const script = document.createElement('script');
-  script.src = 'portal-data.js?t=' + Date.now();
+  script.src = 'p-' + token + '.js?t=' + Date.now();
   script.onload = function() {
-    if (typeof PORTAL_DATA === 'undefined' || !PORTAL_DATA.clients[clientKey]) { showError(); return; }
-    if (PORTAL_DATA.tokens[clientKey] !== token) { showError(); return; }
-    clientData = PORTAL_DATA.clients[clientKey];
-    allVideos = PORTAL_DATA.videos.filter(v => v.client === clientKey);
+    if (typeof PORTAL_DATA === 'undefined' || !PORTAL_DATA.client) { showError(); return; }
+    clientKey = PORTAL_DATA.key;
+    clientData = PORTAL_DATA.client;
+    allVideos = PORTAL_DATA.videos || [];
     showApp();
   };
   script.onerror = function() { showError(); };
@@ -342,8 +343,7 @@ function renderClientMetrics() {
   const [y, m] = metMonth.split('-');
   document.getElementById('met-month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
 
-  const allMet = PORTAL_DATA.metricas || {};
-  const clientMet = allMet[clientKey] || {};
+  const clientMet = PORTAL_DATA.metricas || {}; // já vem só deste cliente
   const met = clientMet[metMonth] || {};
   const prevM = parseInt(m) - 1 < 1 ? `${parseInt(y)-1}-12` : `${y}-${String(parseInt(m)-1).padStart(2,'0')}`;
   const prev = clientMet[prevM] || {};

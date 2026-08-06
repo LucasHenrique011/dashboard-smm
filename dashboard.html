@@ -357,7 +357,12 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
   <button class="btn-sm btn-primary" onclick="publicarTudo()">🚀 Publicar tudo</button>
   <button class="btn-sm" onclick="publicarPortalLinks()">📋 Links clientes</button>
+  <button class="btn-sm" onclick="syncConfigurar()" title="Sincronizar com o celular">🔒 Sincronização</button>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+</div>
+<div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:0 24px 8px;">
+  <span id="sync-status" style="font-size:11px;font-weight:600;color:var(--text3);">🔓 Sincronização desligada</span>
+  <button class="btn-sm" onclick="syncDesfazer()" style="font-size:10px;padding:3px 8px;" title="Volta os dados pra antes da última sincronização">Desfazer sync</button>
 </div>
 <nav>
   <button class="active" onclick="showModule('clientes')">Clientes</button>
@@ -2435,12 +2440,57 @@ const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
 const FIXED_TOKENS = { cube: 'cube2026ls', pallefort: 'pall2026ls', mania: 'mania2026ls', lucas: 'lucas2026ls' };
+// Cada cliente tem um código secreto longo. O arquivo dele no servidor tem esse
+// código no nome, então trocar a URL não mostra os dados de outro cliente.
 function getTokens() {
-  const tokens = Object.assign({}, FIXED_TOKENS);
+  let salvos = {};
+  try { salvos = JSON.parse(localStorage.getItem('smm_portal_tokens')) || {}; } catch {}
+  let mudou = false;
   for (const key of Object.keys(CLIENTS)) {
-    if (!tokens[key]) tokens[key] = key.slice(0,4) + '2026ls';
+    if (!salvos[key] || salvos[key].length < 20) {
+      const r = crypto.getRandomValues(new Uint8Array(16));
+      salvos[key] = key.slice(0, 6) + '-' + Array.from(r, b => b.toString(36).padStart(2, '0')).join('').slice(0, 24);
+      mudou = true;
+    }
   }
-  return tokens;
+  if (mudou) localStorage.setItem('smm_portal_tokens', JSON.stringify(salvos));
+  return salvos;
+}
+
+// Monta o pacote de UM cliente só — sem nenhum dado dos outros
+function buildPortalDataFor(key) {
+  const cl = CLIENTS[key];
+  if (!cl) return null;
+  const videos = (load('videos') || []).filter(v => v.client === key);
+  const todasMetricas = loadAllMetricas();
+  return 'const PORTAL_DATA = ' + JSON.stringify({
+    key,
+    client: {
+      name: cl.name, valor: cl.valor, pillars: cl.pillars, cadencia: cl.cadencia,
+      objetivo: cl.objetivo || '', icp: cl.icp || ''
+    },
+    videos: videos.map(v => ({
+      client: v.client, title: v.title, pillar: v.pillar, date: v.date,
+      status: v.status, ref: v.ref || '', roteiro: v.roteiro || ''
+    })),
+    metricas: todasMetricas[key] || {},
+    updatedAt: new Date().toISOString()
+  }, null, 2) + ';';
+}
+
+// Publica um arquivo por cliente: p-<código secreto>.js
+async function pushPortaisPorCliente() {
+  const ghToken = getGithubToken();
+  if (!ghToken) return false;
+  const tokens = getTokens();
+  let todosOk = true;
+  for (const key of Object.keys(CLIENTS)) {
+    const conteudo = buildPortalDataFor(key);
+    if (!conteudo) continue;
+    const ok = await pushFileToGithub(`p-${tokens[key]}.js`, conteudo);
+    if (!ok) todosOk = false;
+  }
+  return todosOk;
 }
 
 function buildPortalData() {
@@ -2553,16 +2603,16 @@ async function publicarTudo() {
   btn.textContent = '⏳ Publicando...';
   btn.disabled = true;
   try {
-    const portalContent = buildPortalData();
-    const ok1 = await pushPortalToGithub(portalContent);
-    const ok2 = await pushDashboardData(ghToken);
+    if (!syncSenha()) syncConfigurar();
+    const ok1 = await pushPortaisPorCliente();
+    const ok2 = syncSenha() ? await syncEnviar() : true;
     btn.disabled = false;
     if (ok1 && ok2) {
       btn.textContent = '✅ Publicado!';
       setTimeout(() => { btn.textContent = '🚀 Publicar tudo'; }, 3000);
     } else {
       btn.textContent = '🚀 Publicar tudo';
-      alert(`Erro ao publicar:\nPortal: ${ok1 ? '✅' : '❌'}\nDados sync: ${ok2 ? '✅' : '❌'}`);
+      alert(`Erro ao publicar:\nPortais dos clientes: ${ok1 ? '✅' : '❌'}\nSincronização: ${ok2 ? '✅' : '❌'}`);
     }
   } catch(e) {
     btn.disabled = false;
@@ -2572,38 +2622,216 @@ async function publicarTudo() {
 }
 
 // Monta snapshot de todos os dados pra sync entre dispositivos
-function buildDashboardData() {
-  return {
-    _savedAt: new Date().toISOString(),
-    smm_videos: localStorage.getItem('smm_videos'),
-    smm_clients: localStorage.getItem('smm_clients'),
-    smm_finance: localStorage.getItem('smm_finance'),
-    smm_prospects: localStorage.getItem('smm_prospects'),
-    smm_metricas: localStorage.getItem('smm_metricas'),
-    smm_metas: localStorage.getItem('smm_metas'),
-    smm_metas_mes: localStorage.getItem('smm_metas_mes'),
-    smm_processos: localStorage.getItem('smm_processos'),
-  };
+// ============ SINCRONIZAÇÃO COM SENHA ============
+// Os dados sobem pro GitHub embaralhados. Sem a senha, o arquivo é ilegível.
+
+const SYNC_FILE = 'sync.js';
+// chaves que NUNCA sobem (segredos ficam só neste aparelho)
+const SYNC_NUNCA = ['smm_sync_pass', 'smm_ai_key', 'smm_github_token', 'smm_sync_at',
+                    'smm_device_id', 'smm_sync_undo', 'smm_sync_savedAt'];
+
+function syncSenha() { return localStorage.getItem('smm_sync_pass') || ''; }
+function syncDeviceId() {
+  let d = localStorage.getItem('smm_device_id');
+  if (!d) { d = Math.random().toString(36).slice(2, 10); localStorage.setItem('smm_device_id', d); }
+  return d;
 }
 
-// Publica dados no GitHub pra sincronizar com celular
-async function pushDashboardData(ghToken) {
-  const content = 'const DASHBOARD_SYNC = ' + JSON.stringify(buildDashboardData(), null, 2) + ';';
-  const encoded = btoa(unescape(encodeURIComponent(content)));
-  const filename = 'dashboard-sync.js';
-  const getRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
-    headers: { 'Authorization': 'token ' + ghToken }
-  });
-  const existing = getRes.ok ? await getRes.json() : null;
-  const body = { message: 'sync: atualiza dados do dashboard', content: encoded };
-  if (existing && existing.sha) body.sha = existing.sha;
-  const putRes = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${filename}`, {
-    method: 'PUT',
-    headers: { 'Authorization': 'token ' + ghToken, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  return putRes.ok;
+const b64 = {
+  enc: buf => btoa(String.fromCharCode(...new Uint8Array(buf))),
+  dec: str => Uint8Array.from(atob(str), c => c.charCodeAt(0))
+};
+
+async function syncChave(senha, salt) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 250000, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
 }
+
+async function syncEmbaralhar(obj, senha) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await syncChave(senha, salt);
+  const dados = new TextEncoder().encode(JSON.stringify(obj));
+  const cifrado = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, dados);
+  return { v: 1, salt: b64.enc(salt), iv: b64.enc(iv), data: b64.enc(cifrado) };
+}
+
+async function syncDesembaralhar(blob, senha) {
+  const key = await syncChave(senha, b64.dec(blob.salt));
+  const claro = await crypto.subtle.decrypt({ name: 'AES-GCM', iv: b64.dec(blob.iv) }, key, b64.dec(blob.data));
+  return JSON.parse(new TextDecoder().decode(claro));
+}
+
+// monta o pacote com tudo que deve sincronizar
+function syncPacote() {
+  const dados = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k.startsWith('smm_') || SYNC_NUNCA.includes(k)) continue;
+    dados[k] = localStorage.getItem(k);
+  }
+  return dados;
+}
+
+// conta quantos itens existem — serve de trava pra nuvem vazia não apagar o aparelho
+function syncTemConteudo(dados) {
+  const n = s => {
+    try {
+      const v = JSON.parse(dados[s] || 'null');
+      if (Array.isArray(v)) return v.length;
+      if (v && typeof v === 'object') return Object.keys(v).length; // smm_clients é objeto
+      return 0;
+    } catch { return 0; }
+  };
+  return n('smm_videos') + n('smm_clients') + n('smm_mapas');
+}
+
+// -- ENVIAR --
+let _syncTimer = null, _syncEnviando = false;
+function syncAgendar() {
+  if (!getGithubToken() || !syncSenha()) return;
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(() => syncEnviar(), 8000);
+}
+
+async function syncEnviar(avisar) {
+  const ghToken = getGithubToken(), senha = syncSenha();
+  if (!ghToken || !senha || _syncEnviando) return false;
+  _syncEnviando = true;
+  syncStatus('enviando');
+  try {
+    const blob = await syncEmbaralhar(syncPacote(), senha);
+    blob.savedAt = new Date().toISOString();
+    blob.device = syncDeviceId();
+    const conteudo = 'const SYNC_BLOB = ' + JSON.stringify(blob) + ';';
+    const enc = btoa(unescape(encodeURIComponent(conteudo)));
+
+    const get = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${SYNC_FILE}`,
+      { headers: { 'Authorization': 'token ' + ghToken } });
+    const atual = get.ok ? await get.json() : null;
+    const body = { message: 'sync', content: enc };
+    if (atual && atual.sha) body.sha = atual.sha;
+
+    const put = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${SYNC_FILE}`, {
+      method: 'PUT',
+      headers: { 'Authorization': 'token ' + ghToken, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (put.ok) {
+      localStorage.setItem('smm_sync_at', blob.savedAt);
+      syncStatus('ok');
+      if (avisar) showBanner('✅ Salvo na nuvem — já aparece no celular');
+      return true;
+    }
+    syncStatus('erro');
+    return false;
+  } catch (e) {
+    syncStatus('erro');
+    return false;
+  } finally { _syncEnviando = false; }
+}
+
+// -- RECEBER --
+let _syncUltimoPull = 0;
+function syncReceber(forcar) {
+  if (!syncSenha()) return;
+  const agora = Date.now();
+  if (!forcar && agora - _syncUltimoPull < 30000) return;
+  _syncUltimoPull = agora;
+
+  // script tag em vez de fetch: funciona no celular sem bloqueio do navegador
+  const s = document.createElement('script');
+  s.src = SYNC_FILE + '?t=' + agora;
+  s.onload = async () => {
+    s.remove();
+    if (typeof SYNC_BLOB === 'undefined') return;
+    try {
+      const remoto = SYNC_BLOB;
+      const meuAt = localStorage.getItem('smm_sync_at') || '';
+      if (remoto.device === syncDeviceId() || (remoto.savedAt || '') <= meuAt) return;
+
+      const dados = await syncDesembaralhar(remoto, syncSenha());
+
+      // trava de segurança: nunca deixa a nuvem apagar dados locais
+      if (syncTemConteudo(dados) === 0 && syncTemConteudo(syncPacote()) > 0) {
+        syncStatus('erro');
+        return;
+      }
+
+      // rede de proteção antes de aplicar
+      localStorage.setItem('smm_sync_undo', JSON.stringify(syncPacote()));
+
+      Object.entries(dados).forEach(([k, v]) => {
+        if (k.startsWith('smm_') && !SYNC_NUNCA.includes(k) && v != null) localStorage.setItem(k, v);
+      });
+      localStorage.setItem('smm_sync_at', remoto.savedAt);
+      CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+      syncStatus('ok');
+      showBanner('✅ Atualizado — dados novos chegaram');
+      setTimeout(() => location.reload(), 900);
+    } catch (e) {
+      syncStatus('senha'); // senha errada ou arquivo de outra senha
+    }
+  };
+  s.onerror = () => s.remove();
+  document.head.appendChild(s);
+}
+
+// desfaz a última chegada da nuvem
+function syncDesfazer() {
+  const bkp = localStorage.getItem('smm_sync_undo');
+  if (!bkp) { alert('Não há nada pra desfazer.'); return; }
+  if (!confirm('Voltar os dados pra como estavam antes da última sincronização?')) return;
+  Object.entries(JSON.parse(bkp)).forEach(([k, v]) => { if (v != null) localStorage.setItem(k, v); });
+  location.reload();
+}
+
+// -- SENHA --
+function syncConfigurar() {
+  const atual = syncSenha();
+  if (atual) {
+    const acao = confirm('A sincronização já está ligada neste aparelho.\n\nOK = trocar a senha\nCancelar = desligar a sincronização');
+    if (acao) {
+      const nova = prompt('Nova senha de sincronização:');
+      if (nova && nova.trim()) { localStorage.setItem('smm_sync_pass', nova.trim()); syncEnviar(true); }
+    } else {
+      localStorage.removeItem('smm_sync_pass');
+      syncStatus('off');
+      showBanner('Sincronização desligada neste aparelho');
+    }
+    return;
+  }
+  const senha = prompt(
+    'Crie uma senha pra trancar seus dados na nuvem.\n\n' +
+    'Use a MESMA senha no Mac e no celular.\n' +
+    'Guarde ela — sem a senha os dados da nuvem não voltam.');
+  if (!senha || !senha.trim()) return;
+  localStorage.setItem('smm_sync_pass', senha.trim());
+  syncStatus('ok');
+  if (getGithubToken()) syncEnviar(true);
+  else syncReceber(true);
+}
+
+function syncStatus(estado) {
+  const el = document.getElementById('sync-status');
+  if (!el) return;
+  const mapa = {
+    off:      { t: '🔓 Sincronização desligada', c: 'var(--text3)' },
+    ok:       { t: '🔒 Sincronizado', c: 'var(--green)' },
+    enviando: { t: '🔄 Salvando...', c: 'var(--text2)' },
+    erro:     { t: '⚠️ Falha ao sincronizar', c: 'var(--yellow)' },
+    senha:    { t: '⚠️ Senha não confere', c: 'var(--red)' }
+  };
+  const m = mapa[estado] || mapa.off;
+  el.textContent = m.t;
+  el.style.color = m.c;
+}
+
+// compatibilidade com chamadas antigas
+function buildDashboardData() { return syncPacote(); }
+async function pushDashboardData() { return syncEnviar(); }
 
 
 function showBanner(msg) {
@@ -2617,13 +2845,10 @@ function showBanner(msg) {
 // Auto-publish when data changes (debounced)
 var _autoPublishTimer = null;
 function scheduleAutoPublish() {
+  syncAgendar(); // manda os dados trancados pro celular
   if (!getGithubToken()) return;
   if (_autoPublishTimer) clearTimeout(_autoPublishTimer);
-  _autoPublishTimer = setTimeout(() => {
-    const content = buildPortalData();
-    pushPortalToGithub(content);
-    pushDashboardData(getGithubToken()); // sincroniza dados também
-  }, 10000);
+  _autoPublishTimer = setTimeout(() => { pushPortaisPorCliente(); }, 12000);
 }
 
 function publicarPortalLinks() {
@@ -2631,7 +2856,7 @@ function publicarPortalLinks() {
   const baseUrl = 'https://lucashenrique011.github.io/dashboard-smm/cliente.html';
   let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
   for (const [key, cl] of Object.entries(CLIENTS)) {
-    const link = `${baseUrl}?c=${key}&k=${tokens[key]}`;
+    const link = `${baseUrl}?k=${tokens[key]}`;
     html += `<div style="background:#16161e;border:1px solid #2a2a3a;border-radius:10px;padding:12px;">
       <div style="font-weight:700;color:#fff;margin-bottom:6px;">${cl.name}</div>
       <input value="${link}" readonly style="width:100%;background:#0f0f14;border:1px solid #333;color:#4f9;padding:8px;border-radius:6px;font-size:12px;margin-bottom:6px;" onclick="this.select()">
@@ -3563,58 +3788,14 @@ function renderAll() {
     doAutoBackup();
   }
 
-  function restoreFromPortal() {
-    if (typeof PORTAL_DATA === 'undefined') return;
-    if ((load('videos') || []).length < 10 && PORTAL_DATA.videos && PORTAL_DATA.videos.length > 0) {
-      save('videos', PORTAL_DATA.videos.map((v, i) => ({ ...v, id: v.id || ('restored-' + i) })));
-    }
-    if (PORTAL_DATA.metricas) {
-      const met = loadAllMetricas();
-      for (const [client, months] of Object.entries(PORTAL_DATA.metricas)) {
-        if (client.startsWith('_')) continue;
-        if (!met[client]) met[client] = {};
-        for (const [month, data] of Object.entries(months)) {
-          if (!met[client][month]) met[client][month] = data;
-        }
-      }
-      localStorage.setItem('smm_metricas', JSON.stringify(met));
-    }
-    if (PORTAL_DATA.clients && !localStorage.getItem('smm_clients')) {
-      const restored = {};
-      for (const [key, cl] of Object.entries(PORTAL_DATA.clients)) {
-        restored[key] = { ...cl, color: key };
-      }
-      saveClients(restored);
-      CLIENTS = restored;
-    }
-  }
+  startApp();
 
-  // Carrega dados de sync (Mac → celular) como script, igual ao portal-data.js
-  const syncScript = document.createElement('script');
-  syncScript.src = 'dashboard-sync.js?t=' + Date.now();
-  syncScript.onload = function() { restoreFromSync(); loadPortal(); };
-  syncScript.onerror = function() { loadPortal(); };
-  document.head.appendChild(syncScript);
-
-  function loadPortal() {
-    const script = document.createElement('script');
-    script.src = 'portal-data.js?t=' + Date.now();
-    script.onload = function() { restoreFromPortal(); startApp(); };
-    script.onerror = function() { startApp(); };
-    document.head.appendChild(script);
-  }
-
-  function restoreFromSync() {
-    if (typeof DASHBOARD_SYNC === 'undefined') return;
-    const hasVideos = localStorage.getItem('smm_videos');
-    const hasClients = localStorage.getItem('smm_clients');
-    if (hasVideos || hasClients) return;
-    Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
-      if (k.startsWith('smm_') && k !== 'smm_ai_key' && v) localStorage.setItem(k, v);
-    });
-    localStorage.setItem('smm_sync_savedAt', DASHBOARD_SYNC._savedAt);
-    CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
-    showBanner('✅ Dados sincronizados!');
+  // Sincronização trancada com senha: busca ao abrir e sempre que voltar pro app
+  syncStatus(syncSenha() ? 'ok' : 'off');
+  if (syncSenha()) {
+    syncReceber(true);
+    window.addEventListener('focus', () => syncReceber());
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) syncReceber(); });
   }
 })();
 
