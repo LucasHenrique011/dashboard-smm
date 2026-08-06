@@ -754,11 +754,22 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 .mm-node.sel { box-shadow:0 0 0 3px rgba(124,92,252,.35); }
 .mm-node.edit { cursor:text; user-select:text; outline:none; }
 .mm-node.empty::before { content:'Escreva aqui...'; color:#a0a0b4; }
-.mm-handle { position:absolute; right:-7px; top:50%; margin-top:-7px; width:14px; height:14px; border-radius:50%;
-  background:var(--accent); border:2px solid #fff; opacity:0; transition:opacity .15s; cursor:crosshair;
-  box-shadow:0 1px 4px rgba(20,20,45,.3); }
+.mm-handle { position:absolute; width:14px; height:14px; border-radius:50%;
+  background:var(--accent); border:2px solid #fff; opacity:0; transition:opacity .15s, transform .12s; cursor:crosshair;
+  box-shadow:0 1px 4px rgba(20,20,45,.35); }
+.mm-handle[data-side="t"] { top:-8px; left:50%; margin-left:-7px; }
+.mm-handle[data-side="r"] { right:-8px; top:50%; margin-top:-7px; }
+.mm-handle[data-side="b"] { bottom:-8px; left:50%; margin-left:-7px; }
+.mm-handle[data-side="l"] { left:-8px; top:50%; margin-top:-7px; }
+.mm-handle:hover { transform:scale(1.35); }
 .mm-node:hover .mm-handle, .mm-node.sel .mm-handle { opacity:1; }
-#mm-hint { position:absolute; left:14px; bottom:12px; font-size:11px; color:#8a8a9e; pointer-events:none; }
+#mm-hint { position:absolute; left:14px; top:10px; font-size:11px; color:#8a8a9e; pointer-events:none; }
+#mm-mini { position:absolute; left:14px; bottom:12px; background:#fff; border:1px solid #d8d8e4; border-radius:10px;
+  box-shadow:0 2px 8px rgba(20,20,45,.12); overflow:hidden; cursor:pointer; }
+#mm-mini svg { display:block; }
+#mm-mini-lbl { position:absolute; left:6px; top:5px; font-size:9px; font-weight:600; color:#8a8a9e;
+  text-transform:uppercase; letter-spacing:.06em; pointer-events:none;
+  background:rgba(255,255,255,.85); padding:1px 5px; border-radius:5px; }
 #mm-editor.open ~ #ai-btn, #mm-editor.open ~ #ai-panel { display:none !important; }
 #mm-zoom { position:absolute; right:14px; bottom:12px; display:flex; gap:6px; align-items:center;
   background:#fff; border:1px solid #d8d8e4; border-radius:10px; padding:5px 8px; box-shadow:0 2px 8px rgba(20,20,45,.1); }
@@ -779,6 +790,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <span class="mm-crumb" id="mm-crumb"></span>
     <div class="sep"></div>
     <button class="btn-sm btn-primary" onclick="mmAddNode()">+ Card</button>
+    <button class="btn-sm" id="mm-btn-ia" onclick="mmGerarIA()" title="A IA monta o mapa pra você">✨ Gerar com IA</button>
     <button class="btn-sm" id="mm-btn-undo" onclick="mmDesfazer()" title="Desfazer (Ctrl+Z)">↩ Desfazer</button>
     <button class="btn-sm" id="mm-btn-redo" onclick="mmRefazer()" title="Refazer (Ctrl+Shift+Z)">↪ Refazer</button>
     <div class="sep"></div>
@@ -797,7 +809,11 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
       <g id="mm-edges"></g>
     </svg>
     <div id="mm-world"></div>
-    <div id="mm-hint">Duplo clique no vazio = novo card · Arraste a bolinha pro vazio = card já ligado · Ctrl+Z = desfazer</div>
+    <div id="mm-hint">Duplo clique no vazio = novo card · Arraste uma bolinha pro vazio = card já ligado · Ctrl+Z = desfazer</div>
+    <div id="mm-mini" onclick="mmMiniIr(event)" title="Mapa geral — clique pra ir até lá">
+      <svg id="mm-mini-svg" width="150" height="110"></svg>
+      <span id="mm-mini-lbl">Onde estou</span>
+    </div>
     <div id="mm-zoom">
       <button onclick="mmZoom(-1)">−</button>
       <span id="mm-zoom-lbl">100%</span>
@@ -4349,6 +4365,60 @@ function mmApply() {
   document.getElementById('mm-world').style.transform = t;
   document.getElementById('mm-edges').setAttribute('transform', `translate(${mmTx},${mmTy}) scale(${mmSc})`);
   document.getElementById('mm-zoom-lbl').textContent = Math.round(mmSc * 100) + '%';
+  mmMini();
+}
+
+// -- minimapa: mostra tudo + onde você está --
+const MM_MINI_W = 150, MM_MINI_H = 110;
+let mmMiniBox = null; // guarda a escala pro clique
+
+function mmMiniCaixa() {
+  const vp = document.getElementById('mm-viewport').getBoundingClientRect();
+  // retângulo do que está na tela agora, em coordenadas do mundo
+  const tela = { x0: -mmTx / mmSc, y0: -mmTy / mmSc, x1: (vp.width - mmTx) / mmSc, y1: (vp.height - mmTy) / mmSc };
+  let x0 = tela.x0, y0 = tela.y0, x1 = tela.x1, y1 = tela.y1;
+  (mmAtual?.nodes || []).forEach(n => {
+    x0 = Math.min(x0, n.x); y0 = Math.min(y0, n.y);
+    x1 = Math.max(x1, n.x + MM_W); y1 = Math.max(y1, n.y + (n.h || 52));
+  });
+  const m = 40;
+  return { x0: x0 - m, y0: y0 - m, x1: x1 + m, y1: y1 + m, tela };
+}
+
+function mmMini() {
+  const svg = document.getElementById('mm-mini-svg');
+  if (!svg || !mmAtual) return;
+  const b = mmMiniCaixa();
+  const bw = b.x1 - b.x0, bh = b.y1 - b.y0;
+  const k = Math.min(MM_MINI_W / bw, MM_MINI_H / bh);
+  const ox = (MM_MINI_W - bw * k) / 2, oy = (MM_MINI_H - bh * k) / 2;
+  mmMiniBox = { b, k, ox, oy };
+  const X = v => (v - b.x0) * k + ox, Y = v => (v - b.y0) * k + oy;
+
+  const cards = mmAtual.nodes.map(n => {
+    const c = MM_CORES[n.color] || MM_CORES.roxo;
+    return `<rect x="${X(n.x)}" y="${Y(n.y)}" width="${Math.max(2, MM_W * k)}" height="${Math.max(2, (n.h || 52) * k)}"
+      rx="1.5" fill="${c.bd}" opacity=".75"/>`;
+  }).join('');
+
+  const t = b.tela;
+  const visor = `<rect x="${X(t.x0)}" y="${Y(t.y0)}" width="${(t.x1 - t.x0) * k}" height="${(t.y1 - t.y0) * k}"
+    fill="rgba(124,92,252,.10)" stroke="#7c5cfc" stroke-width="1.5" rx="2"/>`;
+
+  svg.innerHTML = `<rect width="${MM_MINI_W}" height="${MM_MINI_H}" fill="#fafaff"/>${cards}${visor}`;
+}
+
+// clicar no minimapa leva a tela até aquele ponto
+function mmMiniIr(ev) {
+  if (!mmAtual || !mmMiniBox) return;
+  const r = document.getElementById('mm-mini-svg').getBoundingClientRect();
+  const { b, k, ox, oy } = mmMiniBox;
+  const wx = (ev.clientX - r.left - ox) / k + b.x0;
+  const wy = (ev.clientY - r.top - oy) / k + b.y0;
+  const vp = document.getElementById('mm-viewport').getBoundingClientRect();
+  mmTx = vp.width / 2 - wx * mmSc;
+  mmTy = vp.height / 2 - wy * mmSc;
+  mmApply();
 }
 function mmToWorld(sx, sy) {
   const r = document.getElementById('mm-viewport').getBoundingClientRect();
@@ -4394,7 +4464,9 @@ function mmDraw() {
   world.innerHTML = mmAtual.nodes.map(n => {
     const c = MM_CORES[n.color] || MM_CORES.roxo;
     return `<div class="mm-node${mmSel === n.id ? ' sel' : ''}${n.text ? '' : ' empty'}" data-id="${n.id}"
-      style="left:${n.x}px;top:${n.y}px;background:${c.bg};border-color:${c.bd};color:${c.tx};">${escapeHtml(n.text)}<div class="mm-handle" data-handle="${n.id}"></div></div>`;
+      style="left:${n.x}px;top:${n.y}px;background:${c.bg};border-color:${c.bd};color:${c.tx};">${escapeHtml(n.text)}${
+        ['t','r','b','l'].map(s => `<div class="mm-handle" data-handle="${n.id}" data-side="${s}"></div>`).join('')
+      }</div>`;
   }).join('');
   // mede altura real pra ancorar as setas
   world.querySelectorAll('.mm-node').forEach(el => {
@@ -4403,6 +4475,15 @@ function mmDraw() {
   });
   mmApply();
   mmDrawEdges();
+}
+
+// ponto exato de cada bolinha (t=cima, r=direita, b=baixo, l=esquerda)
+function mmLadoPonto(n, lado) {
+  const h = n.h || 52;
+  if (lado === 't') return { x: n.x + MM_W / 2, y: n.y };
+  if (lado === 'b') return { x: n.x + MM_W / 2, y: n.y + h };
+  if (lado === 'l') return { x: n.x, y: n.y + h / 2 };
+  return { x: n.x + MM_W, y: n.y + h / 2 };
 }
 
 function mmAnchor(a, b) {
@@ -4495,7 +4576,7 @@ function mmDelSel() {
 (function mmBind() {
   const vp = document.getElementById('mm-viewport');
   if (!vp) return;
-  let mode = null, start = null, dragNode = null, linkFrom = null;
+  let mode = null, start = null, dragNode = null, linkFrom = null, linkSide = 'r';
   const pointers = new Map();
   let pinchDist = 0;
   const mmCap = id => { try { vp.setPointerCapture(id); } catch (_) {} };
@@ -4513,7 +4594,7 @@ function mmDelSel() {
     const edge = e.target.closest('[data-edge]');
 
     if (handle) {
-      linkFrom = handle.dataset.handle; mode = 'link';
+      linkFrom = handle.dataset.handle; linkSide = handle.dataset.side || 'r'; mode = 'link';
       mmCap(e.pointerId); e.preventDefault(); return;
     }
     if (node) {
@@ -4561,8 +4642,9 @@ function mmDelSel() {
     }
     if (mode === 'link' && linkFrom) {
       const a = mmAtual.nodes.find(x => x.id === linkFrom);
+      const p = mmLadoPonto(a, linkSide);
       const w = mmToWorld(e.clientX, e.clientY);
-      mmDrawEdges({ x1: a.x + MM_W, y1: a.y + (a.h || 52) / 2, x2: w.x, y2: w.y });
+      mmDrawEdges({ x1: p.x, y1: p.y, x2: w.x, y2: w.y });
     }
   });
 
@@ -4630,6 +4712,115 @@ function mmDelSel() {
     else if (e.key === 'Enter' && mmSel) { e.preventDefault(); mmEditar(mmSel); }
   });
 })();
+
+// -- gerar mapa com a IA --
+async function mmGerarIA() {
+  if (!mmAtual) return;
+  const key = localStorage.getItem('smm_ai_key');
+  if (!key) { alert('Cole a chave da API no assistente (botão 🤖 → Config) antes de usar isso.'); return; }
+
+  const tema = prompt('Sobre o que é o mapa?\n\nEx: "Planejamento de agosto da Pallefort" ou "Ideias de vídeo pra loja de roupa"');
+  if (!tema || !tema.trim()) return;
+
+  const btn = document.getElementById('mm-btn-ia');
+  const txtOrig = btn.textContent;
+  btn.textContent = '✨ Montando...'; btn.disabled = true;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'content-type': 'application/json',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1500,
+        system: buildSystemPrompt() + `
+
+Agora você vai montar um MAPA MENTAL. Responda APENAS com JSON válido, sem texto antes ou depois, sem markdown.
+
+Formato:
+{"titulo":"texto curto do centro","ramos":[{"texto":"ramo principal","cor":"azul","filhos":[{"texto":"sub-ideia"}]}]}
+
+Regras:
+- Máximo 5 ramos principais, máximo 4 filhos em cada
+- Cada texto tem no máximo 8 palavras, direto ao ponto
+- "cor" só pode ser: roxo, verde, amarelo, vermelho, azul, cinza
+- Use cores diferentes entre os ramos principais
+- Seja específico pro negócio do Lucas, nada genérico`,
+        messages: [{ role: 'user', content: 'Monta um mapa mental sobre: ' + tema.trim() }]
+      })
+    });
+
+    const data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+
+    let bruto = data.content[0].text.trim();
+    const ini = bruto.indexOf('{'), fim = bruto.lastIndexOf('}');
+    if (ini < 0 || fim < 0) throw new Error('resposta fora do formato');
+    const plano = JSON.parse(bruto.slice(ini, fim + 1));
+
+    mmSnap();
+    mmMontarArvore(plano);
+    mmDraw(); mmPersist();
+    requestAnimationFrame(mmFit);
+    showBanner('✅ Mapa criado! Ajuste o que quiser.');
+  } catch (e) {
+    alert('Não consegui montar o mapa: ' + e.message);
+  } finally {
+    btn.textContent = txtOrig; btn.disabled = false;
+  }
+}
+
+// desenha a árvore de cima pra baixo, sem sobrepor
+function mmMontarArvore(plano) {
+  const GAP_X = 40, GAP_Y = 130, ALT = 60;
+  const novos = [], novasSetas = [];
+
+  // 1. transforma o JSON numa árvore simples
+  const raiz = { texto: plano.titulo || 'Mapa', cor: 'roxo', filhos: [] };
+  (plano.ramos || []).slice(0, 6).forEach(r => {
+    raiz.filhos.push({
+      texto: r.texto || '', cor: MM_CORES[r.cor] ? r.cor : 'azul',
+      filhos: (r.filhos || []).slice(0, 5).map(f => ({ texto: f.texto || '', cor: MM_CORES[r.cor] ? r.cor : 'azul', filhos: [] }))
+    });
+  });
+
+  // 2. largura que cada galho ocupa
+  function largura(n) {
+    if (!n.filhos.length) return MM_W + GAP_X;
+    return Math.max(MM_W + GAP_X, n.filhos.reduce((s, f) => s + largura(f), 0));
+  }
+
+  // 3. posiciona: pai fica centralizado sobre os filhos
+  function posicionar(n, esq, nivel) {
+    const w = largura(n);
+    if (n.filhos.length) {
+      let x = esq;
+      n.filhos.forEach(f => { posicionar(f, x, nivel + 1); x += largura(f); });
+    }
+    n.x = Math.round(esq + w / 2 - MM_W / 2);
+    n.y = nivel * GAP_Y;
+    const id = mmUid();
+    n.id = id;
+    novos.push({ id, x: n.x, y: n.y, text: n.texto, color: n.cor, h: ALT });
+    n.filhos.forEach(f => novasSetas.push({ id: mmUid(), from: id, to: f.id }));
+  }
+  posicionar(raiz, 0, 0);
+
+  // 4. não pisa em cima do que já existe: joga tudo pra baixo
+  let deslocY = 0;
+  if (mmAtual.nodes.length) {
+    deslocY = Math.max(...mmAtual.nodes.map(n => n.y + (n.h || 52))) + 120;
+  }
+  novos.forEach(n => n.y += deslocY);
+
+  mmAtual.nodes.push(...novos);
+  mmAtual.edges.push(...novasSetas);
+}
 
 // -- exportar imagem --
 function mmExportPNG() {
