@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Adicionar mapa CUBE GROWTH</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,sans-serif; background:#08080f; color:#e2e2f0;
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 20% 30%, #1e0a4a 0%, transparent 55%); }
+.caixa { position:relative; z-index:1; background:#12121f; border:1px solid #282840;
+  border-radius:20px; padding:28px; width:100%; max-width:460px; }
+.logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#7c5cfc,#a78bfa);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin-bottom:16px; }
+h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px; }
+p { font-size:13.5px; color:#9090b0; line-height:1.7; margin-bottom:16px; }
+.linha { display:flex; gap:9px; font-size:13px; padding:7px 0; border-bottom:1px solid #1f1f35; line-height:1.5; }
+.linha:last-of-type { border-bottom:none; }
+.linha .tx { color:#9090b0; }
+.linha .tx b { color:#e2e2f0; font-weight:600; }
+button { width:100%; margin-top:18px; padding:14px; border-radius:11px; border:none; background:#7c5cfc;
+  color:#fff; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
+button:hover:not(:disabled) { background:#6d4ef0; }
+button:disabled { opacity:.45; cursor:default; }
+a.botao { display:block; text-align:center; margin-top:10px; padding:14px; border-radius:11px;
+  background:#1c1c2e; border:1px solid #282840; color:#e2e2f0; text-decoration:none; font-size:15px; font-weight:600; }
+.res { margin-top:16px; padding:14px; border-radius:11px; font-size:13px; line-height:1.65; display:none; }
+.res.ok { display:block; background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; }
+.res.erro { display:block; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <div class="logo">LS</div>
+  <h1>Mapa CUBE GROWTH</h1>
+  <p>Monta no seu sistema o mapa de canais de aquisição do Cube, do jeito que estava no Miro.</p>
+  <div id="diag"></div>
+  <button id="btn">Adicionar ao meu sistema</button>
+  <div class="res" id="res"></div>
+  <a class="botao" id="ir" href="dashboard.html" style="display:none;">Ver o mapa →</a>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+
+// ---- estrutura lida do board do Miro ----
+const PLANO = {
+  titulo: 'CUBE GROWTH', cor: 'roxo',
+  ramos: [
+    { texto: 'Canais de aquisição', cor: 'roxo', filhos: [
+      { texto: 'INBOUND', cor: 'azul', filhos: [
+        { texto: 'Fachada', filhos: [
+          { texto: 'Formas', filhos: [ { texto: 'QR Code' }, { texto: 'Panfleto' } ] } ] },
+        { texto: 'Tráfego pago', filhos: [
+          { texto: 'Ads', filhos: [
+            { texto: 'Micro canais', filhos: [ { texto: 'Meta' }, { texto: 'Google' }, { texto: 'TikTok' } ] } ] } ] },
+        { texto: 'Indicação / parceria', filhos: [
+          { texto: 'Descontos', filhos: [ { texto: 'Família que matricular' }, { texto: 'Família que indicar' } ] } ] },
+        { texto: 'Redes sociais', filhos: [
+          { texto: 'Dicas para os pais', filhos: [
+            { texto: 'Web série', filhos: [ { texto: 'Daily' } ] } ] } ] }
+      ] },
+      { texto: 'OUTBOUND', cor: 'verde', filhos: [
+        { texto: 'Lista', filhos: [
+          { texto: 'Base de contatos', filhos: [ { texto: 'Definir estratégia pra chamar leads' } ] } ] },
+        { texto: 'Comunidade', filhos: [
+          { texto: 'Eventos', filhos: [ { texto: 'Atrair pessoas novas' } ] } ] }
+      ] }
+    ] },
+    { texto: 'Planos de ação', cor: 'amarelo', filhos: [] }
+  ]
+};
+
+// ---- mesmo cálculo de posição que o sistema usa ----
+const MM_W = 180, GAP_X = 70, GAP_Y = 26, ALT = 64;
+const CORES = ['roxo','verde','amarelo','vermelho','azul','cinza'];
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+function montar(plano) {
+  const nodes = [], edges = [];
+  const norm = (n, corPai) => {
+    const cor = CORES.includes(n.cor) ? n.cor : (corPai || 'azul');
+    return { texto: n.texto || n.titulo || '', cor, filhos: (n.filhos || n.ramos || []).map(f => norm(f, cor)) };
+  };
+  const raiz = { texto: plano.titulo, cor: plano.cor || 'roxo',
+                 filhos: (plano.ramos || []).map(r => norm(r, null)) };
+  const altura = n => n.filhos.length
+    ? Math.max(ALT + GAP_Y, n.filhos.reduce((s, f) => s + altura(f), 0))
+    : ALT + GAP_Y;
+  function pos(n, topo, nivel) {
+    const h = altura(n);
+    if (n.filhos.length) { let y = topo; n.filhos.forEach(f => { pos(f, y, nivel + 1); y += altura(f); }); }
+    n.x = nivel * (MM_W + GAP_X);
+    n.y = Math.round(topo + h / 2 - ALT / 2);
+    n.id = uid();
+    nodes.push({ id: n.id, x: n.x, y: n.y, text: n.texto, color: n.cor, h: ALT });
+    n.filhos.forEach(f => edges.push({ id: uid(), from: n.id, to: f.id }));
+  }
+  pos(raiz, 0, 0);
+  return { nodes, edges };
+}
+
+const ler = k => { try { return JSON.parse(localStorage.getItem(k)) || null; } catch { return null; } };
+
+function diag() {
+  const projetos = ler('smm_mm_projetos') || [];
+  const mapas = ler('smm_mapas') || [];
+  const jaTem = mapas.some(m => m.name === 'CUBE GROWTH');
+  el('diag').innerHTML =
+    '<div class="linha"><span class="tx">Cards que serão criados: <b>' + montar(PLANO).nodes.length + '</b></span></div>' +
+    '<div class="linha"><span class="tx">Projetos que você já tem: <b>' + projetos.length + '</b></span></div>' +
+    '<div class="linha"><span class="tx">Mapa CUBE GROWTH já existe: <b>' + (jaTem ? 'sim (vou substituir)' : 'não') + '</b></span></div>';
+}
+diag();
+
+el('btn').onclick = () => {
+  el('btn').disabled = true;
+  try {
+    const { nodes, edges } = montar(PLANO);
+    const projetos = ler('smm_mm_projetos') || [];
+    let proj = projetos.find(p => p.name === 'Cube Educacional');
+    if (!proj) {
+      proj = { id: uid(), name: 'Cube Educacional', createdAt: new Date().toISOString() };
+      projetos.push(proj);
+      localStorage.setItem('smm_mm_projetos', JSON.stringify(projetos));
+    }
+    const mapas = (ler('smm_mapas') || []).filter(m => m.name !== 'CUBE GROWTH');
+    mapas.push({ id: uid(), projeto: proj.id, name: 'CUBE GROWTH', nodes, edges,
+                 updatedAt: new Date().toISOString() });
+    localStorage.setItem('smm_mapas', JSON.stringify(mapas));
+
+    const conf = (ler('smm_mapas') || []).find(m => m.name === 'CUBE GROWTH');
+    if (!conf || conf.nodes.length !== nodes.length) throw new Error('gravou mas não li de volta');
+
+    el('res').className = 'res ok';
+    el('res').innerHTML = '<b>Pronto!</b> O mapa <b>CUBE GROWTH</b> foi criado com ' +
+      conf.nodes.length + ' cards, dentro do projeto <b>' + proj.name + '</b>.<br><br>' +
+      'No sistema: aba <b>Mapas</b> → <b>' + proj.name + '</b> → <b>CUBE GROWTH</b>.';
+    el('ir').style.display = 'block';
+    el('btn').style.display = 'none';
+    diag();
+  } catch (e) {
+    el('res').className = 'res erro';
+    el('res').textContent = 'Falhou: ' + e.message;
+    el('btn').disabled = false;
+  }
+};
+</script>
+</body>
+</html>
