@@ -3799,6 +3799,40 @@ function renderAll() {
     syncReceber(true);
     window.addEventListener('focus', () => syncReceber());
     document.addEventListener('visibilitychange', () => { if (!document.hidden) syncReceber(); });
+  } else {
+    avisarSistemaVazio();
+  }
+
+  // Se abrir sem nada e sem senha, explica o que fazer em vez de mostrar tela em branco.
+  // (o Safari apaga os dados guardados de sites que ficam dias sem ser abertos)
+  function avisarSistemaVazio() {
+    // "notion-*" e "plan-*" são exemplos que o sistema recria sozinho — não contam como dado seu
+    let videos = [];
+    try { videos = JSON.parse(localStorage.getItem('smm_videos') || '[]'); } catch {}
+    const videosReais = videos.filter(v => !/^(notion|plan)-/.test(String(v && v.id || ''))).length;
+    const clientesSalvos = localStorage.getItem('smm_clients');
+    if (videosReais > 0 || clientesSalvos) return;
+
+    const cx = document.createElement('div');
+    cx.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);' +
+      'z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;';
+    cx.innerHTML =
+      '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:28px;max-width:440px;">' +
+        '<h3 style="font-size:17px;margin:0 0 10px;">Seu sistema está vazio</h3>' +
+        '<p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px;">' +
+          'Isso costuma acontecer quando o navegador limpa os dados guardados — não quer dizer que você perdeu nada.</p>' +
+        '<p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:18px;">' +
+          'Se você já usava a sincronização, é só digitar sua senha que tudo volta.</p>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
+          '<button class="btn-primary" id="vazio-senha">Recuperar com minha senha</button>' +
+          '<button id="vazio-arquivo">Tenho um arquivo de backup</button>' +
+          '<button id="vazio-fechar">Começar do zero</button>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(cx);
+    cx.querySelector('#vazio-senha').onclick = () => { cx.remove(); syncConfigurar(); };
+    cx.querySelector('#vazio-arquivo').onclick = () => { cx.remove(); document.getElementById('import-file').click(); };
+    cx.querySelector('#vazio-fechar').onclick = () => cx.remove();
   }
 })();
 
