@@ -2702,10 +2702,13 @@ function syncAgendar() {
 async function syncEnviar(avisar) {
   const ghToken = getGithubToken(), senha = syncSenha();
   if (!ghToken || !senha || _syncEnviando) return false;
+  // trava: nunca manda um aparelho vazio pra nuvem — apagaria os dados dos outros
+  const pacote = syncPacote();
+  if (syncTemConteudo(pacote) === 0) { syncStatus('erro'); return false; }
   _syncEnviando = true;
   syncStatus('enviando');
   try {
-    const blob = await syncEmbaralhar(syncPacote(), senha);
+    const blob = await syncEmbaralhar(pacote, senha);
     blob.savedAt = new Date().toISOString();
     blob.device = syncDeviceId();
     const conteudo = 'const SYNC_BLOB = ' + JSON.stringify(blob) + ';';
@@ -2813,8 +2816,9 @@ function syncConfigurar() {
   if (!senha || !senha.trim()) return;
   localStorage.setItem('smm_sync_pass', senha.trim());
   syncStatus('ok');
-  if (getGithubToken()) syncEnviar(true);
-  else syncReceber(true);
+  // Na estreia SEMPRE busca primeiro. Se empurrasse, um aparelho vazio
+  // apagaria o que está na nuvem.
+  syncReceber(true);
 }
 
 function syncStatus(estado) {
