@@ -3805,9 +3805,10 @@ function renderAll() {
     syncReceber(true);
     window.addEventListener('focus', () => syncReceber());
     document.addEventListener('visibilitychange', () => { if (!document.hidden) syncReceber(); });
-  } else {
-    reporDadosAutomatico();
   }
+  // Sempre repõe se o aparelho estiver vazio — mesmo com senha salva.
+  // (ter senha guardada não pode impedir a reposição, senão fica em branco)
+  reporDadosAutomatico();
 
   // Se o aparelho estiver sem dados, repõe sozinho a partir do arquivo do servidor.
   // É o que fazia o sistema se curar quando o navegador limpava o armazenamento.

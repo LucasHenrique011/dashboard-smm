@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Voltar meus dados</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,sans-serif; background:#08080f; color:#e2e2f0;
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 20% 30%, #1e0a4a 0%, transparent 55%); }
+.caixa { position:relative; z-index:1; background:#12121f; border:1px solid #282840;
+  border-radius:20px; padding:28px; width:100%; max-width:460px; }
+.logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#7c5cfc,#a78bfa);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin-bottom:16px; }
+h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; margin-bottom:16px; }
+.linha { display:flex; align-items:flex-start; gap:9px; font-size:13px; padding:7px 0;
+  border-bottom:1px solid #1f1f35; line-height:1.5; }
+.linha:last-of-type { border-bottom:none; }
+.linha .ic { flex-shrink:0; width:16px; }
+.linha .tx { color:#9090b0; }
+.linha .tx b { color:#e2e2f0; font-weight:600; }
+button { width:100%; margin-top:18px; padding:14px; border-radius:11px; border:none; background:#7c5cfc;
+  color:#fff; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
+button:hover:not(:disabled) { background:#6d4ef0; }
+button:disabled { opacity:.45; cursor:default; }
+a.botao { display:block; text-align:center; margin-top:10px; padding:14px; border-radius:11px;
+  background:#1c1c2e; border:1px solid #282840; color:#e2e2f0; text-decoration:none; font-size:15px; font-weight:600; }
+.res { margin-top:16px; padding:14px; border-radius:11px; font-size:13px; line-height:1.65; display:none; }
+.res.ok { display:block; background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; }
+.res.erro { display:block; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <div class="logo">LS</div>
+  <h1>Voltar meus dados</h1>
+  <div id="diag"></div>
+  <button id="btn" disabled>Verificando...</button>
+  <div class="res" id="res"></div>
+  <a class="botao" id="ir" href="dashboard.html" style="display:none;">Abrir meu sistema →</a>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+const estado = { salvar:null, arquivo:null, videosArquivo:0, videosAqui:0, videosProprios:0, clientesAqui:0, erro:'' };
+
+function linha(ok, texto) {
+  return '<div class="linha"><span class="ic">' + (ok ? '✅' : '❌') + '</span><span class="tx">' + texto + '</span></div>';
+}
+
+function pintarDiag() {
+  el('diag').innerHTML =
+    linha(estado.salvar === true, 'Navegador deixa salvar dados: <b>' + (estado.salvar === null ? 'checando' : estado.salvar ? 'sim' : 'NÃO') + '</b>') +
+    linha(estado.arquivo === true, 'Arquivo de backup baixado: <b>' + (estado.arquivo === null ? 'checando' : estado.arquivo ? estado.videosArquivo + ' vídeos' : 'FALHOU') + '</b>') +
+    linha(estado.videosProprios > 0, 'Dados neste aparelho agora: <b>' + estado.videosAqui + ' vídeos, ' + estado.clientesAqui + ' clientes</b>');
+}
+
+// 1. o navegador deixa gravar?
+try {
+  localStorage.setItem('__t', '1'); localStorage.removeItem('__t');
+  estado.salvar = true;
+} catch (e) { estado.salvar = false; estado.erro = e.message; }
+
+// 2. o que já existe aqui
+function lerAqui() {
+  try {
+    const v = JSON.parse(localStorage.getItem('smm_videos') || '[]');
+    estado.videosAqui = v.length;
+    // os "notion-*" e "plan-*" são exemplos que o sistema cria sozinho
+    estado.videosProprios = v.filter(x => !/^(notion|plan)-/.test(String(x && x.id || ''))).length;
+    estado.clientesAqui = Object.keys(JSON.parse(localStorage.getItem('smm_clients') || '{}')).length;
+  } catch {}
+}
+lerAqui();
+pintarDiag();
+
+// 3. baixa o arquivo de backup
+const s = document.createElement('script');
+s.src = 'dashboard-sync.js?t=' + Date.now();
+s.onload = () => {
+  if (typeof DASHBOARD_SYNC === 'undefined') {
+    estado.arquivo = false; pintarDiag();
+    el('btn').textContent = 'Arquivo veio vazio';
+    return;
+  }
+  estado.arquivo = true;
+  try { estado.videosArquivo = JSON.parse(DASHBOARD_SYNC.smm_videos || '[]').length; } catch {}
+  pintarDiag();
+  el('btn').disabled = !estado.salvar;
+  el('btn').textContent = estado.salvar ? 'Voltar meus dados agora' : 'Navegador bloqueando';
+};
+s.onerror = () => {
+  estado.arquivo = false; pintarDiag();
+  el('btn').textContent = 'Não consegui baixar o arquivo';
+};
+document.head.appendChild(s);
+
+el('btn').onclick = () => {
+  el('btn').disabled = true;
+  try {
+    let n = 0;
+    Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
+      if (k.startsWith('smm_') && k !== 'smm_ai_key' && v) { localStorage.setItem(k, v); n++; }
+    });
+    // tira a senha antiga pra não atrapalhar o carregamento
+    localStorage.removeItem('smm_sync_pass');
+    localStorage.removeItem('smm_sync_at');
+    lerAqui(); pintarDiag();
+
+    if (estado.videosProprios === 0) throw new Error('gravou mas não li de volta');
+    el('res').className = 'res ok';
+    el('res').innerHTML = '<b>Pronto!</b> Voltaram ' + estado.videosAqui + ' vídeos e ' +
+      estado.clientesAqui + ' clientes para este aparelho.';
+    el('ir').style.display = 'block';
+    el('btn').style.display = 'none';
+  } catch (e) {
+    el('res').className = 'res erro';
+    el('res').textContent = 'Falhou ao gravar: ' + e.message;
+    el('btn').disabled = false;
+  }
+};
+</script>
+</body>
+</html>
