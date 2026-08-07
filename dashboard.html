@@ -3806,18 +3806,43 @@ function renderAll() {
     window.addEventListener('focus', () => syncReceber());
     document.addEventListener('visibilitychange', () => { if (!document.hidden) syncReceber(); });
   } else {
-    avisarSistemaVazio();
+    reporDadosAutomatico();
+  }
+
+  // Se o aparelho estiver sem dados, repõe sozinho a partir do arquivo do servidor.
+  // É o que fazia o sistema se curar quando o navegador limpava o armazenamento.
+  function reporDadosAutomatico() {
+    if (temDadosReais()) return;
+    if (sessionStorage.getItem('smm_ja_repos')) { avisarSistemaVazio(); return; }
+
+    const s = document.createElement('script');
+    s.src = 'dashboard-sync.js?t=' + Date.now();
+    s.onload = () => {
+      s.remove();
+      if (typeof DASHBOARD_SYNC === 'undefined') { avisarSistemaVazio(); return; }
+      let gravou = 0;
+      Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
+        if (k.startsWith('smm_') && k !== 'smm_ai_key' && v) { localStorage.setItem(k, v); gravou++; }
+      });
+      if (!gravou) { avisarSistemaVazio(); return; }
+      sessionStorage.setItem('smm_ja_repos', '1'); // evita recarregar em loop
+      location.reload();
+    };
+    s.onerror = () => { s.remove(); avisarSistemaVazio(); };
+    document.head.appendChild(s);
+  }
+
+  function temDadosReais() {
+    let videos = [];
+    try { videos = JSON.parse(localStorage.getItem('smm_videos') || '[]'); } catch {}
+    const reais = videos.filter(v => !/^(notion|plan)-/.test(String(v && v.id || ''))).length;
+    return reais > 0 || !!localStorage.getItem('smm_clients');
   }
 
   // Se abrir sem nada e sem senha, explica o que fazer em vez de mostrar tela em branco.
   // (o Safari apaga os dados guardados de sites que ficam dias sem ser abertos)
   function avisarSistemaVazio() {
-    // "notion-*" e "plan-*" são exemplos que o sistema recria sozinho — não contam como dado seu
-    let videos = [];
-    try { videos = JSON.parse(localStorage.getItem('smm_videos') || '[]'); } catch {}
-    const videosReais = videos.filter(v => !/^(notion|plan)-/.test(String(v && v.id || ''))).length;
-    const clientesSalvos = localStorage.getItem('smm_clients');
-    if (videosReais > 0 || clientesSalvos) return;
+    if (temDadosReais()) return;
 
     const cx = document.createElement('div');
     cx.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);' +
