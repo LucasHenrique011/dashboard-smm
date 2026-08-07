@@ -2711,7 +2711,9 @@ async function syncEnviar(avisar) {
     const blob = await syncEmbaralhar(pacote, senha);
     blob.savedAt = new Date().toISOString();
     blob.device = syncDeviceId();
-    const conteudo = 'const SYNC_BLOB = ' + JSON.stringify(blob) + ';';
+    // window.X e não const: o arquivo é recarregado várias vezes por sessão
+    // e um "const" repetido daria erro de sintaxe, travando a sincronização
+    const conteudo = 'window.SYNC_BLOB = ' + JSON.stringify(blob) + ';';
     const enc = btoa(unescape(encodeURIComponent(conteudo)));
 
     const get = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/contents/${SYNC_FILE}`,
@@ -2752,9 +2754,9 @@ function syncReceber(forcar) {
   s.src = SYNC_FILE + '?t=' + agora;
   s.onload = async () => {
     s.remove();
-    if (typeof SYNC_BLOB === 'undefined') return;
+    if (!window.SYNC_BLOB) return;
     try {
-      const remoto = SYNC_BLOB;
+      const remoto = window.SYNC_BLOB;
       const meuAt = localStorage.getItem('smm_sync_at') || '';
       if (remoto.device === syncDeviceId() || (remoto.savedAt || '') <= meuAt) return;
 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Recuperar meus dados</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,sans-serif; background:#08080f; color:#e2e2f0;
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;
+  -webkit-font-smoothing:antialiased; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 20% 30%, #1e0a4a 0%, transparent 55%); }
+.caixa { position:relative; z-index:1; background:#12121f; border:1px solid #282840;
+  border-radius:20px; padding:30px; width:100%; max-width:440px; }
+.logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#7c5cfc,#a78bfa);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin-bottom:18px; }
+h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px; }
+p { font-size:13.5px; color:#9090b0; line-height:1.7; margin-bottom:18px; }
+label { display:block; font-size:12px; font-weight:500; color:#9090b0; margin-bottom:6px; }
+input { width:100%; background:#1c1c2e; border:1px solid #282840; color:#e2e2f0; padding:12px 14px;
+  border-radius:11px; font-size:16px; font-family:inherit; outline:none; transition:border-color .2s; }
+input:focus { border-color:#7c5cfc; box-shadow:0 0 0 3px rgba(124,92,252,.15); }
+button { width:100%; margin-top:14px; padding:13px; border-radius:11px; border:none; background:#7c5cfc;
+  color:#fff; font-size:14px; font-weight:600; font-family:inherit; cursor:pointer; transition:background .15s; }
+button:hover:not(:disabled) { background:#6d4ef0; }
+button:disabled { opacity:.5; cursor:default; }
+.msg { margin-top:16px; padding:14px; border-radius:11px; font-size:13px; line-height:1.6; display:none; }
+.msg.erro { display:block; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; }
+.msg.ok { display:block; background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; }
+.lista { margin:10px 0 0; padding-left:18px; }
+.lista li { margin:3px 0; }
+a.botao { display:block; text-align:center; margin-top:14px; padding:13px; border-radius:11px;
+  background:#1c1c2e; border:1px solid #282840; color:#e2e2f0; text-decoration:none; font-size:14px; font-weight:600; }
+a.botao:hover { border-color:#7c5cfc; color:#a78bfa; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <div class="logo">LS</div>
+  <h1>Recuperar meus dados</h1>
+  <p>Digite a senha da sincronização. Seus vídeos, clientes e financeiro voltam para este aparelho.</p>
+
+  <label for="senha">Senha</label>
+  <input type="password" id="senha" placeholder="sua senha" autocomplete="current-password">
+  <button id="btn">Recuperar</button>
+
+  <div class="msg" id="msg"></div>
+  <a class="botao" id="ir" href="dashboard.html" style="display:none;">Abrir meu sistema →</a>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+const b64dec = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+
+function aviso(texto, tipo) {
+  const m = el('msg');
+  m.className = 'msg ' + tipo;
+  m.innerHTML = texto;
+}
+
+async function derivarChave(senha, salt) {
+  const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(senha), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt, iterations:250000, hash:'SHA-256' },
+    base, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+}
+
+// carrega o arquivo trancado
+let blob = null;
+const s = document.createElement('script');
+s.src = 'sync.js?t=' + Date.now();
+s.onload = () => {
+  blob = window.SYNC_BLOB;
+  if (!blob) aviso('Não encontrei o arquivo de dados na nuvem.', 'erro');
+};
+s.onerror = () => aviso('Não consegui baixar o arquivo de dados. Verifique sua internet.', 'erro');
+document.head.appendChild(s);
+
+el('senha').addEventListener('keydown', e => { if (e.key === 'Enter') el('btn').click(); });
+
+el('btn').onclick = async () => {
+  const senha = el('senha').value.trim();
+  if (!senha) { aviso('Digite a senha.', 'erro'); return; }
+  if (!blob) { aviso('Ainda estou baixando o arquivo. Espere um instante e tente de novo.', 'erro'); return; }
+
+  el('btn').disabled = true;
+  el('btn').textContent = 'Abrindo...';
+  try {
+    const chave = await derivarChave(senha, b64dec(blob.salt));
+    const claro = await crypto.subtle.decrypt({ name:'AES-GCM', iv:b64dec(blob.iv) }, chave, b64dec(blob.data));
+    const dados = JSON.parse(new TextDecoder().decode(claro));
+
+    const conta = s => { try { const v = JSON.parse(dados[s] || 'null');
+      return Array.isArray(v) ? v.length : (v && typeof v === 'object' ? Object.keys(v).length : 0); } catch { return 0; } };
+    const videos = conta('smm_videos'), clientes = conta('smm_clients');
+
+    if (videos + clientes === 0) {
+      aviso('O arquivo abriu, mas está vazio. Não gravei nada para não apagar o que você tem.', 'erro');
+      el('btn').disabled = false; el('btn').textContent = 'Recuperar';
+      return;
+    }
+
+    Object.entries(dados).forEach(([k, v]) => {
+      if (k.startsWith('smm_') && v != null) localStorage.setItem(k, v);
+    });
+    localStorage.setItem('smm_sync_pass', senha);
+    localStorage.setItem('smm_sync_at', blob.savedAt || new Date().toISOString());
+
+    aviso('<strong>Pronto, seus dados voltaram:</strong><ul class="lista">' +
+      '<li>' + videos + ' vídeos</li>' +
+      '<li>' + clientes + ' clientes</li>' +
+      '<li>' + conta('smm_prospects') + ' prospects</li>' +
+      '<li>' + conta('smm_finance') + ' meses de financeiro</li></ul>', 'ok');
+    el('ir').style.display = 'block';
+    el('btn').style.display = 'none';
+  } catch (e) {
+    aviso('Senha incorreta. Nada foi alterado no seu aparelho.', 'erro');
+    el('btn').disabled = false;
+    el('btn').textContent = 'Recuperar';
+  }
+};
+</script>
+</body>
+</html>
