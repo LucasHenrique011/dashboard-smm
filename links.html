@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Links dos clientes</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,sans-serif; background:#08080f; color:#e2e2f0;
+  min-height:100vh; padding:24px 20px; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 20% 20%, #1e0a4a 0%, transparent 55%); }
+.wrap { position:relative; z-index:1; max-width:560px; margin:0 auto; }
+.topo { display:flex; align-items:center; gap:12px; margin-bottom:6px; }
+.logo { width:38px; height:38px; border-radius:11px; background:linear-gradient(135deg,#7c5cfc,#a78bfa);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; }
+h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; }
+p.sub { font-size:13.5px; color:#9090b0; line-height:1.7; margin:10px 0 20px; }
+.cli { background:#12121f; border:1px solid #282840; border-radius:16px; padding:16px; margin-bottom:12px; }
+.cli h2 { font-size:15px; font-weight:600; margin-bottom:4px; }
+.cli .st { font-size:11px; font-weight:600; margin-bottom:10px; }
+.link { display:block; width:100%; background:#08080f; border:1px solid #282840; color:#a78bfa;
+  padding:10px 12px; border-radius:9px; font-size:11.5px; font-family:ui-monospace,monospace;
+  word-break:break-all; line-height:1.5; margin-bottom:9px; }
+button { padding:9px 16px; border-radius:9px; border:1px solid #282840; background:#1c1c2e; color:#e2e2f0;
+  font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; }
+button:hover { border-color:#7c5cfc; color:#a78bfa; }
+button.pri { background:#7c5cfc; border-color:#7c5cfc; color:#fff; }
+button.pri:hover { background:#6d4ef0; color:#fff; }
+.aviso { background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399;
+  padding:13px; border-radius:11px; font-size:13px; line-height:1.6; margin-bottom:18px; display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topo"><div class="logo">LS</div><h1>Links dos clientes</h1></div>
+  <p class="sub">Cada link abre só os dados daquele cliente. Trocar o endereço não mostra os outros.</p>
+  <div class="aviso" id="aviso"></div>
+  <div id="lista"></div>
+  <button class="pri" id="sincronizar" style="width:100%;margin-top:6px;padding:13px;">
+    Salvar estes links no meu sistema
+  </button>
+  <p class="sub" style="margin-top:12px;">Isso faz o botão <b>Links clientes</b> do dashboard mostrar exatamente estes endereços.</p>
+</div>
+
+<script>
+const BASE = location.origin + location.pathname.replace(/links\.html$/, '') + 'cliente.html';
+const TOKENS = {
+  "cube":            { nome: "Cube Educacional",        token: "cube-nibtkvfys1htqdhnarzhdj4a" },
+  "pallefort":       { nome: "Pallefort",               token: "pallef-x7lxmkk0795y5gsxx6tx0a1u" },
+  "mania":           { nome: "Mania da Web",            token: "mania-7ze8a0g3wjjutfra8ifs99vw" },
+  "pedroblackeguil": { nome: "PEDRO BLACK e GUILHERME", token: "pedrob-szilnr4t7u0bxq3xaq1lh62j" },
+  "lucas":           { nome: "Lucas SM (pessoal)",      token: "lucas-bhmzg7zkr1bvkmet1xq253x2" }
+};
+
+const lista = document.getElementById('lista');
+lista.innerHTML = Object.entries(TOKENS).map(([k, c]) => {
+  const url = BASE + '?k=' + c.token;
+  return '<div class="cli">' +
+    '<h2>' + c.nome + '</h2>' +
+    '<div class="st" id="st-' + k + '" style="color:#50506a;">verificando o link...</div>' +
+    '<div class="link">' + url + '</div>' +
+    '<button onclick="copiar(this,\'' + url + '\')">Copiar link</button> ' +
+    '<button onclick="window.open(\'' + url + '\',\'_blank\')">Abrir e testar</button>' +
+  '</div>';
+}).join('');
+
+function copiar(btn, url) {
+  navigator.clipboard.writeText(url).then(() => {
+    const t = btn.textContent; btn.textContent = 'Copiado!';
+    setTimeout(() => btn.textContent = t, 1600);
+  });
+}
+
+// confere se o arquivo de cada cliente existe mesmo no servidor
+Object.entries(TOKENS).forEach(([k, c]) => {
+  const s = document.createElement('script');
+  s.src = 'p-' + c.token + '.js?t=' + Date.now();
+  s.onload = () => {
+    const el = document.getElementById('st-' + k);
+    const n = (typeof PORTAL_DATA !== 'undefined' && PORTAL_DATA.videos) ? PORTAL_DATA.videos.length : 0;
+    el.textContent = '✅ funcionando — ' + n + ' vídeos';
+    el.style.color = '#34d399';
+    s.remove();
+  };
+  s.onerror = () => {
+    const el = document.getElementById('st-' + k);
+    el.textContent = '❌ arquivo não encontrado no servidor';
+    el.style.color = '#f87171';
+    s.remove();
+  };
+  document.head.appendChild(s);
+});
+
+document.getElementById('sincronizar').onclick = function () {
+  const guardar = {};
+  Object.entries(TOKENS).forEach(([k, c]) => guardar[k] = c.token);
+  localStorage.setItem('smm_portal_tokens', JSON.stringify(guardar));
+  const a = document.getElementById('aviso');
+  a.style.display = 'block';
+  a.innerHTML = '<b>Salvo.</b> O botão <b>Links clientes</b> do dashboard agora mostra estes mesmos links.';
+  this.textContent = 'Salvo no sistema';
+  this.disabled = true;
+};
+</script>
+</body>
+</html>
