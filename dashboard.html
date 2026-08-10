@@ -4821,6 +4821,15 @@ function mmEditar(id) {
   });
 }
 
+// Só liga/desliga o destaque de seleção, sem recriar os cards.
+// Recriar destruía o card entre os dois cliques e matava o duplo clique.
+function mmMarcarSelecao() {
+  if (mmSalvarEdicao()) { mmDraw(); return; } // o texto mudou: aí sim redesenha
+  document.querySelectorAll('.mm-node').forEach(el =>
+    el.classList.toggle('sel', el.dataset.id === mmSel));
+  mmDrawEdges();
+}
+
 // Grava o texto editado. Não redesenha — quem chama cuida disso.
 function mmSalvarEdicao() {
   if (!mmEditando || !mmAtual) return false;
@@ -4880,15 +4889,16 @@ function mmDelSel() {
       mmSel = node.dataset.id; mmSelEdge = null;
       const n = mmAtual.nodes.find(x => x.id === mmSel);
       const w = mmToWorld(e.clientX, e.clientY);
-      mmSnap(); // guarda a posição antes de arrastar (desfeito no pointerup se não moveu)
-      dragNode = { n, ox: w.x - n.x, oy: w.y - n.y, moved: false };
+      // Sem preventDefault e sem redesenhar aqui: as duas coisas impediam o
+      // navegador de reconhecer o duplo clique que abre a edição do card.
+      dragNode = { n, ox: w.x - n.x, oy: w.y - n.y, moved: false, sx: e.clientX, sy: e.clientY };
       mode = 'node';
-      mmDraw();
-      mmCap(e.pointerId); e.preventDefault(); return;
+      mmMarcarSelecao();
+      return;
     }
-    if (edge) { mmSelEdge = edge.dataset.edge; mmSel = null; mmDraw(); return; }
+    if (edge) { mmSelEdge = edge.dataset.edge; mmSel = null; mmMarcarSelecao(); return; }
 
-    mmSel = null; mmSelEdge = null; mmDraw();
+    mmSel = null; mmSelEdge = null; mmMarcarSelecao();
     mode = 'pan'; start = { x: e.clientX, y: e.clientY, tx: mmTx, ty: mmTy };
     vp.classList.add('panning');
     mmCap(e.pointerId);
@@ -4910,10 +4920,17 @@ function mmDelSel() {
       mmApply(); return;
     }
     if (mode === 'node' && dragNode) {
+      // só vira arrasto depois de sair uns 3px do lugar — abaixo disso é clique
+      if (!dragNode.moved) {
+        if (Math.hypot(e.clientX - dragNode.sx, e.clientY - dragNode.sy) < 3) return;
+        dragNode.moved = true;
+        mmSnap();              // histórico só quando move de verdade
+        mmCap(e.pointerId);    // captura só durante o arrasto
+        e.preventDefault();
+      }
       const w = mmToWorld(e.clientX, e.clientY);
       dragNode.n.x = Math.round(w.x - dragNode.ox);
       dragNode.n.y = Math.round(w.y - dragNode.oy);
-      dragNode.moved = true;
       const el = document.querySelector(`.mm-node[data-id="${dragNode.n.id}"]`);
       if (el) { el.style.left = dragNode.n.x + 'px'; el.style.top = dragNode.n.y + 'px'; }
       mmDrawEdges(); return;
@@ -4949,10 +4966,8 @@ function mmDelSel() {
         linkFrom = null; mmDraw();
       }
     }
-    if (mode === 'node' && dragNode) {
-      if (dragNode.moved) mmPersist();
-      else { mmUndoPilha.pop(); mmBotoesHist(); } // não moveu: descarta o snapshot
-    }
+    // o snapshot agora só é criado quando o card realmente se move
+    if (mode === 'node' && dragNode && dragNode.moved) mmPersist();
     vp.classList.remove('panning');
     mode = pointers.size ? mode : null;
     dragNode = null;
