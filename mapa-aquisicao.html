@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Mapa de aquisição — Cube</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,sans-serif; background:#08080f; color:#e2e2f0;
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 20% 30%, #1e0a4a 0%, transparent 55%); }
+.caixa { position:relative; z-index:1; background:#12121f; border:1px solid #282840;
+  border-radius:20px; padding:28px; width:100%; max-width:470px; }
+.logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#7c5cfc,#a78bfa);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin-bottom:16px; }
+h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px; }
+p { font-size:13.5px; color:#9090b0; line-height:1.7; margin-bottom:16px; }
+.linha { display:flex; gap:9px; font-size:13px; padding:7px 0; border-bottom:1px solid #1f1f35; line-height:1.5; }
+.linha:last-of-type { border-bottom:none; }
+.linha .tx { color:#9090b0; }
+.linha .tx b { color:#e2e2f0; font-weight:600; }
+button { width:100%; margin-top:18px; padding:14px; border-radius:11px; border:none; background:#7c5cfc;
+  color:#fff; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
+button:hover:not(:disabled) { background:#6d4ef0; }
+button:disabled { opacity:.45; cursor:default; }
+a.botao { display:block; text-align:center; margin-top:10px; padding:14px; border-radius:11px;
+  background:#1c1c2e; border:1px solid #282840; color:#e2e2f0; text-decoration:none; font-size:15px; font-weight:600; }
+.res { margin-top:16px; padding:14px; border-radius:11px; font-size:13px; line-height:1.65; display:none; }
+.res.ok { display:block; background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; }
+.res.erro { display:block; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <div class="logo">LS</div>
+  <h1>Mapa de aquisição — Cube</h1>
+  <p>Plano completo pra ocupar a capacidade da escola: prioridades, verba, conteúdo, sistema e ordem de execução.</p>
+  <div id="diag"></div>
+  <button id="btn">Adicionar ao meu sistema</button>
+  <div class="res" id="res"></div>
+  <a class="botao" id="ir" href="dashboard.html" style="display:none;">Ver o mapa →</a>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+
+/* verde = custo zero · azul = mídia paga · amarelo = conteúdo
+   cinza = sistema · vermelho = risco e controle */
+const PLANO = {
+titulo: 'OCUPAR A CAPACIDADE\nCube Educacional · 150 alunos', cor: 'roxo',
+ramos: [
+
+{ texto: 'PRIORIDADE', cor: 'roxo', filhos: [
+  { texto: '1º Vagas ociosas da tarde\nR$0 pra criar a vaga\nMargem quase 100%', cor: 'verde' },
+  { texto: '2º Migrar base pro integral\nO aluno já está aqui\nCusto de aquisição zero', cor: 'verde' },
+  { texto: '3º Abrir turmas de manhã\nSó depois da demanda provada\nAbrir turma vazia custa caro', cor: 'amarelo' }
+]},
+
+{ texto: 'INBOUND\nR$3.000 em 45 dias', cor: 'azul', filhos: [
+  { texto: 'Google Ads — R$2.100\nR$47 por dia\nQuem busca já decidiu procurar escola', cor: 'azul', filhos: [
+    { texto: 'Local, alta intenção — R$1.100\nR$24/dia\n"escola perto de mim" na Nova Cantareira' },
+    { texto: 'Marca, defesa — R$400\nR$9/dia\nImpede concorrente de comprar nosso nome' },
+    { texto: 'Integral e berçário — R$600\nR$13/dia\nAponta pra onde estão as vagas ociosas' }
+  ]},
+  { texto: 'Meta e Instagram — R$900\nR$20 por dia\nAlcança quem ainda não procurou', cor: 'azul', filhos: [
+    { texto: 'Objetivo: mensagem no WhatsApp\nSem formulário, conversa começa na hora' },
+    { texto: 'Raio de 3 km\nNinguém troca de escola pra bairro longe' }
+  ]},
+  { texto: 'TikTok — R$0\nOrgânico apenas\nTesta alcance antes de pôr dinheiro', cor: 'verde' }
+]},
+
+{ texto: 'OUTBOUND\nR$0 — começa por aqui', cor: 'verde', filhos: [
+  { texto: 'Fachada\nBanner + QR code rastreado\nMilhares passam na avenida todo dia', cor: 'verde' },
+  { texto: 'Indicação\nPai satisfeito é o canal mais barato', cor: 'verde', filhos: [
+    { texto: 'Recompensa pontual por matrícula trazida' },
+    { texto: 'Material pronto pro pai só encaminhar' },
+    { texto: 'Convênio com empresas do entorno' }
+  ]},
+  { texto: 'Lista de leads antigos\nJá demonstraram interesse uma vez', cor: 'verde', filhos: [
+    { texto: 'Visitou e não fechou' },
+    { texto: 'Sumiu no meio da conversa' },
+    { texto: 'Ex-aluno que saiu' },
+    { texto: 'Follow-up de 3 toques, depois para' }
+  ]},
+  { texto: 'Avaliações no Google\nDe 43 para 120\nUniepre tem 128 e aparece na frente', cor: 'verde' }
+]},
+
+{ texto: 'CONTEÚDO', cor: 'amarelo', filhos: [
+  { texto: 'Web série "Dicas para os pais"\n8 episódios', cor: 'amarelo', filhos: [
+    { texto: 'Gravar tudo em lote: 1 ou 2 dias' },
+    { texto: 'Publicar 1 por semana' },
+    { texto: '3 cortes verticais por episódio' }
+  ]},
+  { texto: 'Criativos para Meta', cor: 'amarelo', filhos: [
+    { texto: 'Rosto real de quem trabalha na escola' },
+    { texto: 'Vertical 9:16 e sempre legendado' },
+    { texto: 'Gancho nos 2 primeiros segundos' }
+  ]},
+  { texto: 'Conformidade com o ECA\nAutorização de imagem assinada\nSem isso, nenhum vídeo com criança sai', cor: 'vermelho' }
+]},
+
+{ texto: 'SISTEMA', cor: 'cinza', filhos: [
+  { texto: 'Site', cor: 'cinza', filhos: [
+    { texto: 'WhatsApp flutuante em toda página' },
+    { texto: 'Prova social: nota e depoimentos' },
+    { texto: 'Seção própria do período integral' },
+    { texto: 'Formulário de 4 campos, não mais' }
+  ]},
+  { texto: 'Rastreio\nSem isso não dá pra saber o que funcionou', cor: 'cinza', filhos: [
+    { texto: 'Pixel e tag de conversão instalados' },
+    { texto: 'GA4 configurado' },
+    { texto: 'UTM viajando até o texto do WhatsApp' }
+  ]},
+  { texto: 'Automação', cor: 'cinza', filhos: [
+    { texto: 'Saudação já pergunta idade e período' },
+    { texto: 'Resposta humana em até 5 minutos' }
+  ]},
+  { texto: 'Pipeline', cor: 'cinza', filhos: [
+    { texto: 'Novo → Respondido → Qualificado' },
+    { texto: 'Visita agendada → Visita realizada' },
+    { texto: 'Proposta → Matriculado ou Perdido' }
+  ]}
+]},
+
+{ texto: 'GESTÃO DO BUDGET', cor: 'vermelho', filhos: [
+  { texto: 'Checkpoints\nDia 7, 15, 30 e 45', cor: 'vermelho' },
+  { texto: 'Critérios definidos ANTES de ligar\nEvita decidir no calor da hora', cor: 'vermelho', filhos: [
+    { texto: 'CPL até R$150 → escala' },
+    { texto: 'CPL de R$150 a R$250 → ajusta' },
+    { texto: 'CPL acima de R$250 → problema estrutural' }
+  ]},
+  { texto: 'O que NÃO é culpa da mídia', cor: 'vermelho', filhos: [
+    { texto: 'Demora pra responder o lead' },
+    { texto: 'Pai que marca visita e não aparece' },
+    { texto: 'Roteiro da visita que não convence' }
+  ]},
+  { texto: 'Expectativa combinada\n2 a 3 matrículas em 45 dias\nAmostra pequena demais pra conclusão', cor: 'vermelho' }
+]},
+
+{ texto: 'ORDEM DE EXECUÇÃO', cor: 'roxo', filhos: [
+  { texto: 'Semana 1 — tudo que é custo zero\nFachada, indicação, lista, avaliações', cor: 'verde' },
+  { texto: 'Semana 2 — rastreio e site\nLigar mídia sem medir é jogar dinheiro fora', cor: 'cinza' },
+  { texto: 'Semana 3 — ligar a mídia paga\nGoogle e Meta no ar', cor: 'azul' },
+  { texto: 'Semana 4 em diante — otimizar\nCortar o que não traz, reforçar o que traz', cor: 'amarelo' }
+]}
+
+]};
+
+// ---- mesmo cálculo de posição do sistema, com altura por nó ----
+const MM_W = 180, GAP_X = 80, GAP_Y = 22;
+const CORES = ['roxo','verde','amarelo','vermelho','azul','cinza'];
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+// card tem 180px e fonte 13px: ~23 caracteres por linha
+function alturaDoTexto(txt) {
+  const linhas = String(txt || '').split('\n')
+    .reduce((soma, l) => soma + Math.max(1, Math.ceil(l.length / 23)), 0);
+  return Math.max(52, linhas * 19 + 22);
+}
+
+function montar(plano) {
+  const nodes = [], edges = [];
+  const norm = (n, corPai) => {
+    const cor = CORES.includes(n.cor) ? n.cor : (corPai || 'cinza');
+    return { texto: n.texto || n.titulo || '', cor,
+             filhos: (n.filhos || n.ramos || []).map(f => norm(f, cor)) };
+  };
+  const raiz = { texto: plano.titulo, cor: plano.cor || 'roxo',
+                 filhos: (plano.ramos || []).map(r => norm(r, null)) };
+
+  const altura = n => {
+    const propria = alturaDoTexto(n.texto) + GAP_Y;
+    if (!n.filhos.length) return propria;
+    return Math.max(propria, n.filhos.reduce((s, f) => s + altura(f), 0));
+  };
+  function pos(n, topo, nivel) {
+    const h = altura(n), hp = alturaDoTexto(n.texto);
+    if (n.filhos.length) { let y = topo; n.filhos.forEach(f => { pos(f, y, nivel + 1); y += altura(f); }); }
+    n.id = uid();
+    nodes.push({ id: n.id, x: nivel * (MM_W + GAP_X),
+                 y: Math.round(topo + h / 2 - hp / 2), text: n.texto, color: n.cor, h: hp });
+    n.filhos.forEach(f => edges.push({ id: uid(), from: n.id, to: f.id }));
+  }
+  pos(raiz, 0, 0);
+  return { nodes, edges };
+}
+
+const ler = k => { try { return JSON.parse(localStorage.getItem(k)) || null; } catch { return null; } };
+const NOME = 'CUBE — Mapa de aquisição';
+
+function diag() {
+  const { nodes } = montar(PLANO);
+  const mapas = ler('smm_mapas') || [];
+  const niveis = new Set(nodes.map(n => n.x)).size;
+  el('diag').innerHTML =
+    '<div class="linha"><span class="tx">Cards que serão criados: <b>' + nodes.length + '</b></span></div>' +
+    '<div class="linha"><span class="tx">Níveis de profundidade: <b>' + niveis + '</b></span></div>' +
+    '<div class="linha"><span class="tx">Já existe no sistema: <b>' +
+      (mapas.some(m => m.name === NOME) ? 'sim (vou substituir)' : 'não') + '</b></span></div>';
+}
+diag();
+
+el('btn').onclick = () => {
+  el('btn').disabled = true;
+  try {
+    const { nodes, edges } = montar(PLANO);
+
+    // confere que nenhum card ficou por cima de outro
+    let colisoes = 0;
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        // sobreposição de verdade: um começa antes do outro terminar
+        if (a.x === b.x && a.y < b.y + b.h && b.y < a.y + a.h) colisoes++;
+      }
+    if (colisoes) throw new Error(colisoes + ' cards ficariam sobrepostos');
+
+    const projetos = ler('smm_mm_projetos') || [];
+    let proj = projetos.find(p => p.name === 'Cube Educacional');
+    if (!proj) {
+      proj = { id: uid(), name: 'Cube Educacional', createdAt: new Date().toISOString() };
+      projetos.push(proj);
+      localStorage.setItem('smm_mm_projetos', JSON.stringify(projetos));
+    }
+    const mapas = (ler('smm_mapas') || []).filter(m => m.name !== NOME);
+    mapas.push({ id: uid(), projeto: proj.id, name: NOME, nodes, edges,
+                 updatedAt: new Date().toISOString() });
+    localStorage.setItem('smm_mapas', JSON.stringify(mapas));
+
+    const conf = (ler('smm_mapas') || []).find(m => m.name === NOME);
+    if (!conf || conf.nodes.length !== nodes.length) throw new Error('gravou mas não li de volta');
+
+    el('res').className = 'res ok';
+    el('res').innerHTML = '<b>Pronto!</b> Mapa criado com ' + conf.nodes.length +
+      ' cards e nenhum sobreposto, dentro do projeto <b>' + proj.name + '</b>.<br><br>' +
+      'No sistema: aba <b>Mapas</b> → <b>' + proj.name + '</b> → <b>' + NOME + '</b>.';
+    el('ir').style.display = 'block';
+    el('btn').style.display = 'none';
+    diag();
+  } catch (e) {
+    el('res').className = 'res erro';
+    el('res').textContent = 'Falhou: ' + e.message;
+    el('btn').disabled = false;
+  }
+};
+</script>
+</body>
+</html>

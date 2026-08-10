@@ -4115,7 +4115,7 @@ function toggleAI() {
   panel.style.flexDirection = 'column';
   if (aiOpen && aiHistory.length === 0) {
     loadAIConfig();
-    const key = localStorage.getItem('smm_ai_key');
+    const key = aiChave();
     if (!key) {
       switchAITab('config');
       addAIMsg('bot', 'Oi! Sou o Lucas AI 👋\n\nPra começar, vai na aba ⚙️ Config e cola sua chave da API da Anthropic.');
@@ -4136,6 +4136,14 @@ function switchAITab(tab) {
   });
 }
 
+// A chave vai num cabeçalho HTTP, que só aceita caracteres simples.
+// Colar de PDF, e-mail ou chat costuma trazer espaço invisível e aspa curva,
+// e aí o navegador recusa a requisição inteira.
+function aiChave() {
+  const bruta = localStorage.getItem('smm_ai_key') || '';
+  return bruta.replace(/[^\x21-\x7E]/g, '');
+}
+
 function loadAIConfig() {
   const key = localStorage.getItem('smm_ai_key') || '';
   const persona = localStorage.getItem('smm_ai_persona') || '';
@@ -4146,7 +4154,8 @@ function loadAIConfig() {
 }
 
 function saveAIConfig() {
-  const key = document.getElementById('ai-api-key').value.trim();
+  // limpa caracteres invisíveis já na hora de salvar
+  const key = document.getElementById('ai-api-key').value.replace(/[^\x21-\x7E]/g, '');
   const persona = document.getElementById('ai-persona').value.trim();
   const context = document.getElementById('ai-context').value.trim();
   if (key) localStorage.setItem('smm_ai_key', key);
@@ -4290,7 +4299,7 @@ async function sendAI(customMsg) {
   const msg = customMsg || input.value.trim();
   if (!msg) return;
 
-  const key = localStorage.getItem('smm_ai_key');
+  const key = aiChave();
   if (!key) { switchAITab('config'); return; }
 
   if (!customMsg) { input.value = ''; input.style.height = 'auto'; }
@@ -4394,7 +4403,7 @@ buildDashboardData = function() {
 // Carrega config ao abrir
 document.addEventListener('DOMContentLoaded', () => {
   loadAIConfig();
-  const key = localStorage.getItem('smm_ai_key');
+  const key = aiChave();
   if (key) {
     document.getElementById('ai-badge').style.display = 'flex';
     document.getElementById('ai-badge').textContent = '✓';
@@ -5009,8 +5018,13 @@ function mmDelSel() {
 // -- gerar mapa com a IA --
 async function mmGerarIA() {
   if (!mmAtual) return;
-  const key = localStorage.getItem('smm_ai_key');
+  const key = aiChave();
   if (!key) { alert('Cole a chave da API no assistente (botão 🤖 → Config) antes de usar isso.'); return; }
+  if (!/^sk-ant-/.test(key)) {
+    alert('A chave da API parece incompleta ou colada com caracteres estranhos.\n\n' +
+          'Abre o assistente (🤖) → Config, apaga o campo da chave, cola de novo e salva.');
+    return;
+  }
 
   const tema = prompt('Sobre o que é o mapa?\n\nEx: "Planejamento de agosto da Pallefort" ou "Ideias de vídeo pra loja de roupa"');
   if (!tema || !tema.trim()) return;
