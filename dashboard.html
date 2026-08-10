@@ -4710,6 +4710,7 @@ function mmFit() {
 // -- render --
 function mmDraw() {
   if (!mmAtual) return;
+  mmSalvarEdicao(); // nunca redesenhar por cima de uma edição aberta
   const world = document.getElementById('mm-world');
   world.innerHTML = mmAtual.nodes.map(n => {
     const c = MM_CORES[n.color] || MM_CORES.roxo;
@@ -4784,28 +4785,42 @@ function mmPintar(cor) {
   if (n) { mmSnap(); n.color = cor; mmDraw(); mmPersist(); }
 }
 
+// Guarda a edição em andamento. Sem isso, redesenhar a tela destruía o card
+// que estava sendo editado e o texto novo era perdido em silêncio.
+let mmEditando = null;
+
 function mmEditar(id) {
+  mmSalvarEdicao(); // fecha a edição anterior antes de abrir outra
   const el = document.querySelector(`.mm-node[data-id="${id}"]`);
-  if (!el) return;
+  if (!el || !mmAtual) return;
   const n = mmAtual.nodes.find(x => x.id === id);
+  if (!n) return;
   el.classList.add('edit'); el.classList.remove('empty');
   el.contentEditable = 'true';
   el.textContent = n.text;
   el.focus();
   document.execCommand('selectAll', false, null);
-  const antes = n.text;
-  const fim = () => {
-    el.contentEditable = 'false';
-    el.classList.remove('edit');
-    const novo = el.textContent.trim();
-    if (novo !== antes) { n.text = antes; mmSnap(); n.text = novo; }
-    mmDraw(); mmPersist();
-  };
-  el.addEventListener('blur', fim, { once: true });
+  mmEditando = { id, antes: n.text, el };
+  el.addEventListener('blur', () => { if (mmSalvarEdicao()) mmDraw(); }, { once: true });
   el.addEventListener('keydown', ev => {
     if (ev.key === 'Escape' || (ev.key === 'Enter' && (ev.metaKey || ev.ctrlKey))) { ev.preventDefault(); el.blur(); }
     ev.stopPropagation();
   });
+}
+
+// Grava o texto editado. Não redesenha — quem chama cuida disso.
+function mmSalvarEdicao() {
+  if (!mmEditando || !mmAtual) return false;
+  const { id, antes, el } = mmEditando;
+  mmEditando = null; // zera antes pra não reentrar
+  if (el) { el.contentEditable = 'false'; el.classList.remove('edit'); }
+  const n = mmAtual.nodes.find(x => x.id === id);
+  if (!n || !el) return false;
+  const novo = el.textContent.trim();
+  if (novo === antes) return false;
+  n.text = antes; mmSnap(); n.text = novo; // registra no histórico pro Ctrl+Z
+  mmPersist();
+  return true;
 }
 
 function mmDelSel() {
