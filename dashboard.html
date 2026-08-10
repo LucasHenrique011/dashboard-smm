@@ -2442,13 +2442,26 @@ function importData(e) {
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
-const FIXED_TOKENS = { cube: 'cube2026ls', pallefort: 'pall2026ls', mania: 'mania2026ls', lucas: 'lucas2026ls' };
+// Códigos dos portais que estão publicados no servidor. Eles têm prioridade:
+// se o navegador inventar outros, os links apontariam pra arquivos inexistentes.
+const TOKENS_PUBLICADOS = {
+  cube:            'cube-nibtkvfys1htqdhnarzhdj4a',
+  pallefort:       'pallef-x7lxmkk0795y5gsxx6tx0a1u',
+  mania:           'mania-7ze8a0g3wjjutfra8ifs99vw',
+  lucas:           'lucas-bhmzg7zkr1bvkmet1xq253x2',
+  pedroblackeguil: 'pedrob-szilnr4t7u0bxq3xaq1lh62j'
+};
+
 // Cada cliente tem um código secreto longo. O arquivo dele no servidor tem esse
 // código no nome, então trocar a URL não mostra os dados de outro cliente.
 function getTokens() {
   let salvos = {};
   try { salvos = JSON.parse(localStorage.getItem('smm_portal_tokens')) || {}; } catch {}
   let mudou = false;
+  // o que já está publicado sempre vence o que o navegador tiver guardado
+  for (const [k, v] of Object.entries(TOKENS_PUBLICADOS)) {
+    if (salvos[k] !== v) { salvos[k] = v; mudou = true; }
+  }
   for (const key of Object.keys(CLIENTS)) {
     if (!salvos[key] || salvos[key].length < 20) {
       const r = crypto.getRandomValues(new Uint8Array(16));
