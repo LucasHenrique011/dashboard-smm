@@ -358,6 +358,7 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm btn-primary" onclick="publicarTudo()">🚀 Publicar tudo</button>
   <button class="btn-sm" onclick="publicarPortalLinks()">📋 Links clientes</button>
   <button class="btn-sm" onclick="syncConfigurar()" title="Sincronizar com o celular">🔒 Sincronização</button>
+  <span id="app-versao" style="font-size:10px;color:var(--text3);align-self:center;padding-left:4px;"></span>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
 <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:0 24px 8px;">
@@ -2439,6 +2440,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
+const VERSAO_APP = '20260810-1625';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -3810,7 +3812,49 @@ function renderAll() {
     doAutoBackup();
   }
 
+  const elv = document.getElementById('app-versao');
+  if (elv) elv.textContent = 'v' + VERSAO_APP;
+  const elVersao = document.getElementById('app-versao');
+  if (elVersao) elVersao.textContent = 'v' + VERSAO_APP;
   startApp();
+  // As funções de mapa ficam no segundo bloco de script, que ainda não foi lido
+  // aqui. Por isso esperamos a página terminar de carregar.
+  window.addEventListener('load', () => { abrirMapaPorLink(); checarVersao(); });
+
+  // Abre direto um mapa quando o endereço traz ?mapa=<id>
+  function abrirMapaPorLink() {
+    try {
+      const id = new URLSearchParams(location.search).get('mapa');
+      if (!id || typeof mmLoad !== 'function') return;
+      const m = (mmLoad() || []).find(x => x.id === id);
+      if (!m) return;
+      showModule('mapas');
+      if (m.projeto) abrirProjeto(m.projeto);
+      abrirMapa(m.id);
+    } catch (e) { console.error('abrirMapaPorLink:', e); }
+  }
+
+  // O navegador guarda a página por 10 minutos. Sem isso, não dá pra saber
+  // se você está vendo a versão nova ou uma antiga em cache.
+  function checarVersao() {
+    fetch('versao.json?t=' + Date.now(), { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d || !d.v || d.v === VERSAO_APP) return;
+        const b = document.createElement('div');
+        b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);bottom:20px;z-index:500;' +
+          'background:var(--accent);color:#fff;padding:12px 18px;border-radius:12px;font-size:13px;' +
+          'font-weight:600;box-shadow:0 8px 24px rgba(124,92,252,.4);display:flex;gap:12px;align-items:center;';
+        b.innerHTML = '<span>Existe uma versão mais nova do sistema</span>';
+        const btn = document.createElement('button');
+        btn.textContent = 'Atualizar agora';
+        btn.style.cssText = 'background:#fff;color:#4a3ab0;border:none;padding:7px 14px;border-radius:8px;font-weight:700;';
+        btn.onclick = () => location.replace(location.pathname + '?v=' + d.v);
+        b.appendChild(btn);
+        document.body.appendChild(b);
+      })
+      .catch(() => {});
+  }
 
   // Sincronização trancada com senha: busca ao abrir e sempre que voltar pro app
   syncStatus(syncSenha() ? 'ok' : 'off');

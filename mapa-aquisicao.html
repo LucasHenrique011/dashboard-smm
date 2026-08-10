@@ -245,10 +245,13 @@ el('btn').onclick = () => {
       projetos.push(proj);
       localStorage.setItem('smm_mm_projetos', JSON.stringify(projetos));
     }
+    const idMapa = uid();
     const mapas = (ler('smm_mapas') || []).filter(m => m.name !== NOME);
-    mapas.push({ id: uid(), projeto: proj.id, name: NOME, nodes, edges,
+    mapas.push({ id: idMapa, projeto: proj.id, name: NOME, nodes, edges,
                  updatedAt: new Date().toISOString() });
     localStorage.setItem('smm_mapas', JSON.stringify(mapas));
+    // leva direto pro mapa aberto, sem ter que procurar nas abas
+    el('ir').href = 'dashboard.html?mapa=' + idMapa;
 
     const conf = (ler('smm_mapas') || []).find(m => m.name === NOME);
     if (!conf || conf.nodes.length !== nodes.length) throw new Error('gravou mas não li de volta');

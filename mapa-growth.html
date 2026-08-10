@@ -128,8 +128,9 @@ el('btn').onclick = () => {
       projetos.push(proj);
       localStorage.setItem('smm_mm_projetos', JSON.stringify(projetos));
     }
+    const idMapa = uid();
     const mapas = (ler('smm_mapas') || []).filter(m => m.name !== 'CUBE GROWTH');
-    mapas.push({ id: uid(), projeto: proj.id, name: 'CUBE GROWTH', nodes, edges,
+    mapas.push({ id: idMapa, projeto: proj.id, name: 'CUBE GROWTH', nodes, edges,
                  updatedAt: new Date().toISOString() });
     localStorage.setItem('smm_mapas', JSON.stringify(mapas));
 
@@ -140,6 +141,7 @@ el('btn').onclick = () => {
     el('res').innerHTML = '<b>Pronto!</b> O mapa <b>CUBE GROWTH</b> foi criado com ' +
       conf.nodes.length + ' cards, dentro do projeto <b>' + proj.name + '</b>.<br><br>' +
       'No sistema: aba <b>Mapas</b> → <b>' + proj.name + '</b> → <b>CUBE GROWTH</b>.';
+    el('ir').href = 'dashboard.html?mapa=' + idMapa;
     el('ir').style.display = 'block';
     el('btn').style.display = 'none';
     diag();
