@@ -2440,7 +2440,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260810-1625';
+const VERSAO_APP = '20260814-1355';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -3891,10 +3891,20 @@ function renderAll() {
   }
 
   function temDadosReais() {
+    // Contar de verdade. Antes bastava a chave existir — e uma lista vazia ("{}")
+    // fazia o sistema achar que tinha dados, travando a reposição pra sempre.
+    const conta = chave => {
+      try {
+        const v = JSON.parse(localStorage.getItem(chave) || 'null');
+        if (Array.isArray(v)) return v.length;
+        if (v && typeof v === 'object') return Object.keys(v).length;
+        return 0;
+      } catch { return 0; }
+    };
     let videos = [];
     try { videos = JSON.parse(localStorage.getItem('smm_videos') || '[]'); } catch {}
-    const reais = videos.filter(v => !/^(notion|plan)-/.test(String(v && v.id || ''))).length;
-    return reais > 0 || !!localStorage.getItem('smm_clients');
+    const videosReais = videos.filter(v => !/^(notion|plan)-/.test(String(v && v.id || ''))).length;
+    return videosReais > 0 || conta('smm_clients') > 0;
   }
 
   // Se abrir sem nada e sem senha, explica o que fazer em vez de mostrar tela em branco.
