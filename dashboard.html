@@ -2440,7 +2440,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260814-1355';
+const VERSAO_APP = '20260814-1400';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -3871,7 +3871,6 @@ function renderAll() {
   // É o que fazia o sistema se curar quando o navegador limpava o armazenamento.
   function reporDadosAutomatico() {
     if (temDadosReais()) return;
-    if (sessionStorage.getItem('smm_ja_repos')) { avisarSistemaVazio(); return; }
 
     const s = document.createElement('script');
     s.src = 'dashboard-sync.js?t=' + Date.now();
@@ -3882,8 +3881,10 @@ function renderAll() {
       Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
         if (k.startsWith('smm_') && k !== 'smm_ai_key' && v) { localStorage.setItem(k, v); gravou++; }
       });
-      if (!gravou) { avisarSistemaVazio(); return; }
-      sessionStorage.setItem('smm_ja_repos', '1'); // evita recarregar em loop
+      // Só recarrega se os dados realmente entraram. Isso evita loop sem
+      // precisar de trava de sessão — a trava antiga bloqueava a reposição
+      // pro resto da aba e deixava o sistema em branco pra sempre.
+      if (!gravou || !temDadosReais()) { avisarSistemaVazio(); return; }
       location.reload();
     };
     s.onerror = () => { s.remove(); avisarSistemaVazio(); };
