@@ -2440,7 +2440,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260814-1400';
+const VERSAO_APP = '20260814-1407';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -2609,6 +2609,24 @@ async function pushFileToGithub(filename, content) {
   } catch(e) { console.error(filename, e); return false; }
 }
 
+// Sobe os dados ATUAIS deste aparelho pro arquivo que abastece o celular.
+// Só sobe se houver conteúdo — nunca publica um aparelho vazio por cima do bom.
+async function pushBackupPublico() {
+  const dados = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (!k.startsWith('smm_') || SYNC_NUNCA.includes(k) || k === 'smm_portal_tokens') continue;
+    dados[k] = localStorage.getItem(k);
+  }
+  if (syncTemConteudo(dados) === 0) {
+    alert('Não publiquei: este aparelho está sem dados.\n\nSe eu subisse assim, apagaria o backup bom que abastece o celular.');
+    return false;
+  }
+  dados._savedAt = new Date().toISOString();
+  return pushFileToGithub('dashboard-sync.js',
+    'const DASHBOARD_SYNC = ' + JSON.stringify(dados, null, 2) + ';');
+}
+
 async function publicarTudo() {
   let ghToken = getGithubToken();
   if (!ghToken) {
@@ -2621,9 +2639,11 @@ async function publicarTudo() {
   btn.textContent = '⏳ Publicando...';
   btn.disabled = true;
   try {
-    if (!syncSenha()) syncConfigurar();
+    // Publicar SÓ SOBE. Nunca baixa nada.
+    // Antes isso chamava syncConfigurar(), que pedia senha e puxava a cópia
+    // antiga do servidor por cima do trabalho atual — apagando tudo.
     const ok1 = await pushPortaisPorCliente();
-    const ok2 = syncSenha() ? await syncEnviar() : true;
+    const ok2 = await pushBackupPublico();
     btn.disabled = false;
     if (ok1 && ok2) {
       btn.textContent = '✅ Publicado!';
@@ -3856,15 +3876,10 @@ function renderAll() {
       .catch(() => {});
   }
 
-  // Sincronização trancada com senha: busca ao abrir e sempre que voltar pro app
-  syncStatus(syncSenha() ? 'ok' : 'off');
-  if (syncSenha()) {
-    syncReceber(true);
-    window.addEventListener('focus', () => syncReceber());
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) syncReceber(); });
-  }
-  // Sempre repõe se o aparelho estiver vazio — mesmo com senha salva.
-  // (ter senha guardada não pode impedir a reposição, senão fica em branco)
+  // A busca automática por senha foi DESLIGADA. Ela baixava a cópia do servidor
+  // por cima do trabalho atual toda vez que o sistema abria ou voltava ao foco.
+  // Agora só repõe quando o aparelho está de fato vazio, e nunca sobrescreve.
+  syncStatus('off');
   reporDadosAutomatico();
 
   // Se o aparelho estiver sem dados, repõe sozinho a partir do arquivo do servidor.
