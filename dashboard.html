@@ -1105,7 +1105,7 @@ function saveClientForm() {
 }
 
 function deleteClient(key) {
-  if (!confirm(`Remover ${CLIENTS[key].name}? Os vídeos desse cliente continuam no histórico.`)) return;
+  if (!confirm(`Remover ${(CLIENTS[key]||{}).name || key}? Os vídeos desse cliente continuam no histórico.`)) return;
   delete CLIENTS[key];
   saveClients(CLIENTS);
   populateClientSelects();
@@ -1268,7 +1268,7 @@ function renderCalendar() {
     const ds = dateStr(dt);
     const dayVideos = videos.filter(v => v.date === ds);
     let items = dayVideos.map(v =>
-      `<div class="cal-item ${v.client}" onclick="editVideo('${v.id}')"><span class="cal-status cal-status-${v.status}"></span>${CLIENTS[v.client].name.split(' ')[0]}: ${v.title.substring(0,18)}</div>`
+      `<div class="cal-item ${v.client}" onclick="editVideo('${v.id}')"><span class="cal-status cal-status-${v.status}"></span>${((CLIENTS[v.client]||{}).name || v.client || '—').split(' ')[0]}: ${v.title.substring(0,18)}</div>`
     ).join('');
     items += `<div class="cal-item empty" onclick="openVideoModalForDate('${ds}')">+</div>`;
     cal.innerHTML += `<div class="cal-day"><div class="cal-day-label">${days[i]} ${dt.getDate()}/${dt.getMonth()+1}</div>${items}</div>`;
@@ -1291,7 +1291,7 @@ function renderTracker() {
   tbody.innerHTML = filtered.length === 0
     ? '<tr><td colspan="6" style="text-align:center;color:#555;padding:24px;">Nenhum vídeo encontrado</td></tr>'
     : filtered.map(v => `<tr>
-      <td><span class="cal-item ${v.client}" style="display:inline-block;margin:0;">${CLIENTS[v.client].name}</span></td>
+      <td><span class="cal-item ${v.client}" style="display:inline-block;margin:0;">${(CLIENTS[v.client] || {}).name || v.client || '—'}</span></td>
       <td>${v.title}</td>
       <td><span class="pill pill-${v.client}">${v.pillar}</span></td>
       <td>
@@ -1467,7 +1467,7 @@ function closeVideoModal() { document.getElementById('video-modal').classList.re
 function updatePillarOptions() {
   const client = document.getElementById('v-client').value;
   const sel = document.getElementById('v-pillar');
-  sel.innerHTML = CLIENTS[client].pillars.map(p => `<option value="${p}">${p}</option>`).join('');
+  sel.innerHTML = ((CLIENTS[client]||{}).pillars || []).map(p => `<option value="${p}">${p}</option>`).join('');
   document.getElementById('lbl-roteiro').textContent = 'Roteiro (opcional)';
 }
 
@@ -1643,7 +1643,7 @@ function renderLTV() {
     (data.receitas || []).forEach(r => {
       const key = matchClientKey(r.name);
       if (!key) return;
-      if (!ltvMap[key]) ltvMap[key] = { name: CLIENTS[key].name, total: 0, meses: new Set(), porMes: {} };
+      if (!ltvMap[key]) ltvMap[key] = { name: (CLIENTS[key]||{}).name || key, total: 0, meses: new Set(), porMes: {} };
       ltvMap[key].total += r.value;
       ltvMap[key].meses.add(mes);
       ltvMap[key].porMes[mes] = (ltvMap[key].porMes[mes] || 0) + r.value;
@@ -2357,7 +2357,7 @@ function renderWeeklySummary() {
     <div class="ws-group" style="flex-direction:column;">
       <div class="ws-group-label">Por cliente</div>
       <div style="display:flex;flex:1;">
-        ${Object.entries(perClient).map(([k, c]) => `<div class="ws-item"><div class="ws-val" style="color:${getClientColor(k)};">${c}</div><div class="ws-lbl">${CLIENTS[k].name.split(' ')[0]}</div></div>`).join('')}
+        ${Object.entries(perClient).map(([k, c]) => `<div class="ws-item"><div class="ws-val" style="color:${getClientColor(k)};">${c}</div><div class="ws-lbl">${((CLIENTS[k]||{}).name || k).split(' ')[0]}</div></div>`).join('')}
       </div>
     </div>
   `;
@@ -2440,7 +2440,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260814-1407';
+const VERSAO_APP = '20260815-1906';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -4431,11 +4431,11 @@ async function gerarRelatorio() {
   const clientKeys = Object.keys(CLIENTS).filter(k => k !== 'lucas');
   if (!clientKeys.length) { addAIMsg('bot', 'Nenhum cliente encontrado.'); return; }
 
-  const options = clientKeys.map(k => CLIENTS[k].name).join(', ');
+  const options = clientKeys.map(k => (CLIENTS[k]||{}).name || k).join(', ');
   const nome = prompt(`Para qual cliente gerar o relatório?\n\n${options}`);
   if (!nome) return;
 
-  const key = Object.keys(CLIENTS).find(k => CLIENTS[k].name.toLowerCase().includes(nome.toLowerCase()));
+  const key = Object.keys(CLIENTS).find(k => ((CLIENTS[k]||{}).name||'').toLowerCase().includes(nome.toLowerCase()));
   if (!key) { alert('Cliente não encontrado.'); return; }
 
   const cl = CLIENTS[key];

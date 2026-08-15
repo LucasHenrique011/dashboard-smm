@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>Colocar meu sistema no ar</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Inter',-apple-system,sans-serif; background:#08080f; color:#e2e2f0;
+  min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+body::before { content:''; position:fixed; inset:0; pointer-events:none;
+  background:radial-gradient(ellipse at 20% 30%, #1e0a4a 0%, transparent 55%); }
+.caixa { position:relative; z-index:1; background:#12121f; border:1px solid #282840;
+  border-radius:20px; padding:28px; width:100%; max-width:470px; }
+.logo { width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg,#7c5cfc,#a78bfa);
+  display:flex; align-items:center; justify-content:center; font-weight:800; color:#fff; margin-bottom:16px; }
+h1 { font-size:19px; font-weight:700; letter-spacing:-.02em; margin-bottom:8px; }
+p { font-size:13.5px; color:#9090b0; line-height:1.7; margin-bottom:16px; }
+.linha { display:flex; gap:9px; font-size:13px; padding:8px 0; border-bottom:1px solid #1f1f35; line-height:1.5; }
+.linha:last-of-type { border-bottom:none; }
+.linha .tx { color:#9090b0; }
+.linha .tx b { color:#e2e2f0; font-weight:600; }
+button { width:100%; margin-top:18px; padding:15px; border-radius:11px; border:none; background:#7c5cfc;
+  color:#fff; font-size:15px; font-weight:600; font-family:inherit; cursor:pointer; }
+button:hover:not(:disabled) { background:#6d4ef0; }
+button:disabled { opacity:.45; cursor:default; }
+a.botao { display:block; text-align:center; margin-top:10px; padding:15px; border-radius:11px;
+  background:#1c1c2e; border:1px solid #282840; color:#e2e2f0; text-decoration:none; font-size:15px; font-weight:600; }
+.res { margin-top:16px; padding:14px; border-radius:11px; font-size:13px; line-height:1.7; display:none; }
+.res.ok { display:block; background:rgba(52,211,153,.1); border:1px solid rgba(52,211,153,.3); color:#34d399; }
+.res.erro { display:block; background:rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.3); color:#f87171; }
+</style>
+</head>
+<body>
+<div class="caixa">
+  <div class="logo">LS</div>
+  <h1>Colocar meu sistema no ar</h1>
+  <p>Repõe seus dados se estiverem faltando e adiciona os 3 vídeos da Mania da Web de 18/08. Nada do que você já tem é apagado.</p>
+  <div id="diag"></div>
+  <button id="btn" disabled>Verificando...</button>
+  <div class="res" id="res"></div>
+  <a class="botao" id="ir" href="dashboard.html" style="display:none;">Abrir meu sistema →</a>
+</div>
+
+<script>
+const el = id => document.getElementById(id);
+const est = { salvar:null, backup:null, videosBackup:0, videosAqui:0, clientesAqui:0, faltamVideos:0 };
+
+const NOVOS = [
+ { title:"Produtos que não pode faltar na minha necessaire", pillar:"ATENÇÃO",
+   ref:"https://www.instagram.com/reel/Daio7mJpuEs/", roteiro:"Produtos: a definir" },
+ { title:"Dinheiro não compra felicidade", pillar:"ATENÇÃO",
+   ref:"https://www.instagram.com/reel/DZOUexxA7-t/", roteiro:"Produtos: a definir" },
+ { title:"3 dicas para cuidar do seu vidrinho", pillar:"CONVERSÃO",
+   ref:"https://www.instagram.com/reel/CxtnUoirsPx/",
+   roteiro:"Produtos: 1un esmalte segunda a sexta Anita (reunião que só podia ser email)" }
+];
+
+function ic(ok) { return ok ? '✅' : '❌'; }
+function pintar() {
+  el('diag').innerHTML =
+    '<div class="linha"><span>' + ic(est.salvar) + '</span><span class="tx">Navegador deixa salvar: <b>' +
+      (est.salvar === null ? '...' : est.salvar ? 'sim' : 'NÃO') + '</b></span></div>' +
+    '<div class="linha"><span>' + ic(est.backup) + '</span><span class="tx">Backup no servidor: <b>' +
+      (est.backup === null ? '...' : est.backup ? est.videosBackup + ' vídeos' : 'não carregou') + '</b></span></div>' +
+    '<div class="linha"><span>' + ic(est.videosAqui > 0) + '</span><span class="tx">Neste aparelho agora: <b>' +
+      est.videosAqui + ' vídeos, ' + est.clientesAqui + ' clientes</b></span></div>' +
+    '<div class="linha"><span>' + ic(est.faltamVideos === 0) + '</span><span class="tx">Vídeos de 18/08: <b>' +
+      (est.faltamVideos === 0 ? 'já estão aqui' : 'faltam ' + est.faltamVideos) + '</b></span></div>';
+}
+
+try { localStorage.setItem('__t','1'); localStorage.removeItem('__t'); est.salvar = true; }
+catch { est.salvar = false; }
+
+function lerAqui() {
+  try {
+    const v = JSON.parse(localStorage.getItem('smm_videos') || '[]');
+    est.videosAqui = v.length;
+    est.clientesAqui = Object.keys(JSON.parse(localStorage.getItem('smm_clients') || '{}')).length;
+    const t = new Set(v.map(x => x && x.title));
+    est.faltamVideos = NOVOS.filter(n => !t.has(n.title)).length;
+  } catch {}
+}
+lerAqui(); pintar();
+
+const s = document.createElement('script');
+s.src = 'dashboard-sync.js?t=' + Date.now();
+s.onload = () => {
+  if (typeof DASHBOARD_SYNC === 'undefined') { est.backup = false; pintar(); el('btn').textContent = 'Backup veio vazio'; return; }
+  est.backup = true;
+  try { est.videosBackup = JSON.parse(DASHBOARD_SYNC.smm_videos || '[]').length; } catch {}
+  pintar();
+  el('btn').disabled = !est.salvar;
+  el('btn').textContent = 'Deixar meu sistema pronto';
+};
+s.onerror = () => { est.backup = false; pintar(); el('btn').textContent = 'Não consegui baixar o backup'; };
+document.head.appendChild(s);
+
+el('btn').onclick = () => {
+  el('btn').disabled = true;
+  try {
+    const conta = o => { try { const v = JSON.parse(o || 'null');
+      return Array.isArray(v) ? v.length : (v && typeof v === 'object' ? Object.keys(v).length : 0); } catch { return 0; } };
+
+    // 1) repõe só o que está faltando — nunca sobrescreve o que já tem conteúdo
+    let repostas = 0;
+    Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
+      if (!k.startsWith('smm_') || !v) return;
+      if (conta(localStorage.getItem(k)) === 0) { localStorage.setItem(k, v); repostas++; }
+    });
+
+    // 2) acrescenta os vídeos de 18/08 que ainda não existirem
+    const videos = JSON.parse(localStorage.getItem('smm_videos') || '[]');
+    const titulos = new Set(videos.map(v => v && v.title));
+    let add = 0;
+    NOVOS.forEach(n => {
+      if (titulos.has(n.title)) return;
+      videos.push({ client:'mania', title:n.title, pillar:n.pillar, date:'2026-08-18',
+                    status:'pendente', gancho:'', dev:'', cta:'', ref:n.ref, roteiro:n.roteiro,
+                    id:'v1808' + Math.random().toString(36).slice(2,10) });
+      add++;
+    });
+    localStorage.setItem('smm_videos', JSON.stringify(videos));
+
+    // 3) tira restos da sincronização antiga, que puxava dados velhos por cima
+    localStorage.removeItem('smm_sync_pass');
+    localStorage.removeItem('smm_sync_at');
+    sessionStorage.removeItem('smm_ja_repos');
+
+    lerAqui(); pintar();
+    if (est.videosAqui === 0) throw new Error('gravou mas não li de volta');
+
+    el('res').className = 'res ok';
+    el('res').innerHTML = '<b>Pronto.</b><br>' +
+      est.videosAqui + ' vídeos e ' + est.clientesAqui + ' clientes no aparelho.<br>' +
+      (add ? add + ' vídeo(s) de 18/08 adicionados.' : 'Os vídeos de 18/08 já estavam aqui.') +
+      (repostas ? '<br>' + repostas + ' bloco(s) de dados repostos.' : '');
+    el('ir').style.display = 'block';
+    el('btn').style.display = 'none';
+  } catch (e) {
+    el('res').className = 'res erro';
+    el('res').textContent = 'Falhou: ' + e.message;
+    el('btn').disabled = false;
+  }
+};
+</script>
+</body>
+</html>
