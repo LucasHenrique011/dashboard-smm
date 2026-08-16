@@ -1112,7 +1112,10 @@ async function nuvemPuxarTudo() {
       localStorage.setItem('smm_mapas', JSON.stringify(arr));
       _idsMapasNuvem = new Set(arr.map(x => x.id));
     }
-    if (ap.data) ap.data.forEach(x => localStorage.setItem(x.key, JSON.stringify(x.data)));
+    if (ap.data) ap.data.forEach(x => {
+      // smm_ai_key é texto puro; os outros (metas, processos...) são objetos
+      localStorage.setItem(x.key, x.key === 'smm_ai_key' ? x.data : JSON.stringify(x.data));
+    });
 
     syncStatus('ok');
   } catch (e) {
@@ -1207,6 +1210,11 @@ async function nuvemEmpurrar(chave) {
       if (removidos.length) await supa.from('mm_maps').delete().in('id', removidos);
       _idsMapasNuvem = idsAgora;
     }
+    else if (chave === 'smm_ai_key') {
+      // essa chave é texto puro, não um objeto — vai direto, sem JSON.parse
+      const valor = localStorage.getItem(chave);
+      if (valor) await supa.from('app_state').upsert({ key: chave, data: valor }, { onConflict: 'key' });
+    }
     else if (['smm_metas','smm_processos','smm_metas_mes'].includes(chave)) {
       let dados; try { dados = JSON.parse(localStorage.getItem(chave)); } catch { dados = null; }
       if (dados != null) await supa.from('app_state').upsert({ key: chave, data: dados }, { onConflict: 'key' });
@@ -1221,7 +1229,10 @@ async function nuvemEmpurrar(chave) {
   const original = localStorage.setItem.bind(localStorage);
   localStorage.setItem = function(chave, valor) {
     original(chave, valor);
-    if (typeof chave === 'string' && chave.startsWith('smm_') && chave !== 'smm_ai_key') nuvemAgendarPush(chave);
+    // smm_ai_key agora sincroniza também: o motivo de deixar de fora era o
+    // arquivo antigo ser público na internet. Com login protegendo tudo,
+    // isso não existe mais — cola a chave uma vez e ela some pra sempre.
+    if (typeof chave === 'string' && chave.startsWith('smm_')) nuvemAgendarPush(chave);
   };
 })();
 
@@ -2680,7 +2691,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260816-0204';
+const VERSAO_APP = '20260816-0243';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
