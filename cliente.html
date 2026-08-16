@@ -6,6 +6,7 @@
 <title>Portal do Cliente — Lucas SM</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #111118; color: #e0e0e0; min-height: 100vh; }
@@ -259,6 +260,7 @@ const WHATSAPP_NUMBER = '5511973836281';
 let clientData = null;
 let clientKey = null;
 let allVideos = [];
+let PORTAL_DATA_METRICAS = {};
 let currentWeekStart = getMonday(new Date());
 
 // ============ INIT ============
@@ -267,19 +269,20 @@ function init() {
   const token = params.get('k');
   if (!token || !/^[a-z0-9-]{10,60}$/i.test(token)) { showError(); return; }
 
-  // Cada cliente tem o próprio arquivo, com o código secreto no nome.
-  // Sem o código certo, o arquivo simplesmente não existe.
-  const script = document.createElement('script');
-  script.src = 'p-' + token + '.js?t=' + Date.now();
-  script.onload = function() {
-    if (typeof PORTAL_DATA === 'undefined' || !PORTAL_DATA.client) { showError(); return; }
-    clientKey = PORTAL_DATA.key;
-    clientData = PORTAL_DATA.client;
-    allVideos = PORTAL_DATA.videos || [];
+  // Busca só os dados DESTE cliente direto do banco, via uma porta que
+  // não deixa ver nada dos outros clientes sem o código certo.
+  const supa = window.supabase.createClient(
+    'https://txtskzvkkqrvwzmewgaj.supabase.co',
+    'sb_publishable_ew8flV9PkGwPUWjbEjB0sA_53KHDQ1E'
+  );
+  supa.rpc('portal_do_cliente', { token }).then(({ data, error }) => {
+    if (error || !data || !data.client) { showError(); return; }
+    clientData = data.client;
+    clientKey = token.split('-')[0]; // usa o começo do código secreto como identificador interno
+    allVideos = (data.videos || []).map(v => ({ ...v, client: clientKey }));
+    PORTAL_DATA_METRICAS = data.metrics || {};
     showApp();
-  };
-  script.onerror = function() { showError(); };
-  document.head.appendChild(script);
+  }).catch(() => showError());
 }
 
 function showError() {
@@ -343,7 +346,7 @@ function renderClientMetrics() {
   const [y, m] = metMonth.split('-');
   document.getElementById('met-month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
 
-  const clientMet = PORTAL_DATA.metricas || {}; // já vem só deste cliente
+  const clientMet = PORTAL_DATA_METRICAS; // já vem só deste cliente
   const met = clientMet[metMonth] || {};
   const prevM = parseInt(m) - 1 < 1 ? `${parseInt(y)-1}-12` : `${y}-${String(parseInt(m)-1).padStart(2,'0')}`;
   const prev = clientMet[prevM] || {};

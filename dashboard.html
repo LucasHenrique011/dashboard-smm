@@ -11,6 +11,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230f0f0f'/><text x='50' y='62' text-anchor='middle' font-family='-apple-system,sans-serif' font-weight='700' font-size='40' fill='%2344ff99'>LS</text></svg>">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
@@ -36,6 +37,8 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+body.trancado > *:not(#login-gate) { display: none !important; }
+body.trancado #login-gate { display: flex !important; }
 body::before { content: ''; position: fixed; inset: 0; background: radial-gradient(ellipse at 15% 40%, #1e0a4a 0%, transparent 55%), radial-gradient(ellipse at 85% 80%, #0d0628 0%, transparent 50%); pointer-events: none; z-index: 0; }
 nav, .toolbar, .module, .modal-overlay { position: relative; z-index: 1; }
 
@@ -355,15 +358,27 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="btn-sm" onclick="exportData()">↓ Exportar backup</button>
   <button class="btn-sm" onclick="document.getElementById('import-file').click()">↑ Importar</button>
   <button class="btn-sm" onclick="restoreAutoBackup()">🔄 Restaurar backup</button>
-  <button class="btn-sm btn-primary" onclick="publicarTudo()">🚀 Publicar tudo</button>
   <button class="btn-sm" onclick="publicarPortalLinks()">📋 Links clientes</button>
-  <button class="btn-sm" onclick="syncConfigurar()" title="Sincronizar com o celular">🔒 Sincronização</button>
+  <button class="btn-sm" onclick="nuvemAtualizarAgora()" title="Busca o que mudou em outro aparelho">🔄 Atualizar agora</button>
+  <button class="btn-sm" onclick="nuvemSair()" title="Sair da conta">🚪 Sair</button>
   <span id="app-versao" style="font-size:10px;color:var(--text3);align-self:center;padding-left:4px;"></span>
   <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
 </div>
 <div style="display:flex;justify-content:flex-end;align-items:center;gap:10px;padding:0 24px 8px;">
-  <span id="sync-status" style="font-size:11px;font-weight:600;color:var(--text3);">🔓 Sincronização desligada</span>
-  <button class="btn-sm" onclick="syncDesfazer()" style="font-size:10px;padding:3px 8px;" title="Volta os dados pra antes da última sincronização">Desfazer sync</button>
+  <span id="sync-status" style="font-size:11px;font-weight:600;color:var(--green);">☁️ Conectado à nuvem</span>
+</div>
+
+<!-- Portão de login: nada do sistema aparece antes de logar -->
+<div id="login-gate" style="position:fixed;inset:0;z-index:1000;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px;">
+  <div style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:30px;width:100%;max-width:360px;">
+    <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#7c5cfc,#a78bfa);display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;margin-bottom:16px;">LS</div>
+    <h3 style="font-size:19px;margin:0 0 6px;">Entrar no sistema</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6;">Só você acessa. Seus dados moram na nuvem, sincronizados em todos os aparelhos.</p>
+    <div class="form-group"><label>E-mail</label><input type="email" id="login-email" autocomplete="username"></div>
+    <div class="form-group"><label>Senha</label><input type="password" id="login-senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')nuvemEntrar()"></div>
+    <button class="btn-primary" style="width:100%;margin-top:6px;" onclick="nuvemEntrar()" id="login-btn">Entrar</button>
+    <p id="login-erro" style="color:var(--red);font-size:12px;margin-top:10px;display:none;"></p>
+  </div>
 </div>
 <nav>
   <button class="active" onclick="showModule('clientes')">Clientes</button>
@@ -985,6 +1000,231 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 </div>
 
 <script>
+// ============ NUVEM (Supabase) ============
+// O banco é a fonte da verdade. localStorage vira só um espelho rápido pra
+// tela não ficar esperando rede o tempo todo — toda escrita nele também
+// vai pro banco, e todo login novo puxa o banco por cima do espelho.
+const SUPA_URL = 'https://txtskzvkkqrvwzmewgaj.supabase.co';
+const SUPA_ANON = 'sb_publishable_ew8flV9PkGwPUWjbEjB0sA_53KHDQ1E';
+const supa = window.supabase.createClient(SUPA_URL, SUPA_ANON);
+
+async function nuvemEntrar() {
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  const erroEl = document.getElementById('login-erro');
+  const btn = document.getElementById('login-btn');
+  erroEl.style.display = 'none';
+  if (!email || !senha) { erroEl.textContent = 'Preenche e-mail e senha.'; erroEl.style.display = 'block'; return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  const { error } = await supa.auth.signInWithPassword({ email, password: senha });
+  btn.disabled = false; btn.textContent = 'Entrar';
+  if (error) { erroEl.textContent = 'E-mail ou senha errados.'; erroEl.style.display = 'block'; return; }
+  await nuvemIniciar();
+}
+
+async function nuvemSair() {
+  if (!confirm('Sair do sistema?')) return;
+  await supa.auth.signOut();
+  location.reload();
+}
+
+async function nuvemAtualizarAgora() {
+  await nuvemPuxarTudo();
+  showBanner('✅ Atualizado com o que estava na nuvem');
+  renderAll();
+}
+
+// Roda ao abrir a página: se já tem sessão, entra direto; senão mostra o login.
+async function nuvemBoot() {
+  const { data: { session } } = await supa.auth.getSession();
+  if (session) { await nuvemIniciar(); }
+  else { document.body.classList.add('trancado'); }
+}
+
+let _nuvemJaIniciou = false;
+async function nuvemIniciar() {
+  // Trava contra chamar isso duas vezes ao mesmo tempo (ex: o carregamento
+  // automático da página e um login manual disparando junto) — evitava
+  // que dois "puxar + empurrar de volta" corressem em paralelo e duplicassem linha.
+  if (_nuvemJaIniciou) return;
+  _nuvemJaIniciou = true;
+  document.body.classList.remove('trancado');
+  await nuvemPuxarTudo();
+  // CLIENTS foi lido do localStorage antes do banco responder — atualiza
+  // com o que acabou de chegar, senão a tela mostra a lista velha/vazia.
+  CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+  if (window.__iniciarApp) window.__iniciarApp();
+}
+
+// -- PUXAR: baixa tudo do banco e escreve no localStorage no MESMO formato
+// de sempre, pra nenhuma outra parte do sistema precisar mudar. --
+async function nuvemPuxarTudo() {
+  try {
+    const [c, v, f, m, p, mp, mm, ap] = await Promise.all([
+      supa.from('clients').select('*'),
+      supa.from('videos').select('*'),
+      supa.from('finance_entries').select('*'),
+      supa.from('metrics').select('*'),
+      supa.from('prospects').select('*'),
+      supa.from('mm_projects').select('*'),
+      supa.from('mm_maps').select('*'),
+      supa.from('app_state').select('*'),
+    ]);
+
+    if (c.data) {
+      const obj = {};
+      c.data.forEach(x => { obj[x.key] = { name: x.name, valor: x.valor, pillars: x.pillars || [],
+        cadencia: x.cadencia, objetivo: x.objetivo || '', icp: x.icp || '', color: x.key }; });
+      localStorage.setItem('smm_clients', JSON.stringify(obj));
+      _tokensPortal = {}; c.data.forEach(x => { if (x.portal_token) _tokensPortal[x.key] = x.portal_token; });
+    }
+    if (v.data) {
+      const arr = v.data.map(x => ({ id: x.id, client: x.client_key, title: x.title, pillar: x.pillar,
+        date: x.date, status: x.status, gancho: x.gancho || '', dev: x.dev || '', cta: x.cta || '',
+        ref: x.ref || '', roteiro: x.roteiro || '' }));
+      localStorage.setItem('smm_videos', JSON.stringify(arr));
+      _idsVideosNuvem = new Set(arr.map(x => x.id));
+    }
+    if (f.data) {
+      const fin = {};
+      f.data.forEach(x => {
+        if (!fin[x.month]) fin[x.month] = { receitas: [], custos: [] };
+        (x.type === 'receita' ? fin[x.month].receitas : fin[x.month].custos).push({ name: x.name, value: Number(x.value) });
+      });
+      localStorage.setItem('smm_finance', JSON.stringify(fin));
+    }
+    if (m.data) {
+      const met = {};
+      m.data.forEach(x => { if (!met[x.client_key]) met[x.client_key] = {}; met[x.client_key][x.month] = x.data; });
+      localStorage.setItem('smm_metricas', JSON.stringify(met));
+    }
+    if (p.data) {
+      const arr = p.data.map(x => x.data);
+      localStorage.setItem('smm_prospects', JSON.stringify(arr));
+      _idsProspectsNuvem = new Set(arr.map(x => x.id));
+    }
+    if (mp.data) {
+      localStorage.setItem('smm_mm_projetos', JSON.stringify(mp.data.map(x => ({ id: x.id, name: x.name, createdAt: x.created_at }))));
+      _idsProjetosNuvem = new Set(mp.data.map(x => x.id));
+    }
+    if (mm.data) {
+      const arr = mm.data.map(x => ({ id: x.id, projeto: x.project_id, name: x.name, nodes: x.nodes, edges: x.edges, updatedAt: x.updated_at }));
+      localStorage.setItem('smm_mapas', JSON.stringify(arr));
+      _idsMapasNuvem = new Set(arr.map(x => x.id));
+    }
+    if (ap.data) ap.data.forEach(x => localStorage.setItem(x.key, JSON.stringify(x.data)));
+
+    syncStatus('ok');
+  } catch (e) {
+    console.error('nuvemPuxarTudo:', e);
+    syncStatus('erro');
+  }
+}
+
+// -- EMPURRAR: qualquer escrita em localStorage (smm_*) reflete no banco. --
+let _tokensPortal = {}, _idsVideosNuvem = new Set(), _idsProspectsNuvem = new Set(), _idsMapasNuvem = new Set(), _idsProjetosNuvem = new Set();
+let _filaFinanceiro = Promise.resolve();
+let _nuvemPushTimers = {};
+
+function nuvemAgendarPush(chave) {
+  clearTimeout(_nuvemPushTimers[chave]);
+  _nuvemPushTimers[chave] = setTimeout(() => nuvemEmpurrar(chave), 900);
+}
+
+async function nuvemEmpurrar(chave) {
+  try {
+    if (chave === 'smm_clients') {
+      const obj = JSON.parse(localStorage.getItem('smm_clients') || '{}');
+      const linhas = Object.entries(obj).map(([k, c]) => ({ key: k, name: c.name, valor: String(c.valor || ''),
+        pillars: c.pillars || [], cadencia: c.cadencia, objetivo: c.objetivo || '', icp: c.icp || '',
+        portal_token: _tokensPortal[k] || (k.slice(0,6) + '-' + crypto.getRandomValues(new Uint32Array(4)).join('')) }));
+      linhas.forEach(l => { _tokensPortal[l.key] = l.portal_token; });
+      if (linhas.length) await supa.from('clients').upsert(linhas, { onConflict: 'key' });
+      const chaves = new Set(linhas.map(l => l.key));
+      const antigas = Object.keys(_tokensPortal).filter(k => !chaves.has(k));
+      if (antigas.length) await supa.from('clients').delete().in('key', antigas);
+    }
+    else if (chave === 'smm_videos') {
+      const arr = JSON.parse(localStorage.getItem('smm_videos') || '[]').filter(v => v && v.id);
+      const linhas = arr.map(v => ({ id: v.id, client_key: v.client, title: v.title, pillar: v.pillar,
+        date: v.date || null, status: v.status || 'pendente', gancho: v.gancho || '', dev: v.dev || '',
+        cta: v.cta || '', ref: v.ref || '', roteiro: v.roteiro || '' }));
+      if (linhas.length) await supa.from('videos').upsert(linhas, { onConflict: 'id' });
+      const idsAgora = new Set(linhas.map(l => l.id));
+      const removidos = [..._idsVideosNuvem].filter(id => !idsAgora.has(id));
+      if (removidos.length) await supa.from('videos').delete().in('id', removidos);
+      _idsVideosNuvem = idsAgora;
+    }
+    else if (chave === 'smm_finance') {
+      // Fila de uma peça só: se duas gravações de financeiro caíssem quase
+      // juntas, "apagar tudo + reescrever" das duas ao mesmo tempo podia
+      // duplicar linha. Isso força elas a acontecerem uma de cada vez.
+      _filaFinanceiro = _filaFinanceiro.then(async () => {
+        const fin = JSON.parse(localStorage.getItem('smm_finance') || '{}');
+        const linhas = [];
+        Object.entries(fin).forEach(([mes, bloco]) => {
+          (bloco.receitas || []).forEach(r => linhas.push({ month: mes, type: 'receita', name: r.name, value: r.value }));
+          (bloco.custos || []).forEach(c => linhas.push({ month: mes, type: 'custo', name: c.name, value: c.value }));
+        });
+        await supa.from('finance_entries').delete().gt('id', 0);
+        if (linhas.length) await supa.from('finance_entries').insert(linhas);
+      });
+      await _filaFinanceiro;
+    }
+    else if (chave === 'smm_metricas') {
+      const met = JSON.parse(localStorage.getItem('smm_metricas') || '{}');
+      const linhas = [];
+      Object.entries(met).forEach(([ck, meses]) => {
+        if (typeof meses !== 'object' || meses === null) return;
+        Object.entries(meses).forEach(([mes, dados]) => { if (dados && typeof dados === 'object') linhas.push({ client_key: ck, month: mes, data: dados }); });
+      });
+      if (linhas.length) await supa.from('metrics').upsert(linhas, { onConflict: 'client_key,month' });
+    }
+    else if (chave === 'smm_prospects') {
+      const arr = JSON.parse(localStorage.getItem('smm_prospects') || '[]').filter(p => p && p.id);
+      const linhas = arr.map(p => ({ id: p.id, data: p }));
+      if (linhas.length) await supa.from('prospects').upsert(linhas, { onConflict: 'id' });
+      const idsAgora = new Set(linhas.map(l => l.id));
+      const removidos = [..._idsProspectsNuvem].filter(id => !idsAgora.has(id));
+      if (removidos.length) await supa.from('prospects').delete().in('id', removidos);
+      _idsProspectsNuvem = idsAgora;
+    }
+    else if (chave === 'smm_mm_projetos') {
+      const arr = JSON.parse(localStorage.getItem('smm_mm_projetos') || '[]');
+      const linhas = arr.map(p => ({ id: p.id, name: p.name, created_at: p.createdAt }));
+      if (linhas.length) await supa.from('mm_projects').upsert(linhas, { onConflict: 'id' });
+      const idsAgora = new Set(linhas.map(l => l.id));
+      const removidos = [..._idsProjetosNuvem].filter(id => !idsAgora.has(id));
+      if (removidos.length) await supa.from('mm_projects').delete().in('id', removidos);
+      _idsProjetosNuvem = idsAgora;
+    }
+    else if (chave === 'smm_mapas') {
+      const arr = JSON.parse(localStorage.getItem('smm_mapas') || '[]');
+      const linhas = arr.map(m => ({ id: m.id, project_id: m.projeto || null, name: m.name, nodes: m.nodes || [], edges: m.edges || [] }));
+      if (linhas.length) await supa.from('mm_maps').upsert(linhas, { onConflict: 'id' });
+      const idsAgora = new Set(linhas.map(l => l.id));
+      const removidos = [..._idsMapasNuvem].filter(id => !idsAgora.has(id));
+      if (removidos.length) await supa.from('mm_maps').delete().in('id', removidos);
+      _idsMapasNuvem = idsAgora;
+    }
+    else if (['smm_metas','smm_processos','smm_metas_mes'].includes(chave)) {
+      let dados; try { dados = JSON.parse(localStorage.getItem(chave)); } catch { dados = null; }
+      if (dados != null) await supa.from('app_state').upsert({ key: chave, data: dados }, { onConflict: 'key' });
+    }
+  } catch (e) { console.error('nuvemEmpurrar(' + chave + '):', e); }
+}
+
+// Um único ponto de interceptação pega TODA escrita, mesmo as várias
+// chamadas soltas de localStorage.setItem espalhadas pelo sistema —
+// evita ter que caçar cada função que grava dado.
+(function interceptarEscritas() {
+  const original = localStorage.setItem.bind(localStorage);
+  localStorage.setItem = function(chave, valor) {
+    original(chave, valor);
+    if (typeof chave === 'string' && chave.startsWith('smm_') && chave !== 'smm_ai_key') nuvemAgendarPush(chave);
+  };
+})();
+
 // ============ DATA LAYER (localStorage) ============
 const STORAGE_KEYS = { videos: 'smm_videos', finance: 'smm_finance', playbook: 'smm_playbook', prospects: 'smm_prospects' };
 
@@ -2440,7 +2680,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260815-1906';
+const VERSAO_APP = '20260816-0204';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -2888,12 +3128,10 @@ function showBanner(msg) {
 
 // Auto-publish when data changes (debounced)
 var _autoPublishTimer = null;
-function scheduleAutoPublish() {
-  syncAgendar(); // manda os dados trancados pro celular
-  if (!getGithubToken()) return;
-  if (_autoPublishTimer) clearTimeout(_autoPublishTimer);
-  _autoPublishTimer = setTimeout(() => { pushPortaisPorCliente(); }, 12000);
-}
+// O empurrão pro banco agora acontece sozinho (ver interceptarEscritas lá em
+// cima). Essa função só existe pra não quebrar as chamadas antigas espalhadas
+// pelo código.
+function scheduleAutoPublish() {}
 
 function publicarPortalLinks() {
   const tokens = getTokens();
@@ -3834,12 +4072,17 @@ function renderAll() {
 
   const elv = document.getElementById('app-versao');
   if (elv) elv.textContent = 'v' + VERSAO_APP;
-  const elVersao = document.getElementById('app-versao');
-  if (elVersao) elVersao.textContent = 'v' + VERSAO_APP;
-  startApp();
-  // As funções de mapa ficam no segundo bloco de script, que ainda não foi lido
-  // aqui. Por isso esperamos a página terminar de carregar.
-  window.addEventListener('load', () => { abrirMapaPorLink(); checarVersao(); });
+
+  // Nada disso roda antes de confirmar login — a página fica trancada
+  // (ver nuvemBoot) até o Supabase confirmar quem é você.
+  window.__iniciarApp = function() {
+    startApp();
+    abrirMapaPorLink();
+  };
+
+  // As funções de mapa ficam no segundo bloco de script, que ainda não foi
+  // lido aqui — por isso espera a página terminar de carregar.
+  window.addEventListener('load', () => { checarVersao(); nuvemBoot(); });
 
   // Abre direto um mapa quando o endereço traz ?mapa=<id>
   function abrirMapaPorLink() {
@@ -3874,80 +4117,6 @@ function renderAll() {
         document.body.appendChild(b);
       })
       .catch(() => {});
-  }
-
-  // A busca automática por senha foi DESLIGADA. Ela baixava a cópia do servidor
-  // por cima do trabalho atual toda vez que o sistema abria ou voltava ao foco.
-  // Agora só repõe quando o aparelho está de fato vazio, e nunca sobrescreve.
-  syncStatus('off');
-  reporDadosAutomatico();
-
-  // Se o aparelho estiver sem dados, repõe sozinho a partir do arquivo do servidor.
-  // É o que fazia o sistema se curar quando o navegador limpava o armazenamento.
-  function reporDadosAutomatico() {
-    if (temDadosReais()) return;
-
-    const s = document.createElement('script');
-    s.src = 'dashboard-sync.js?t=' + Date.now();
-    s.onload = () => {
-      s.remove();
-      if (typeof DASHBOARD_SYNC === 'undefined') { avisarSistemaVazio(); return; }
-      let gravou = 0;
-      Object.entries(DASHBOARD_SYNC).forEach(([k, v]) => {
-        if (k.startsWith('smm_') && k !== 'smm_ai_key' && v) { localStorage.setItem(k, v); gravou++; }
-      });
-      // Só recarrega se os dados realmente entraram. Isso evita loop sem
-      // precisar de trava de sessão — a trava antiga bloqueava a reposição
-      // pro resto da aba e deixava o sistema em branco pra sempre.
-      if (!gravou || !temDadosReais()) { avisarSistemaVazio(); return; }
-      location.reload();
-    };
-    s.onerror = () => { s.remove(); avisarSistemaVazio(); };
-    document.head.appendChild(s);
-  }
-
-  function temDadosReais() {
-    // Contar de verdade. Antes bastava a chave existir — e uma lista vazia ("{}")
-    // fazia o sistema achar que tinha dados, travando a reposição pra sempre.
-    const conta = chave => {
-      try {
-        const v = JSON.parse(localStorage.getItem(chave) || 'null');
-        if (Array.isArray(v)) return v.length;
-        if (v && typeof v === 'object') return Object.keys(v).length;
-        return 0;
-      } catch { return 0; }
-    };
-    let videos = [];
-    try { videos = JSON.parse(localStorage.getItem('smm_videos') || '[]'); } catch {}
-    const videosReais = videos.filter(v => !/^(notion|plan)-/.test(String(v && v.id || ''))).length;
-    return videosReais > 0 || conta('smm_clients') > 0;
-  }
-
-  // Se abrir sem nada e sem senha, explica o que fazer em vez de mostrar tela em branco.
-  // (o Safari apaga os dados guardados de sites que ficam dias sem ser abertos)
-  function avisarSistemaVazio() {
-    if (temDadosReais()) return;
-
-    const cx = document.createElement('div');
-    cx.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);' +
-      'z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;';
-    cx.innerHTML =
-      '<div style="background:var(--bg3);border:1px solid var(--border2);border-radius:20px;padding:28px;max-width:440px;">' +
-        '<h3 style="font-size:17px;margin:0 0 10px;">Seu sistema está vazio</h3>' +
-        '<p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:8px;">' +
-          'Isso costuma acontecer quando o navegador limpa os dados guardados — não quer dizer que você perdeu nada.</p>' +
-        '<p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:18px;">' +
-          'Se você já usava a sincronização, é só digitar sua senha que tudo volta.</p>' +
-        '<div style="display:flex;gap:8px;flex-wrap:wrap;">' +
-          '<button class="btn-primary" id="vazio-senha">Recuperar com minha senha</button>' +
-          '<button id="vazio-arquivo">Tenho um arquivo de backup</button>' +
-          '<button id="vazio-fechar">Começar do zero</button>' +
-        '</div>' +
-      '</div>';
-    document.body.appendChild(cx);
-    cx.querySelector('#vazio-senha').onclick = () => { cx.remove(); syncConfigurar(); };
-    cx.querySelector('#vazio-arquivo').onclick = () => { cx.remove(); document.getElementById('import-file').click(); };
-    cx.querySelector('#vazio-fechar').onclick = () => cx.remove();
   }
 })();
 
