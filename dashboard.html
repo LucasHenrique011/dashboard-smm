@@ -2691,7 +2691,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260816-0243';
+const VERSAO_APP = '20260827-0134';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -4067,7 +4067,7 @@ function renderAll() {
     populateClientSelects, renderCards, renderWeeklySummary, renderCalendar,
     renderTracker, renderHistory, renderFinance, renderFinChart,
     renderPlaybook, renderMetas, renderFerramentas, renderMetricas,
-    seedPipelineClients, renderPipeline
+    renderPipeline
   ];
   fns.forEach(fn => { try { fn(); } catch(e) { console.error(fn.name + ':', e); } });
 }
