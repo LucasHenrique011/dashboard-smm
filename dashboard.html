@@ -919,6 +919,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
       <input id="cl-cadencia" value="3 reels por semana">
     </div>
     <div class="form-group">
+      <label>Instagram (@usuario ou link)</label>
+      <input id="cl-instagram" placeholder="@nomedocliente">
+    </div>
+    <div class="form-group">
       <label>Objetivo</label>
       <textarea id="cl-objetivo" placeholder="Objetivo do trabalho"></textarea>
     </div>
@@ -1053,6 +1057,7 @@ async function nuvemIniciar() {
   // CLIENTS foi lido do localStorage antes do banco responder — atualiza
   // com o que acabou de chegar, senão a tela mostra a lista velha/vazia.
   CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
+  if (typeof loadClientInstagram === 'function') CLIENT_INSTAGRAM = loadClientInstagram();
   if (window.__iniciarApp) window.__iniciarApp();
 }
 
@@ -1215,7 +1220,7 @@ async function nuvemEmpurrar(chave) {
       const valor = localStorage.getItem(chave);
       if (valor) await supa.from('app_state').upsert({ key: chave, data: valor }, { onConflict: 'key' });
     }
-    else if (['smm_metas','smm_processos','smm_metas_mes'].includes(chave)) {
+    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram'].includes(chave)) {
       let dados; try { dados = JSON.parse(localStorage.getItem(chave)); } catch { dados = null; }
       if (dados != null) await supa.from('app_state').upsert({ key: chave, data: dados }, { onConflict: 'key' });
     }
@@ -1321,6 +1326,20 @@ function populateClientSelects() {
   });
 }
 
+// Instagram de cada cliente. Fica num espaço à parte (não na tabela de
+// clientes do banco) pra não precisar mexer no esquema do banco de dados.
+function loadClientInstagram() { try { return JSON.parse(localStorage.getItem('smm_client_instagram')) || {}; } catch { return {}; } }
+function saveClientInstagram(obj) { localStorage.setItem('smm_client_instagram', JSON.stringify(obj)); }
+var CLIENT_INSTAGRAM = loadClientInstagram();
+
+// Aceita @usuario, usuario, ou link completo — sempre devolve um link que abre certo.
+function linkInstagram(valor) {
+  if (!valor) return '';
+  valor = valor.trim();
+  if (/^https?:\/\//i.test(valor)) return valor;
+  return 'https://instagram.com/' + valor.replace(/^@/, '');
+}
+
 function openClientModal(editKey) {
   const cl = editKey ? CLIENTS[editKey] : null;
   document.getElementById('cl-edit-key').value = editKey || '';
@@ -1328,6 +1347,7 @@ function openClientModal(editKey) {
   document.getElementById('cl-valor').value = cl ? cl.valor : '';
   document.getElementById('cl-pillars').value = cl ? cl.pillars.join(', ') : '';
   document.getElementById('cl-cadencia').value = cl ? cl.cadencia : '3 reels por semana';
+  document.getElementById('cl-instagram').value = editKey ? (CLIENT_INSTAGRAM[editKey] || '') : '';
   document.getElementById('cl-objetivo').value = cl ? cl.objetivo : '';
   document.getElementById('cl-icp').value = cl ? cl.icp : '';
   document.getElementById('client-modal-title').textContent = editKey ? 'Editar Cliente' : 'Novo Cliente';
@@ -1350,6 +1370,11 @@ function saveClientForm() {
     icp: document.getElementById('cl-icp').value.trim()
   };
   saveClients(CLIENTS);
+
+  const insta = document.getElementById('cl-instagram').value.trim();
+  if (insta) CLIENT_INSTAGRAM[key] = insta; else delete CLIENT_INSTAGRAM[key];
+  saveClientInstagram(CLIENT_INSTAGRAM);
+
   closeClientModal();
   populateClientSelects();
   renderAll();
@@ -1392,6 +1417,7 @@ function renderCards() {
           <h3 class="client-name-${key}">${cl.name}</h3>
           <div style="display:flex;align-items:center;gap:8px;">
             <span class="card-valor">${cl.valor}${key !== 'lucas' ? '/mês' : ''}</span>
+            ${CLIENT_INSTAGRAM[key] ? `<a href="${linkInstagram(CLIENT_INSTAGRAM[key])}" target="_blank" rel="noopener" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;" title="Abrir Instagram">📷</a>` : ''}
             <button class="btn-sm" onclick="openClientModal('${key}')" title="Editar">✎</button>
             <button class="btn-sm btn-danger" onclick="deleteClient('${key}')" title="Remover">✕</button>
           </div>
@@ -2691,7 +2717,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260827-0134';
+const VERSAO_APP = '20260829-0214';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
