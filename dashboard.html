@@ -865,6 +865,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
       <input id="p-value" type="number" placeholder="1200">
     </div>
     <div class="form-group">
+      <label>Instagram (@usuario ou link)</label>
+      <input id="p-instagram" placeholder="@nomedaempresa">
+    </div>
+    <div class="form-group">
       <label>Estágio</label>
       <select id="p-stage">
         <option value="prospect">Prospect</option>
@@ -2385,6 +2389,22 @@ function renderPipelineMetrics() {
   `;
 }
 
+// Pega o Instagram do prospect: usa o campo próprio se tiver, senão procura
+// nas anotações (as 71 empresas que importei têm o @ escrito lá dentro).
+function extrairInstagramDoTexto(texto) {
+  if (!texto) return '';
+  const link = texto.match(/https?:\/\/(www\.)?instagram\.com\/[^\s·,)]+/i);
+  if (link) return link[0];
+  const arroba = texto.match(/@[\w.]+/);
+  return arroba ? arroba[0] : '';
+}
+function linkInstagramProspect(p) {
+  const valor = (p.instagram || extrairInstagramDoTexto(p.notes) || '').trim();
+  if (!valor) return '';
+  if (/^https?:\/\//i.test(valor)) return valor;
+  return 'https://instagram.com/' + valor.replace(/^@/, '');
+}
+
 function renderKanban() {
   const prospects = getProspects();
   const q = (document.getElementById('pipeline-search')?.value || '').toLowerCase().trim();
@@ -2408,7 +2428,10 @@ function renderKanban() {
           <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}" style="display:flex;gap:8px;align-items:flex-start;">
             <div style="min-width:18px;font-size:10px;color:#555;font-weight:700;padding-top:2px;">${idx+1}</div>
             <div style="flex:1;min-width:0;">
-            <div class="kc-name">${c.name}</div>
+            <div class="kc-name" style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
+              <span>${c.name}</span>
+              ${linkInstagramProspect(c) ? `<a href="${linkInstagramProspect(c)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Abrir Instagram" style="text-decoration:none;flex-shrink:0;">📷</a>` : ''}
+            </div>
             ${c.segment ? `<div class="kc-info">${c.segment}</div>` : ''}
             ${c.value ? `<div class="kc-value">R$ ${parseFloat(c.value).toLocaleString('pt-BR')}/mês</div>` : ''}
             ${alertFollow ? `<div class="kc-alert">⚠ ${daysSince} dias sem contato</div>` : ''}
@@ -2466,6 +2489,7 @@ function openProspectModal(stage) {
   document.getElementById('p-name').value = '';
   document.getElementById('p-segment').value = '';
   document.getElementById('p-value').value = '';
+  document.getElementById('p-instagram').value = '';
   document.getElementById('p-stage').value = stage || 'prospect';
   document.getElementById('p-reactivate').value = '';
   document.getElementById('p-new-log').value = '';
@@ -2484,6 +2508,7 @@ function editProspect(id) {
   document.getElementById('p-name').value = p.name;
   document.getElementById('p-segment').value = p.segment || '';
   document.getElementById('p-value').value = p.value || '';
+  document.getElementById('p-instagram').value = p.instagram || extrairInstagramDoTexto(p.notes) || '';
   document.getElementById('p-stage').value = p.stage;
   document.getElementById('p-reactivate').value = p.reactivate || '';
   document.getElementById('p-new-log').value = '';
@@ -2505,6 +2530,7 @@ function saveProspect() {
     name,
     segment: document.getElementById('p-segment').value.trim(),
     value: document.getElementById('p-value').value,
+    instagram: document.getElementById('p-instagram').value.trim(),
     stage: document.getElementById('p-stage').value,
     reactivate: document.getElementById('p-reactivate').value,
     notes,
@@ -2717,7 +2743,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260829-0214';
+const VERSAO_APP = '20260829-0430';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
