@@ -1141,9 +1141,27 @@ let _nuvemPushTimers = {};
 function nuvemAgendarPush(chave) {
   clearTimeout(_nuvemPushTimers[chave]);
   _nuvemPushTimers[chave] = setTimeout(() => nuvemEmpurrar(chave), 900);
+  _nuvemChavesPendentes.add(chave);
 }
 
+// Se o celular trocar de app, a tela apagar, ou a aba fechar ANTES dos 0,9s
+// de espera terminarem, o setTimeout normal pode nunca disparar — o navegador
+// pausa temporizadores em segundo plano. Isso fazia mudanças (tipo mover um
+// monte de prospect de coluna) ficarem só no aparelho e nunca chegarem no banco.
+// Aqui a gente força o envio na hora que percebe que a aba pode estar saindo.
+let _nuvemChavesPendentes = new Set();
+function nuvemForcarEnvioPendente() {
+  if (!_nuvemChavesPendentes.size) return;
+  const chaves = [..._nuvemChavesPendentes];
+  _nuvemChavesPendentes.clear();
+  chaves.forEach(k => { clearTimeout(_nuvemPushTimers[k]); nuvemEmpurrar(k); });
+}
+document.addEventListener('visibilitychange', () => { if (document.hidden) nuvemForcarEnvioPendente(); });
+window.addEventListener('pagehide', nuvemForcarEnvioPendente);
+window.addEventListener('blur', nuvemForcarEnvioPendente);
+
 async function nuvemEmpurrar(chave) {
+  _nuvemChavesPendentes.delete(chave);
   try {
     if (chave === 'smm_clients') {
       const obj = JSON.parse(localStorage.getItem('smm_clients') || '{}');
@@ -2743,7 +2761,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260829-0430';
+const VERSAO_APP = '20260901-0154';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
