@@ -398,7 +398,10 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 
   <div style="display:flex;justify-content:space-between;align-items:center;">
     <h2>Painel de Clientes</h2>
-    <button class="btn-primary btn-sm" onclick="openClientModal()">+ Novo cliente</button>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-sm" onclick="abrirClientesArquivados()">📦 Arquivados</button>
+      <button class="btn-primary btn-sm" onclick="openClientModal()">+ Novo cliente</button>
+    </div>
   </div>
   <div class="cards" id="client-cards"></div>
 
@@ -901,6 +904,16 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   </div>
 </div>
 
+<!-- MODAL: Clientes arquivados -->
+<div class="modal-overlay" id="arquivados-modal">
+  <div class="modal">
+    <h3>📦 Clientes arquivados</h3>
+    <p style="font-size:12px;color:var(--text3);margin-bottom:14px;">O histórico de vídeos, financeiro e LTV continua intacto. Reative quando quiser.</p>
+    <div id="arquivados-lista"></div>
+    <div class="modal-actions"><button onclick="document.getElementById('arquivados-modal').classList.remove('open')">Fechar</button></div>
+  </div>
+</div>
+
 <!-- MODAL: Cliente -->
 <div class="modal-overlay" id="client-modal">
   <div class="modal">
@@ -1062,6 +1075,7 @@ async function nuvemIniciar() {
   // com o que acabou de chegar, senão a tela mostra a lista velha/vazia.
   CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
   if (typeof loadClientInstagram === 'function') CLIENT_INSTAGRAM = loadClientInstagram();
+  if (typeof loadClientesArquivados === 'function') CLIENTES_ARQUIVADOS = loadClientesArquivados();
   if (window.__iniciarApp) window.__iniciarApp();
 }
 
@@ -1242,7 +1256,7 @@ async function nuvemEmpurrar(chave) {
       const valor = localStorage.getItem(chave);
       if (valor) await supa.from('app_state').upsert({ key: chave, data: valor }, { onConflict: 'key' });
     }
-    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram'].includes(chave)) {
+    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram','smm_clientes_arquivados'].includes(chave)) {
       let dados; try { dados = JSON.parse(localStorage.getItem(chave)); } catch { dados = null; }
       if (dados != null) await supa.from('app_state').upsert({ key: chave, data: dados }, { onConflict: 'key' });
     }
@@ -1334,14 +1348,53 @@ function saveClients(clients) { localStorage.setItem('smm_clients', JSON.stringi
 
 var CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
 
+// Cliente que você parou de atender. Fica só marcado, nada é apagado —
+// vídeos, financeiro e LTV continuam intactos, ela só some do Painel
+// e não pode mais receber vídeo novo por engano.
+function loadClientesArquivados() { try { return JSON.parse(localStorage.getItem('smm_clientes_arquivados')) || []; } catch { return []; } }
+function saveClientesArquivados(arr) { localStorage.setItem('smm_clientes_arquivados', JSON.stringify(arr)); }
+var CLIENTES_ARQUIVADOS = loadClientesArquivados();
+
+function arquivarCliente(key) {
+  const nome = (CLIENTS[key]||{}).name || key;
+  if (!confirm(`Arquivar ${nome}?\n\nEla some da lista de clientes ativos, mas todo o histórico (vídeos, financeiro, LTV) continua no sistema.`)) return;
+  if (!CLIENTES_ARQUIVADOS.includes(key)) CLIENTES_ARQUIVADOS.push(key);
+  saveClientesArquivados(CLIENTES_ARQUIVADOS);
+  renderAll(); populateClientSelects();
+  showBanner('📦 ' + nome + ' arquivada — histórico preservado');
+}
+function reativarCliente(key) {
+  CLIENTES_ARQUIVADOS = CLIENTES_ARQUIVADOS.filter(k => k !== key);
+  saveClientesArquivados(CLIENTES_ARQUIVADOS);
+  renderClientesArquivados(); renderAll(); populateClientSelects();
+}
+function abrirClientesArquivados() {
+  renderClientesArquivados();
+  document.getElementById('arquivados-modal').classList.add('open');
+}
+function renderClientesArquivados() {
+  const el = document.getElementById('arquivados-lista');
+  if (!CLIENTES_ARQUIVADOS.length) { el.innerHTML = '<p style="color:var(--text3);font-size:13px;">Nenhum cliente arquivado.</p>'; return; }
+  el.innerHTML = CLIENTES_ARQUIVADOS.map(key => {
+    const cl = CLIENTS[key];
+    if (!cl) return '';
+    return `<div class="fin-row"><span class="fin-name">${cl.name}</span>
+      <button class="btn-sm btn-primary" onclick="reativarCliente('${key}')">Reativar</button></div>`;
+  }).join('');
+}
+
 function populateClientSelects() {
   ['filter-client', 'v-client', 'hist-client', 'relatorio-client', 'timer-client'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const val = sel.value;
     const isFilter = id !== 'v-client';
+    // Cliente arquivado não recebe vídeo novo nem entra no cronômetro —
+    // mas continua aparecendo nos filtros de histórico/relatório.
+    const escondeArquivado = id === 'v-client' || id === 'timer-client';
     sel.innerHTML = isFilter ? '<option value="all">Todos os clientes</option>' : '';
     for (const [key, cl] of Object.entries(CLIENTS)) {
+      if (escondeArquivado && CLIENTES_ARQUIVADOS.includes(key)) continue;
       sel.innerHTML += `<option value="${key}">${cl.name}</option>`;
     }
     if (val && sel.querySelector(`option[value="${val}"]`)) sel.value = val;
@@ -1427,6 +1480,7 @@ function renderCards() {
   const container = document.getElementById('client-cards');
   container.innerHTML = '';
   for (const [key, cl] of Object.entries(CLIENTS)) {
+    if (CLIENTES_ARQUIVADOS.includes(key)) continue; // arquivado não aparece no painel ativo
     const cv = videos.filter(v => v.client === key);
     const weekEnd = new Date(currentWeekStart); weekEnd.setDate(weekEnd.getDate() + 6);
     const ws = dateStr(currentWeekStart), we = dateStr(weekEnd);
@@ -1441,6 +1495,7 @@ function renderCards() {
             <span class="card-valor">${cl.valor}${key !== 'lucas' ? '/mês' : ''}</span>
             ${CLIENT_INSTAGRAM[key] ? `<a href="${linkInstagram(CLIENT_INSTAGRAM[key])}" target="_blank" rel="noopener" class="btn-sm" style="text-decoration:none;display:inline-flex;align-items:center;" title="Abrir Instagram">📷</a>` : ''}
             <button class="btn-sm" onclick="openClientModal('${key}')" title="Editar">✎</button>
+            <button class="btn-sm" onclick="arquivarCliente('${key}')" title="Arquivar (mantém o histórico)">📦</button>
             <button class="btn-sm btn-danger" onclick="deleteClient('${key}')" title="Remover">✕</button>
           </div>
         </div>
@@ -2761,7 +2816,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260901-0154';
+const VERSAO_APP = '20260922-1918';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
