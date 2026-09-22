@@ -700,6 +700,9 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
 <div id="mod-pipeline" class="module">
   <h2>Pipeline — Land & Expand</h2>
 
+  <!-- O que fazer hoje -->
+  <div id="resumo-hoje" style="margin-bottom:16px;"></div>
+
   <!-- Metrics -->
   <div class="pipeline-metrics" id="pipeline-metrics"></div>
 
@@ -719,6 +722,12 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <h2 style="margin:0;">Kanban de Prospects</h2>
     <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
       <input id="pipeline-search" type="text" placeholder="🔍 Buscar prospect..." oninput="renderKanban()" style="padding:6px 10px;border-radius:8px;border:1px solid #333;background:#1a1a24;color:#fff;font-size:13px;width:200px;">
+      <select id="pipeline-filtro-contato" onchange="renderKanban()" style="padding:6px 10px;border-radius:8px;border:1px solid #333;background:#1a1a24;color:#fff;font-size:13px;width:auto;">
+        <option value="todos">Todos os contatos</option>
+        <option value="atrasado">🔴 Atrasado</option>
+        <option value="em_dia">🟢 Em dia</option>
+        <option value="sem_contato">⚪ Sem contato ainda</option>
+      </select>
       <button class="btn-primary" onclick="openProspectModal()">+ Novo prospect</button>
     </div>
   </div>
@@ -874,14 +883,16 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
     <div class="form-group">
       <label>Estágio</label>
       <select id="p-stage">
-        <option value="prospect">Prospect</option>
-        <option value="diagnostico">Diagnóstico</option>
-        <option value="proposta">Proposta</option>
-        <option value="fechamento">Fechamento</option>
+        <option value="prospects">Prospects</option>
+        <option value="apresentacao">Apresentação</option>
+        <option value="marcar_reuniao">Marcar reunião</option>
+        <option value="reuniao">Reunião</option>
+        <option value="negociacao">Negociação</option>
+        <option value="won">Won</option>
         <option value="onboarding">Onboarding</option>
         <option value="entregando">Entregando</option>
         <option value="expansao">Expansão</option>
-        <option value="perdido">Perdido / Reativar</option>
+        <option value="lost">Lost / Reativar</option>
       </select>
     </div>
     <div class="form-group">
@@ -2278,19 +2289,28 @@ function savePlaybookSection(id, value) {
 }
 
 // ============ MODULE 4: PIPELINE ============
+// Etapas de prospecção (Land) redesenhadas em set/2026 — mais granulares
+// que o funil antigo, pra dar visibilidade fina de onde cada lead trava.
+// Depois de "Won" o fluxo segue pro mesmo pós-venda de sempre (Expand).
 var PIPELINE_STAGES = [
-  { id: 'prospect', name: 'Prospect', color: '#e74c3c', thinking: '"Preciso aparecer nas redes mas não sei como"',
-    info: 'Lead identificado que ainda não teve contato direto com você.',
-    plan: '• Postar conteúdo de Atração no seu perfil (falar com UMA pessoa)\n• Identificar negócios em SP sem presença online\n• Pesquisar Instagram/Google do prospect antes de abordar\n• Meta: 5 prospects novos por semana' },
-  { id: 'diagnostico', name: 'Diagnóstico', color: '#e67e22', thinking: '"Esse cara entende meu problema"',
-    info: 'Primeiro contato feito. Você abordou por DM ou presencial e ele demonstrou interesse.',
-    plan: '• Enviar mensagem de abordagem (ver Playbook)\n• Agendar call de diagnóstico\n• Antes da call: pesquisar perfil, anotar 3 problemas, ver concorrentes\n• Meta: converter 50% dos prospects em call' },
-  { id: 'proposta', name: 'Proposta', color: '#f1c40f', thinking: '"O investimento faz sentido pro que entrega"',
-    info: 'Call feita, diagnóstico apresentado. Hora de enviar a proposta.',
-    plan: '• Usar modelo por meta (R$2.000) → fixo (R$1.300)\n• Enviar proposta escrita no mesmo dia da call\n• Incluir as dores que ELE mencionou\n• Meta: converter 60% das calls em proposta enviada' },
-  { id: 'fechamento', name: 'Fechamento', color: '#2ecc71', thinking: '"Vou fechar, vai dar certo"',
-    info: 'Proposta enviada, em negociação. Follow-up ativo.',
-    plan: '• Follow-up dia 1 (proposta), dia 3 (valor), dia 7 (final)\n• Quebrar objeções com SPIN (ver Playbook)\n• Não deixar esfriar mais de 48h\n• Meta: fechar 50% das propostas enviadas' },
+  { id: 'prospects', name: 'Prospects', color: '#e74c3c', thinking: '"Preciso aparecer nas redes mas não sei como"',
+    info: 'Lead identificado, ainda sem nenhum contato direto.',
+    plan: '• Pesquisar Instagram/Google antes de abordar\n• Identificar a dor específica dele\n• Meta: 5 prospects novos por semana' },
+  { id: 'apresentacao', name: 'Apresentação', color: '#e67e22', thinking: '"Esse cara entende meu problema"',
+    info: 'Você já mandou a primeira abordagem (DM, mensagem, presencial) — aguardando resposta ou já respondeu.',
+    plan: '• Mensagem de abordagem (ver Playbook)\n• Se responder, puxar pra marcar uma reunião\n• Não insistir mais de 3 vezes sem resposta' },
+  { id: 'marcar_reuniao', name: 'Marcar reunião', color: '#f39c12', thinking: '"Beleza, vamos conversar"',
+    info: 'Ele topou conversar — falta só fechar dia e horário.',
+    plan: '• Propor 2-3 horários certos, não deixar em aberto\n• Confirmar 1 dia antes\n• Meta: reunião marcada em até 3 dias do aceite' },
+  { id: 'reuniao', name: 'Reunião', color: '#f1c40f', thinking: '"Será que ele entende do assunto?"',
+    info: 'Reunião marcada — realizada ou ainda por acontecer. Reunião marcada não é reunião confirmada.',
+    plan: '• Confirmar presença na véspera\n• Levar diagnóstico pronto (3 problemas + referências)\n• Sair da call com next step combinado' },
+  { id: 'negociacao', name: 'Negociação', color: '#2ecc71', thinking: '"O investimento faz sentido pro que entrega"',
+    info: 'Proposta enviada, discutindo valor/escopo. Reunião realizada não é fechamento garantido.',
+    plan: '• Follow-up dia 1, dia 3, dia 7\n• Incluir as dores que ELE mencionou na proposta\n• Não deixar esfriar mais de 48h' },
+  { id: 'won', name: 'Won', color: '#27ae60', thinking: '"Fechado!"',
+    info: 'Cliente fechou. Próximo passo é onboarding.',
+    plan: '• Contrato + primeiro pagamento\n• Marcar reunião de onboarding' },
   { id: 'onboarding', name: 'Onboarding', color: '#1abc9c', thinking: '"Tá organizando tudo certinho"',
     info: 'Cliente fechou! Configurando tudo pra começar a entregar.',
     plan: '• Contrato + primeiro pagamento\n• Acesso às redes sociais\n• Reunião de alinhamento (objetivos, tom, referências)\n• Definir pilares, cadência e meta\n• Prazo: tudo pronto em 1 semana' },
@@ -2300,17 +2320,39 @@ var PIPELINE_STAGES = [
   { id: 'expansao', name: 'Expansão', color: '#9b59b6', thinking: '"Quero mais, vale o reajuste"',
     info: 'Resultados aparecendo. Hora de expandir escopo ou reajustar valor.',
     plan: '• Apresentar resultados concretos (antes/depois)\n• Propor reajuste baseado nas metas batidas (até R$2.000)\n• Oferecer novos serviços (tráfego pago, mais plataformas)\n• Meta: reajustar a cada 3-6 meses de resultado consistente' },
-  { id: 'perdido', name: 'Perdido', color: '#666', thinking: '"Não era o momento / fechou com outro"',
+  { id: 'lost', name: 'Lost', color: '#666', thinking: '"Não era o momento / fechou com outro"',
     info: 'Prospect que não fechou. Manter no radar pra reativar.',
     plan: '• Anotar o motivo da perda\n• Definir data de reativação (30-60 dias)\n• Manter contato pelo conteúdo (ele vai te ver postando)\n• Quando reativar: abordar com algo novo de valor' },
 ];
 
 var PIPELINE_BARS = [
-  { label: 'ENGAGING — Atrair e nutrir leads', stages: [0, 2], color: '#2ecc71' },
-  { label: 'SALES — Venda ativa', stages: [2, 3], color: '#3498db' },
-  { label: 'ONBOARD — Setup do cliente', stages: [3, 4], color: '#1abc9c' },
-  { label: 'ONGOING — Entrega + expansão', stages: [4, 6], color: '#e74c3c' },
+  { label: 'ENGAGING — Prospectar e conversar', stages: [0, 3], color: '#2ecc71' },
+  { label: 'SALES — Negociação e fechamento', stages: [4, 5], color: '#3498db' },
+  { label: 'ONBOARD — Setup do cliente', stages: [6, 6], color: '#1abc9c' },
+  { label: 'ONGOING — Entrega + expansão', stages: [7, 8], color: '#e74c3c' },
 ];
+
+// Depois de quantos dias sem contato registrado um lead vira "atrasado",
+// por etapa. Etapas de pós-venda (won em diante) não entram nesse alerta —
+// isso é acompanhado no Painel de Clientes, não no Pipeline de prospecção.
+var PRAZO_ATRASADO_DIAS = {
+  prospects: 3, apresentacao: 3, marcar_reuniao: 1, reuniao: 1, negociacao: 1
+};
+
+// Deriva o status de contato SÓ LENDO os dados — nunca escreve nada.
+// 'sem_prazo'   = etapa de pós-venda, não se aplica
+// 'sem_contato' = nunca teve contato registrado, mas ainda dentro do prazo
+// 'atrasado'    = passou do prazo (com ou sem contato registrado)
+// 'em_dia'      = contato registrado dentro do prazo
+function statusContato(p) {
+  const prazo = PRAZO_ATRASADO_DIAS[p.stage];
+  if (prazo === undefined) return 'sem_prazo';
+  const base = p.lastContact || p.createdAt;
+  if (!base) return 'sem_contato';
+  const dias = Math.floor((Date.now() - new Date(base).getTime()) / 86400000);
+  if (dias > prazo) return p.lastContact ? 'atrasado' : 'atrasado';
+  return p.lastContact ? 'em_dia' : 'sem_contato';
+}
 
 function getProspects() { return load('prospects') || []; }
 function saveProspects(data) { save('prospects', data); }
@@ -2334,7 +2376,7 @@ function renderBowtie() {
   const n = PIPELINE_STAGES.length;
   const w = 910, h = 90, mid = h / 2;
   const segW = w / n;
-  const contractIdx = 3;
+  const contractIdx = 5; // "Won" — momento de decisão, cintura do bowtie
 
   let paths = '';
   // Top line - narrows to contract point then expands
@@ -2442,9 +2484,10 @@ function renderPipelineMetrics() {
   const prospects = getProspects();
   const total = prospects.length;
   const activeClients = prospects.filter(p => ['entregando', 'expansao'].includes(p.stage)).length;
-  const inSales = prospects.filter(p => ['prospect', 'diagnostico', 'proposta', 'fechamento'].includes(p.stage)).length;
+  const emProspeccao = ['prospects', 'apresentacao', 'marcar_reuniao', 'reuniao', 'negociacao'];
+  const inSales = prospects.filter(p => emProspeccao.includes(p.stage)).length;
   const totalPipelineValue = prospects
-    .filter(p => ['prospect', 'diagnostico', 'proposta', 'fechamento'].includes(p.stage))
+    .filter(p => emProspeccao.includes(p.stage))
     .reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
   const mrr = prospects
     .filter(p => ['entregando', 'expansao'].includes(p.stage))
@@ -2478,12 +2521,66 @@ function linkInstagramProspect(p) {
   return 'https://instagram.com/' + valor.replace(/^@/, '');
 }
 
+// "O que fazer hoje" — não muda nada, só lê o que já existe e resume.
+// Mostra contagem por etapa, com os 3 primeiros nomes e um botão pra
+// filtrar o kanban inteiro — uma lista de 50+ nomes não ajuda ninguém.
+function renderResumoHoje(prospects) {
+  const el = document.getElementById('resumo-hoje');
+  if (!el) return;
+  const atrasados = prospects.filter(p => statusContato(p) === 'atrasado');
+  const nomeEtapa = id => (PIPELINE_STAGES.find(s => s.id === id) || {}).name || id;
+  const ordemEtapas = PIPELINE_STAGES.map(s => s.id);
+  const porEtapa = {};
+  atrasados.forEach(p => { (porEtapa[p.stage] = porEtapa[p.stage] || []).push(p); });
+
+  const reativar = prospects.filter(p => p.reactivate && new Date(p.reactivate) <= new Date() && p.stage === 'lost');
+
+  if (!atrasados.length && !reativar.length) {
+    el.innerHTML = `<div class="card" style="border-left:3px solid #2ecc71;">
+      <strong style="color:#2ecc71;">✅ Tudo em dia.</strong>
+      <span style="color:#888;font-size:13px;"> Nenhum prospect atrasado hoje.</span>
+    </div>`;
+    return;
+  }
+
+  const linhas = Object.entries(porEtapa)
+    .sort((a, b) => ordemEtapas.indexOf(a[0]) - ordemEtapas.indexOf(b[0]))
+    .map(([stageId, lista]) => {
+      const nomes = lista.slice(0, 3).map(p => p.name).join(', ');
+      const resto = lista.length > 3 ? ` e mais ${lista.length - 3}` : '';
+      return `<div style="margin-top:6px;font-size:13px;"><strong style="color:#e74c3c;">${lista.length}</strong> em <strong>${nomeEtapa(stageId)}</strong>: ${nomes}${resto}</div>`;
+    }).join('');
+
+  el.innerHTML = `<div class="card" style="border-left:3px solid #e74c3c;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;">
+      <strong style="color:#e74c3c;">📋 O que fazer hoje — ${atrasados.length + reativar.length} pendência(s)</strong>
+      <button class="btn-sm" onclick="document.getElementById('pipeline-filtro-contato').value='atrasado';renderKanban();document.getElementById('kanban').scrollIntoView({behavior:'smooth'});">Ver no Kanban</button>
+    </div>
+    ${linhas}
+    ${reativar.length ? `<div style="margin-top:6px;font-size:13px;"><strong style="color:#fc6;">${reativar.length}</strong> pra reativar (Lost, data vencida): ${reativar.slice(0,3).map(p=>p.name).join(', ')}${reativar.length>3?' e mais '+(reativar.length-3):''}</div>` : ''}
+  </div>`;
+}
+
+// Cor da borda do card = status de contato (só leitura, nunca escreve nada)
+var STATUS_CONTATO_ESTILO = {
+  atrasado:    { borda: '#e74c3c', label: null },
+  em_dia:      { borda: '#2ecc71', label: null },
+  sem_contato: { borda: '#555', label: null },
+  sem_prazo:   { borda: '#333', label: null }
+};
+
 function renderKanban() {
   const prospects = getProspects();
   const q = (document.getElementById('pipeline-search')?.value || '').toLowerCase().trim();
+  const filtroContato = document.getElementById('pipeline-filtro-contato')?.value || 'todos';
   const kanban = document.getElementById('kanban');
   kanban.innerHTML = PIPELINE_STAGES.map(stage => {
-    const cards = prospects.filter(p => p.stage === stage.id && (!q || p.name.toLowerCase().includes(q) || (p.notes||'').toLowerCase().includes(q)));
+    const cards = prospects.filter(p => {
+      if (p.stage !== stage.id) return false;
+      if (q && !p.name.toLowerCase().includes(q) && !(p.notes||'').toLowerCase().includes(q)) return false;
+      if (filtroContato !== 'todos' && statusContato(p) !== filtroContato) return false;
+      return true;
+    });
     return `<div class="kanban-col">
       <div class="kanban-col-header" style="border-top:3px solid ${stage.color};">
         ${stage.name} <span class="count">${cards.length}</span>
@@ -2494,11 +2591,14 @@ function renderKanban() {
         ondrop="dropProspect(event, '${stage.id}')">
         ${cards.map((c, idx) => {
           const lastLog = (c.notes || '').split('\n').filter(Boolean).pop();
-          const daysSince = c.lastContact ? Math.floor((Date.now() - new Date(c.lastContact).getTime()) / 86400000) : null;
-          const alertFollow = daysSince !== null && daysSince > 2 && ['diagnostico','proposta','fechamento'].includes(stage.id);
-          const reactivateAlert = c.reactivate && new Date(c.reactivate) <= new Date() && stage.id === 'perdido';
+          const status = statusContato(c);
+          const prazo = PRAZO_ATRASADO_DIAS[stage.id];
+          const dias = (c.lastContact || c.createdAt) ? Math.floor((Date.now() - new Date(c.lastContact || c.createdAt).getTime()) / 86400000) : null;
+          const corBorda = STATUS_CONTATO_ESTILO[status].borda;
+          const reactivateAlert = c.reactivate && new Date(c.reactivate) <= new Date() && stage.id === 'lost';
           return `
-          <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}" style="display:flex;gap:8px;align-items:flex-start;">
+          <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}"
+            style="display:flex;gap:8px;align-items:flex-start;border-left:3px solid ${corBorda};">
             <div style="min-width:18px;font-size:10px;color:#555;font-weight:700;padding-top:2px;">${idx+1}</div>
             <div style="flex:1;min-width:0;">
             <div class="kc-name" style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
@@ -2507,7 +2607,8 @@ function renderKanban() {
             </div>
             ${c.segment ? `<div class="kc-info">${c.segment}</div>` : ''}
             ${c.value ? `<div class="kc-value">R$ ${parseFloat(c.value).toLocaleString('pt-BR')}/mês</div>` : ''}
-            ${alertFollow ? `<div class="kc-alert">⚠ ${daysSince} dias sem contato</div>` : ''}
+            ${status === 'atrasado' ? `<div class="kc-alert">⚠ ${c.lastContact ? dias + ' dias sem contato (prazo: ' + prazo + ')' : 'nunca contatado, ' + dias + ' dias parado'}</div>` : ''}
+            ${status === 'sem_contato' ? `<div style="font-size:10px;color:#888;margin-top:2px;">○ sem contato registrado ainda</div>` : ''}
             ${reactivateAlert ? `<div class="kc-alert" style="border-color:#fc6;background:#fc622;color:#fc6;">🔄 Hora de reativar!</div>` : ''}
             ${lastLog ? `<div class="kc-log">${lastLog}</div>` : ''}
             ${c.msgEnviada ? `<div style="font-size:10px;color:#4f9;margin-bottom:4px;">✉ Mensagem enviada</div>` : ''}
@@ -2526,6 +2627,7 @@ function renderKanban() {
       <button class="kanban-add" onclick="openProspectModal('${stage.id}')">+ Adicionar</button>
     </div>`;
   }).join('');
+  renderResumoHoje(prospects);
 }
 
 function toggleMsgProspect(id) {
@@ -2563,7 +2665,7 @@ function openProspectModal(stage) {
   document.getElementById('p-segment').value = '';
   document.getElementById('p-value').value = '';
   document.getElementById('p-instagram').value = '';
-  document.getElementById('p-stage').value = stage || 'prospect';
+  document.getElementById('p-stage').value = stage || 'prospects';
   document.getElementById('p-reactivate').value = '';
   document.getElementById('p-new-log').value = '';
   document.getElementById('p-notes').value = '';
@@ -2816,7 +2918,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260922-1918';
+const VERSAO_APP = '20260922-1939';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
