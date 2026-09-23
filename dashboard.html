@@ -2513,6 +2513,7 @@ function renderKanban() {
           const reactivateAlert = c.reactivate && new Date(c.reactivate) <= new Date() && stage.id === 'lost';
           return `
           <div class="kanban-card" draggable="true" ondragstart="dragProspect(event, '${c.id}')" id="card-${c.id}"
+            onclick="editProspect('${c.id}')"
             style="display:flex;gap:8px;align-items:flex-start;border-left:3px solid ${corBorda};">
             <div style="min-width:18px;font-size:10px;color:#555;font-weight:700;padding-top:2px;">${idx+1}</div>
             <div style="flex:1;min-width:0;">
@@ -2527,7 +2528,7 @@ function renderKanban() {
             ${reactivateAlert ? `<div class="kc-alert" style="border-color:#fc6;background:#fc622;color:#fc6;">🔄 Hora de reativar!</div>` : ''}
             ${lastLog ? `<div class="kc-log">${lastLog}</div>` : ''}
             ${c.msgEnviada ? `<div style="font-size:10px;color:#4f9;margin-bottom:4px;">✉ Mensagem enviada</div>` : ''}
-            <div class="kc-actions">
+            <div class="kc-actions" onclick="event.stopPropagation()">
               <select class="btn-sm kc-move" onchange="moveProspect('${c.id}', this.value)" style="width:auto;padding:4px 6px;font-size:10px;">
                 ${PIPELINE_STAGES.map(s => `<option value="${s.id}" ${s.id === stage.id ? 'selected' : ''}>${s.name}</option>`).join('')}
               </select>
@@ -2833,7 +2834,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260923-0012';
+const VERSAO_APP = '20260923-1127';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
