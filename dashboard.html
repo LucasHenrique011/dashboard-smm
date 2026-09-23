@@ -384,9 +384,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   <button class="active" onclick="showModule('clientes')">Clientes</button>
   <button onclick="showModule('financeiro')">Financeiro</button>
   <button onclick="showModule('metas')">Metas</button>
-  <button onclick="showModule('metricas')">Métricas</button>
-  <button onclick="showModule('ferramentas')">Ferramentas</button>
-  <button onclick="showModule('playbook')">Playbook</button>
   <button onclick="showModule('pipeline')">Pipeline</button>
   <button onclick="showModule('mapas')">Mapas</button>
 </nav>
@@ -598,103 +595,6 @@ body.hide-valores .fin-row input[type="number"]::placeholder { color: transparen
   </div>
 </div>
 
-<!-- MODULE: MÉTRICAS -->
-<div id="mod-metricas" class="module">
-  <h2>📈 Métricas Mensais</h2>
-  <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap;">
-    <select id="met-client" onchange="renderMetricas()" style="width:auto;"></select>
-    <div class="week-nav" style="margin:0;">
-      <button class="btn-sm" onclick="changeMetMonth(-1)">← Anterior</button>
-      <span id="met-month-label" style="font-size:14px;font-weight:600;"></span>
-      <button class="btn-sm" onclick="changeMetMonth(1)">Próximo →</button>
-    </div>
-  </div>
-
-  <div class="fin-grid" id="met-evolution"></div>
-
-  <div class="card" style="margin-bottom:16px;">
-    <h3 style="color:#4f9;margin:0 0 12px;">Preencher Métricas</h3>
-    <p style="color:#888;font-size:11px;margin-bottom:12px;">📱 Dados do Instagram Insights (últimos 30 dias)</p>
-    <div class="form-row">
-      <div class="form-group"><label>Seguidores (total atual)</label><input type="number" id="met-seguidores" placeholder="Ex: 561" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Contas alcançadas</label><input type="number" id="met-alcance" placeholder="Ex: 1612" onchange="saveMetricas()"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Visualizações totais</label><input type="number" id="met-views" placeholder="Ex: 2612" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Interações totais</label><input type="number" id="met-interacoes" placeholder="Ex: 113" onchange="saveMetricas()"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Contas com engajamento</label><input type="number" id="met-engajados" placeholder="Ex: 36" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Visitas ao perfil</label><input type="number" id="met-visitas" placeholder="Ex: 61" onchange="saveMetricas()"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Toques no link da bio</label><input type="number" id="met-linkbio" placeholder="Ex: 9" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Taxa de engajamento (%)</label><input type="number" id="met-engajamento" step="0.1" placeholder="Calcular: interações ÷ alcance × 100" onchange="saveMetricas()"></div>
-    </div>
-    <p style="color:#555;font-size:10px;margin:-8px 0 12px;">💡 Engajamento = interações ÷ alcance × 100. Se deixar vazio, calcula automático.</p>
-    <h3 style="color:#888;font-size:12px;margin:16px 0 8px;">📱 Extras (opcional — disponível no app)</h3>
-    <div class="form-row">
-      <div class="form-group"><label>Novos seguidores</label><input type="number" id="met-novos" placeholder="Opcional" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Compartilhamentos</label><input type="number" id="met-compartilhamentos" placeholder="Opcional" onchange="saveMetricas()"></div>
-    </div>
-    <div class="form-row">
-      <div class="form-group"><label>Salvamentos</label><input type="number" id="met-salvamentos" placeholder="Opcional" onchange="saveMetricas()"></div>
-      <div class="form-group"><label>Curtidas</label><input type="number" id="met-curtidas" placeholder="Opcional" onchange="saveMetricas()"></div>
-    </div>
-    <div class="form-group"><label>Melhor vídeo do mês</label><input id="met-melhor" placeholder="Título do vídeo com melhor performance" onchange="saveMetricas()"></div>
-    <div class="form-group"><label>Observações</label><textarea id="met-obs" placeholder="Destaques, insights, próximos passos..." style="min-height:60px;" onchange="saveMetricas()"></textarea></div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px;">
-    <h3 style="color:#4f9;margin:0 0 12px;">📊 Evolução</h3>
-    <svg id="met-chart-svg" viewBox="0 0 700 200" style="width:100%;height:200px;"></svg>
-  </div>
-
-  <button class="btn-primary" onclick="gerarRelatorioMensal()" style="width:100%;">📄 Gerar Relatório do Mês</button>
-  <div id="met-relatorio" style="margin-top:16px;display:none;"></div>
-</div>
-
-<!-- MODULE: FERRAMENTAS -->
-<div id="mod-ferramentas" class="module">
-  <h2>🛠 Ferramentas</h2>
-
-
-  <!-- CONTROLE DE HORAS -->
-  <div class="card" style="margin-bottom:16px;">
-    <h3 style="color:#4f9;margin:0 0 12px;">⏱ Controle de Horas</h3>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;">
-      <select id="timer-client" style="width:auto;"><option value="">Selecione o cliente</option></select>
-      <select id="timer-atividade" style="width:auto;">
-        <option value="gravacao">Gravação</option>
-        <option value="edicao">Edição</option>
-        <option value="roteiro">Roteiro</option>
-        <option value="reuniao">Reunião</option>
-        <option value="planejamento">Planejamento</option>
-      </select>
-      <button class="btn-primary btn-sm" id="timer-btn" onclick="toggleTimer()">▶ Iniciar</button>
-      <button class="btn-sm btn-danger" onclick="stopTimer()">⏹ Salvar e parar</button>
-    </div>
-    <div id="timer-display" style="font-size:32px;font-weight:700;color:#4f9;text-align:center;padding:12px 0;font-family:monospace;">00:00:00</div>
-    <div id="timer-historico"></div>
-  </div>
-
-  <!-- TEMPLATES DE ROTEIRO -->
-  <div class="card" style="margin-bottom:16px;">
-    <h3 style="color:#4f9;margin:0 0 12px;">📝 Templates de Roteiro</h3>
-    <p style="color:#888;font-size:12px;margin-bottom:12px;">Modelos prontos por tipo de conteúdo. Clique pra copiar.</p>
-    <div id="templates-container"></div>
-  </div>
-
-
-
-</div>
-
-<!-- MODULE 3: PLAYBOOK -->
-<div id="mod-playbook" class="module">
-  <h2>Playbook — Consulta Rápida</h2>
-  <p style="color:#888;font-size:13px;margin-bottom:16px;">Clique em cada seção para expandir e editar suas anotações. Tudo salva automaticamente.</p>
-  <div id="playbook-sections"></div>
-</div>
 
 <!-- MODULE 4: PIPELINE -->
 <div id="mod-pipeline" class="module">
@@ -1087,6 +987,7 @@ async function nuvemIniciar() {
   CLIENTS = loadClients() || JSON.parse(JSON.stringify(DEFAULT_CLIENTS));
   if (typeof loadClientInstagram === 'function') CLIENT_INSTAGRAM = loadClientInstagram();
   if (typeof loadClientesArquivados === 'function') CLIENTES_ARQUIVADOS = loadClientesArquivados();
+  if (typeof loadEncerramentos === 'function') CLIENTES_ENCERRAMENTO = loadEncerramentos();
   if (window.__iniciarApp) window.__iniciarApp();
 }
 
@@ -1267,7 +1168,7 @@ async function nuvemEmpurrar(chave) {
       const valor = localStorage.getItem(chave);
       if (valor) await supa.from('app_state').upsert({ key: chave, data: valor }, { onConflict: 'key' });
     }
-    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram','smm_clientes_arquivados'].includes(chave)) {
+    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram','smm_clientes_arquivados','smm_encerramentos'].includes(chave)) {
       let dados; try { dados = JSON.parse(localStorage.getItem(chave)); } catch { dados = null; }
       if (dados != null) await supa.from('app_state').upsert({ key: chave, data: dados }, { onConflict: 'key' });
     }
@@ -1366,17 +1267,28 @@ function loadClientesArquivados() { try { return JSON.parse(localStorage.getItem
 function saveClientesArquivados(arr) { localStorage.setItem('smm_clientes_arquivados', JSON.stringify(arr)); }
 var CLIENTES_ARQUIVADOS = loadClientesArquivados();
 
+// Detalhe do fim de contrato: { [key]: { encerradoEm, motivo, retorno } }
+function loadEncerramentos() { try { return JSON.parse(localStorage.getItem('smm_encerramentos')) || {}; } catch { return {}; } }
+function saveEncerramentos(obj) { localStorage.setItem('smm_encerramentos', JSON.stringify(obj)); }
+var CLIENTES_ENCERRAMENTO = loadEncerramentos();
+
 function arquivarCliente(key) {
   const nome = (CLIENTS[key]||{}).name || key;
-  if (!confirm(`Arquivar ${nome}?\n\nEla some da lista de clientes ativos, mas todo o histórico (vídeos, financeiro, LTV) continua no sistema.`)) return;
+  if (!confirm(`Encerrar contrato com ${nome}?\n\nEla some da lista de clientes ativos, mas todo o histórico (vídeos, financeiro, LTV) continua no sistema.`)) return;
+  const motivo = prompt('Motivo do encerramento (opcional):', '') || '';
+  const retorno = prompt('Previsão de retorno, se houver (ex: Janeiro/2027 — opcional):', '') || '';
   if (!CLIENTES_ARQUIVADOS.includes(key)) CLIENTES_ARQUIVADOS.push(key);
   saveClientesArquivados(CLIENTES_ARQUIVADOS);
+  CLIENTES_ENCERRAMENTO[key] = { encerradoEm: new Date().toISOString().slice(0,10), motivo, retorno };
+  saveEncerramentos(CLIENTES_ENCERRAMENTO);
   renderAll(); populateClientSelects();
-  showBanner('📦 ' + nome + ' arquivada — histórico preservado');
+  showBanner('📦 ' + nome + ' — contrato encerrado, histórico preservado');
 }
 function reativarCliente(key) {
   CLIENTES_ARQUIVADOS = CLIENTES_ARQUIVADOS.filter(k => k !== key);
   saveClientesArquivados(CLIENTES_ARQUIVADOS);
+  delete CLIENTES_ENCERRAMENTO[key];
+  saveEncerramentos(CLIENTES_ENCERRAMENTO);
   renderClientesArquivados(); renderAll(); populateClientSelects();
 }
 function abrirClientesArquivados() {
@@ -1389,7 +1301,14 @@ function renderClientesArquivados() {
   el.innerHTML = CLIENTES_ARQUIVADOS.map(key => {
     const cl = CLIENTS[key];
     if (!cl) return '';
-    return `<div class="fin-row"><span class="fin-name">${cl.name}</span>
+    const enc = CLIENTES_ENCERRAMENTO[key];
+    const detalhe = enc ? `<div style="font-size:11px;color:#888;margin-top:2px;">
+        Encerrado em ${enc.encerradoEm ? enc.encerradoEm.split('-').reverse().join('/') : '—'}
+        ${enc.motivo ? ' · ' + enc.motivo : ''}
+        ${enc.retorno ? ' · <span style="color:#fc6;">pode retornar: ' + enc.retorno + '</span>' : ''}
+      </div>` : '';
+    return `<div class="fin-row" style="align-items:flex-start;">
+      <div><span class="fin-name">${cl.name}</span>${detalhe}</div>
       <button class="btn-sm btn-primary" onclick="reativarCliente('${key}')">Reativar</button></div>`;
   }).join('');
 }
@@ -2486,9 +2405,6 @@ function renderPipelineMetrics() {
   const activeClients = prospects.filter(p => ['entregando', 'expansao'].includes(p.stage)).length;
   const emProspeccao = ['prospects', 'apresentacao', 'marcar_reuniao', 'reuniao', 'negociacao'];
   const inSales = prospects.filter(p => emProspeccao.includes(p.stage)).length;
-  const totalPipelineValue = prospects
-    .filter(p => emProspeccao.includes(p.stage))
-    .reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
   const mrr = prospects
     .filter(p => ['entregando', 'expansao'].includes(p.stage))
     .reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
@@ -2499,7 +2415,6 @@ function renderPipelineMetrics() {
     <div class="metric-box"><div class="metric-val">${total}</div><div class="metric-label">Total prospects</div></div>
     <div class="metric-box"><div class="metric-val">${inSales}</div><div class="metric-label">Em negociação</div></div>
     <div class="metric-box"><div class="metric-val">${activeClients}</div><div class="metric-label">Clientes ativos</div></div>
-    <div class="metric-box"><div class="metric-val">R$ ${totalPipelineValue.toLocaleString('pt-BR')}</div><div class="metric-label">Pipeline (potencial)</div></div>
     <div class="metric-box"><div class="metric-val">R$ ${mrr.toLocaleString('pt-BR')}</div><div class="metric-label">MRR (recorrente)</div></div>
     <div class="metric-box"><div class="metric-val">${winRate}%</div><div class="metric-label">Win rate</div></div>
   `;
@@ -2918,7 +2833,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260922-1939';
+const VERSAO_APP = '20260923-0012';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -3667,7 +3582,6 @@ document.addEventListener('keydown', function(e) {
   if (e.key === 'p' || e.key === 'P') { e.preventDefault(); showModule('pipeline'); openProspectModal(); }
   if (e.key === '1') showModule('clientes');
   if (e.key === '2') showModule('financeiro');
-  if (e.key === '3') showModule('playbook');
   if (e.key === '4') showModule('pipeline');
 });
 
@@ -3868,7 +3782,7 @@ function restoreTimer() {
   if (document.getElementById('timer-client')) document.getElementById('timer-client').value = state.client;
   if (document.getElementById('timer-atividade')) document.getElementById('timer-atividade').value = state.atividade;
   timerRunning = true;
-  document.getElementById('timer-btn').textContent = '⏸ Pausar';
+  if (document.getElementById('timer-btn')) document.getElementById('timer-btn').textContent = '⏸ Pausar';
   updateTimerDisplay();
   timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
 }
@@ -3877,7 +3791,8 @@ function updateTimerDisplay() {
   const h = Math.floor(timerSeconds / 3600);
   const m = Math.floor((timerSeconds % 3600) / 60);
   const s = timerSeconds % 60;
-  document.getElementById('timer-display').textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  const el = document.getElementById('timer-display');
+  if (el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 function toggleTimer() {
@@ -4293,8 +4208,7 @@ function renderAll() {
   const fns = [
     populateClientSelects, renderCards, renderWeeklySummary, renderCalendar,
     renderTracker, renderHistory, renderFinance, renderFinChart,
-    renderPlaybook, renderMetas, renderFerramentas, renderMetricas,
-    renderPipeline
+    renderMetas, renderPipeline
   ];
   fns.forEach(fn => { try { fn(); } catch(e) { console.error(fn.name + ':', e); } });
 }
@@ -4358,28 +4272,6 @@ function renderAll() {
   }
 })();
 
-// Notificação de relatório na última semana do mês
-(function checkReportReminder() {
-  const now = new Date();
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const daysLeft = lastDay - now.getDate();
-  if (daysLeft > 6) return;
-  const key = 'smm_report_reminder_' + now.toISOString().slice(0, 7);
-  if (localStorage.getItem(key)) return;
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const mes = meses[now.getMonth()];
-  const banner = document.createElement('div');
-  banner.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#1a3a2a,#2a4a3a);border:1px solid #4f9;border-radius:14px;padding:16px 24px;z-index:50;display:flex;align-items:center;gap:12px;box-shadow:0 8px 24px rgba(0,0,0,.5);max-width:90%;';
-  banner.innerHTML = `
-    <span style="font-size:24px;">📊</span>
-    <div>
-      <div style="color:#4f9;font-weight:700;font-size:14px;">Hora de montar os relatórios!</div>
-      <div style="color:#ccc;font-size:12px;">Última semana de ${mes} — monte os relatórios mensais dos clientes.</div>
-    </div>
-    <button onclick="this.parentElement.remove();localStorage.setItem('${key}','1')" style="background:none;border:none;color:#888;font-size:18px;cursor:pointer;padding:4px 8px;">✕</button>
-  `;
-  document.body.appendChild(banner);
-})();
 </script>
 
 <!-- ============ AGENTE IA ============ -->
