@@ -988,6 +988,7 @@ async function nuvemIniciar() {
   if (typeof loadClientInstagram === 'function') CLIENT_INSTAGRAM = loadClientInstagram();
   if (typeof loadClientesArquivados === 'function') CLIENTES_ARQUIVADOS = loadClientesArquivados();
   if (typeof loadEncerramentos === 'function') CLIENTES_ENCERRAMENTO = loadEncerramentos();
+  if (typeof loadClientesPipelineStage === 'function') CLIENTES_PIPELINE_STAGE = loadClientesPipelineStage();
   if (window.__iniciarApp) window.__iniciarApp();
 }
 
@@ -1168,7 +1169,7 @@ async function nuvemEmpurrar(chave) {
       const valor = localStorage.getItem(chave);
       if (valor) await supa.from('app_state').upsert({ key: chave, data: valor }, { onConflict: 'key' });
     }
-    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram','smm_clientes_arquivados','smm_encerramentos'].includes(chave)) {
+    else if (['smm_metas','smm_processos','smm_metas_mes','smm_client_instagram','smm_clientes_arquivados','smm_encerramentos','smm_clientes_pipeline_stage'].includes(chave)) {
       let dados; try { dados = JSON.parse(localStorage.getItem(chave)); } catch { dados = null; }
       if (dados != null) await supa.from('app_state').upsert({ key: chave, data: dados }, { onConflict: 'key' });
     }
@@ -1272,6 +1273,36 @@ function loadEncerramentos() { try { return JSON.parse(localStorage.getItem('smm
 function saveEncerramentos(obj) { localStorage.setItem('smm_encerramentos', JSON.stringify(obj)); }
 var CLIENTES_ENCERRAMENTO = loadEncerramentos();
 
+// Em qual etapa pós-venda do Pipeline cada cliente real está: { [key]: 'onboarding'|'entregando'|'expansao'|'won' }
+// Sem entrada aqui = 'entregando' (padrão pra quem já está recebendo conteúdo).
+function loadClientesPipelineStage() { try { return JSON.parse(localStorage.getItem('smm_clientes_pipeline_stage')) || {}; } catch { return {}; } }
+function saveClientesPipelineStage(obj) { localStorage.setItem('smm_clientes_pipeline_stage', JSON.stringify(obj)); }
+var CLIENTES_PIPELINE_STAGE = loadClientesPipelineStage();
+
+// Clientes de verdade (não arquivados, sem contar o perfil pessoal) que devem
+// aparecer como cards no Pipeline — mesma fonte de dados do Painel de Clientes,
+// então editar um cliente em qualquer aba atualiza o Pipeline sozinho.
+function clientesAtivosPipeline() {
+  return Object.keys(CLIENTS)
+    .filter(k => k !== 'lucas' && !CLIENTES_ARQUIVADOS.includes(k))
+    .map(k => ({ key: k, ...CLIENTS[k], pipelineStage: CLIENTES_PIPELINE_STAGE[k] || 'entregando' }));
+}
+function valorMensalCliente(valor) {
+  const nums = String(valor || '').match(/[\d.,]+/g) || [];
+  return nums.reduce((s, n) => s + (parseFloat(n.replace(/\./g, '').replace(',', '.')) || 0), 0);
+}
+function moverClientePipeline(key, stageId) {
+  CLIENTES_PIPELINE_STAGE[key] = stageId;
+  saveClientesPipelineStage(CLIENTES_PIPELINE_STAGE);
+  renderPipeline();
+}
+// Conta prospects + clientes reais numa etapa — usado no bowtie e nas métricas.
+function countInStage(stageId) {
+  const prospectCount = getProspects().filter(p => p.stage === stageId).length;
+  const clientCount = clientesAtivosPipeline().filter(c => c.pipelineStage === stageId).length;
+  return prospectCount + clientCount;
+}
+
 function arquivarCliente(key) {
   const nome = (CLIENTS[key]||{}).name || key;
   if (!confirm(`Encerrar contrato com ${nome}?\n\nEla some da lista de clientes ativos, mas todo o histórico (vídeos, financeiro, LTV) continua no sistema.`)) return;
@@ -1314,14 +1345,14 @@ function renderClientesArquivados() {
 }
 
 function populateClientSelects() {
-  ['filter-client', 'v-client', 'hist-client', 'relatorio-client', 'timer-client'].forEach(id => {
+  ['filter-client', 'v-client', 'hist-client'].forEach(id => {
     const sel = document.getElementById(id);
     if (!sel) return;
     const val = sel.value;
     const isFilter = id !== 'v-client';
-    // Cliente arquivado não recebe vídeo novo nem entra no cronômetro —
+    // Cliente arquivado não recebe vídeo novo —
     // mas continua aparecendo nos filtros de histórico/relatório.
-    const escondeArquivado = id === 'v-client' || id === 'timer-client';
+    const escondeArquivado = id === 'v-client';
     sel.innerHTML = isFilter ? '<option value="all">Todos os clientes</option>' : '';
     for (const [key, cl] of Object.entries(CLIENTS)) {
       if (escondeArquivado && CLIENTES_ARQUIVADOS.includes(key)) continue;
@@ -2318,8 +2349,8 @@ function renderBowtie() {
   let crLabels = '';
   for (let i = 0; i < n - 1; i++) {
     const x = (i + 1) * segW;
-    const count = prospects.filter(p => p.stage === PIPELINE_STAGES[i + 1].id).length;
-    const prevCount = prospects.filter(p => p.stage === PIPELINE_STAGES[i].id).length;
+    const count = countInStage(PIPELINE_STAGES[i + 1].id);
+    const prevCount = countInStage(PIPELINE_STAGES[i].id);
     const cr = prevCount > 0 ? Math.round((count / prevCount) * 100) : 0;
     crLabels += `<text x="${x}" y="${h - 4}" text-anchor="middle" fill="#888" font-size="9" font-family="sans-serif">CR${i + 1}</text>`;
   }
@@ -2328,7 +2359,7 @@ function renderBowtie() {
   // Stage count dots
   for (let i = 0; i < n; i++) {
     const x = i * segW + segW / 2;
-    const count = prospects.filter(p => p.stage === PIPELINE_STAGES[i].id).length;
+    const count = countInStage(PIPELINE_STAGES[i].id);
     if (count > 0) {
       paths += `<circle cx="${x}" cy="${mid}" r="14" fill="${PIPELINE_STAGES[i].color}" opacity="0.8"/>`;
       paths += `<text x="${x}" y="${mid + 4}" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold" font-family="sans-serif">${count}</text>`;
@@ -2402,13 +2433,12 @@ function saveStageInfo(stageId, field, value) {
 function renderPipelineMetrics() {
   const prospects = getProspects();
   const total = prospects.length;
-  const activeClients = prospects.filter(p => ['entregando', 'expansao'].includes(p.stage)).length;
+  const clientesReais = clientesAtivosPipeline();
+  const activeClients = clientesReais.length;
   const emProspeccao = ['prospects', 'apresentacao', 'marcar_reuniao', 'reuniao', 'negociacao'];
   const inSales = prospects.filter(p => emProspeccao.includes(p.stage)).length;
-  const mrr = prospects
-    .filter(p => ['entregando', 'expansao'].includes(p.stage))
-    .reduce((s, p) => s + (parseFloat(p.value) || 0), 0);
-  const winRate = total > 0 ? Math.round((activeClients / total) * 100) : 0;
+  const mrr = clientesReais.reduce((s, c) => s + valorMensalCliente(c.valor), 0);
+  const winRate = (activeClients + total) > 0 ? Math.round((activeClients / (activeClients + total)) * 100) : 0;
 
   const el = document.getElementById('pipeline-metrics');
   el.innerHTML = `
@@ -2484,12 +2514,22 @@ var STATUS_CONTATO_ESTILO = {
   sem_prazo:   { borda: '#333', label: null }
 };
 
+const POST_SALE_STAGES = ['won', 'onboarding', 'entregando', 'expansao'];
+
 function renderKanban() {
   const prospects = getProspects();
+  const clientesReais = clientesAtivosPipeline();
   const q = (document.getElementById('pipeline-search')?.value || '').toLowerCase().trim();
   const filtroContato = document.getElementById('pipeline-filtro-contato')?.value || 'todos';
   const kanban = document.getElementById('kanban');
   kanban.innerHTML = PIPELINE_STAGES.map(stage => {
+    const clientCards = POST_SALE_STAGES.includes(stage.id)
+      ? clientesReais.filter(c => {
+          if (c.pipelineStage !== stage.id) return false;
+          if (q && !c.name.toLowerCase().includes(q)) return false;
+          return true;
+        })
+      : [];
     const cards = prospects.filter(p => {
       if (p.stage !== stage.id) return false;
       if (q && !p.name.toLowerCase().includes(q) && !(p.notes||'').toLowerCase().includes(q)) return false;
@@ -2498,12 +2538,31 @@ function renderKanban() {
     });
     return `<div class="kanban-col">
       <div class="kanban-col-header" style="border-top:3px solid ${stage.color};">
-        ${stage.name} <span class="count">${cards.length}</span>
+        ${stage.name} <span class="count">${clientCards.length + cards.length}</span>
       </div>
       <div class="kanban-col-body" data-stage="${stage.id}"
         ondragover="event.preventDefault(); this.classList.add('drag-over')"
         ondragleave="this.classList.remove('drag-over')"
         ondrop="dropProspect(event, '${stage.id}')">
+        ${clientCards.map(c => `
+          <div class="kanban-card" id="client-card-${c.key}"
+            onclick="openClientModal('${c.key}')"
+            style="display:flex;gap:8px;align-items:flex-start;border-left:3px solid #4f9;cursor:pointer;">
+            <div style="flex:1;min-width:0;">
+              <div class="kc-name" style="display:flex;align-items:center;gap:6px;justify-content:space-between;">
+                <span>${c.name}</span>
+                <span style="font-size:9px;background:#4f9;color:#04140c;padding:1px 6px;border-radius:4px;font-weight:700;flex-shrink:0;">CLIENTE</span>
+              </div>
+              ${(c.pillars && c.pillars.length) ? `<div class="kc-info">${c.pillars.join(', ')}</div>` : ''}
+              <div class="kc-value">R$ ${valorMensalCliente(c.valor).toLocaleString('pt-BR')}/mês</div>
+              <div class="kc-actions" onclick="event.stopPropagation()">
+                <select class="btn-sm kc-move" onchange="moverClientePipeline('${c.key}', this.value)" style="width:auto;padding:4px 6px;font-size:10px;">
+                  ${POST_SALE_STAGES.map(s => `<option value="${s}" ${s === stage.id ? 'selected' : ''}>${PIPELINE_STAGES.find(ps => ps.id === s).name}</option>`).join('')}
+                </select>
+                <button class="btn-sm" onclick="openClientModal('${c.key}')" title="Editar cliente">✎</button>
+              </div>
+            </div>
+          </div>`).join('')}
         ${cards.map((c, idx) => {
           const lastLog = (c.notes || '').split('\n').filter(Boolean).pop();
           const status = statusContato(c);
@@ -2834,7 +2893,7 @@ function importData(e) {
 }
 
 // ============ PORTAL DO CLIENTE ============
-const VERSAO_APP = '20260923-1127';
+const VERSAO_APP = '20260923-2233';
 const GITHUB_REPO = 'LucasHenrique011/dashboard-smm';
 const PORTAL_FILE = 'portal-data.js';
 
@@ -3306,16 +3365,6 @@ function publicarPortalLinks() {
   document.body.appendChild(overlay);
 }
 
-// ============ MÉTRICAS ============
-var metMonth = new Date().toISOString().slice(0, 7);
-
-function changeMetMonth(dir) {
-  const [y, m] = metMonth.split('-').map(Number);
-  const d = new Date(y, m - 1 + dir, 1);
-  metMonth = d.toISOString().slice(0, 7);
-  renderMetricas();
-}
-
 function loadAllMetricas() { return JSON.parse(localStorage.getItem('smm_metricas') || '{}'); }
 
 function seedMetricas() {
@@ -3339,227 +3388,6 @@ function seedMetricas() {
   })();
 }
 seedMetricas();
-
-function getMetricas(client, month) {
-  const all = loadAllMetricas();
-  return (all[client] && all[client][month]) || {};
-}
-
-function saveMetricas() {
-  const client = document.getElementById('met-client').value;
-  if (!client) return;
-  const all = loadAllMetricas();
-  if (!all[client]) all[client] = {};
-  const alcance = parseFloat(document.getElementById('met-alcance').value) || 0;
-  const interacoes = parseFloat(document.getElementById('met-interacoes').value) || 0;
-  let engajamento = parseFloat(document.getElementById('met-engajamento').value) || 0;
-  if (!engajamento && alcance > 0 && interacoes > 0) {
-    engajamento = parseFloat(((interacoes / alcance) * 100).toFixed(1));
-    document.getElementById('met-engajamento').value = engajamento;
-  }
-  all[client][metMonth] = {
-    seguidores: parseFloat(document.getElementById('met-seguidores').value) || 0,
-    alcance,
-    views: parseFloat(document.getElementById('met-views').value) || 0,
-    interacoes,
-    engajados: parseFloat(document.getElementById('met-engajados').value) || 0,
-    visitas: parseFloat(document.getElementById('met-visitas').value) || 0,
-    linkbio: parseFloat(document.getElementById('met-linkbio').value) || 0,
-    engajamento,
-    novos: parseFloat(document.getElementById('met-novos').value) || 0,
-    compartilhamentos: parseFloat(document.getElementById('met-compartilhamentos').value) || 0,
-    salvamentos: parseFloat(document.getElementById('met-salvamentos').value) || 0,
-    curtidas: parseFloat(document.getElementById('met-curtidas').value) || 0,
-    melhor: document.getElementById('met-melhor').value.trim(),
-    obs: document.getElementById('met-obs').value.trim()
-  };
-  localStorage.setItem('smm_metricas', JSON.stringify(all));
-  scheduleAutoBackup();
-  scheduleAutoPublish();
-  renderMetricas();
-}
-
-function renderMetricas() {
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const [y, m] = metMonth.split('-');
-  document.getElementById('met-month-label').textContent = `${meses[parseInt(m)-1]} ${y}`;
-
-  const sel = document.getElementById('met-client');
-  if (!sel.options.length || sel.options[0].value === '') {
-    sel.innerHTML = Object.entries(CLIENTS).map(([k, c]) => `<option value="${k}">${c.name}</option>`).join('');
-  }
-  const client = sel.value;
-  const met = getMetricas(client, metMonth);
-
-  document.getElementById('met-seguidores').value = met.seguidores || '';
-  document.getElementById('met-alcance').value = met.alcance || '';
-  document.getElementById('met-views').value = met.views || '';
-  document.getElementById('met-interacoes').value = met.interacoes || '';
-  document.getElementById('met-engajados').value = met.engajados || '';
-  document.getElementById('met-visitas').value = met.visitas || '';
-  document.getElementById('met-linkbio').value = met.linkbio || '';
-  document.getElementById('met-engajamento').value = met.engajamento || '';
-  document.getElementById('met-novos').value = met.novos || '';
-  document.getElementById('met-compartilhamentos').value = met.compartilhamentos || '';
-  document.getElementById('met-salvamentos').value = met.salvamentos || '';
-  document.getElementById('met-curtidas').value = met.curtidas || '';
-  document.getElementById('met-melhor').value = met.melhor || '';
-  document.getElementById('met-obs').value = met.obs || '';
-
-  // Evolution vs previous month
-  const [py, pm] = [parseInt(y), parseInt(m) - 1];
-  const prevMonth = pm < 1 ? `${py - 1}-12` : `${py}-${String(pm).padStart(2, '0')}`;
-  const prev = getMetricas(client, prevMonth);
-
-  function evol(curr, prevVal, label, suffix) {
-    if (!curr && !prevVal) return `<div class="fin-box"><div class="lbl">${label}</div><div class="val" style="color:#555;">—</div></div>`;
-    const diff = prevVal ? curr - prevVal : 0;
-    const pct = prevVal ? Math.round((diff / prevVal) * 100) : 0;
-    const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '=';
-    const color = diff > 0 ? '#4f9' : diff < 0 ? '#f66' : '#6cf';
-    const diffLabel = prevVal ? `<div style="font-size:11px;color:${color};">${arrow} ${diff > 0 ? '+' : ''}${label === 'Engajamento' ? diff.toFixed(1) + '%' : diff.toLocaleString('pt-BR')} (${pct > 0 ? '+' : ''}${pct}%)</div>` : '';
-    return `<div class="fin-box"><div class="lbl">${label}</div><div class="val green">${label === 'Engajamento' ? (curr || 0).toFixed(1) + '%' : (curr || 0).toLocaleString('pt-BR')}${suffix || ''}</div>${diffLabel}</div>`;
-  }
-
-  document.getElementById('met-evolution').innerHTML =
-    evol(met.seguidores, prev.seguidores, 'Seguidores') +
-    evol(met.alcance, prev.alcance, 'Alcance') +
-    evol(met.views, prev.views, 'Visualizações') +
-    evol(met.interacoes, prev.interacoes, 'Interações') +
-    evol(met.engajados, prev.engajados, 'Engajados') +
-    evol(met.engajamento, prev.engajamento, 'Engajamento') +
-    evol(met.visitas, prev.visitas, 'Visitas Perfil') +
-    evol(met.linkbio, prev.linkbio, 'Link da Bio') +
-    evol(met.novos, prev.novos, 'Novos Seg.') +
-    evol(met.compartilhamentos, prev.compartilhamentos, 'Compartilham.') +
-    evol(met.salvamentos, prev.salvamentos, 'Salvamentos') +
-    evol(met.curtidas, prev.curtidas, 'Curtidas');
-
-  renderMetChart(client);
-}
-
-function renderMetChart(client) {
-  const all = loadAllMetricas();
-  const clientData = all[client] || {};
-  const months = Object.keys(clientData).sort().slice(-6);
-  const svg = document.getElementById('met-chart-svg');
-
-  if (months.length < 2) {
-    svg.innerHTML = '<text x="350" y="100" text-anchor="middle" fill="#555" font-size="12" font-family="sans-serif">Preencha 2+ meses pra ver o gráfico</text>';
-    return;
-  }
-
-  const data = months.map(m => ({ month: m, seg: clientData[m].seguidores || 0, alc: clientData[m].alcance || 0 }));
-  const maxVal = Math.max(...data.map(d => Math.max(d.seg, d.alc)), 1);
-  const w = 700, h = 180, pad = 40;
-  const stepX = (w - pad * 2) / (data.length - 1);
-  function yPos(val) { return h - pad - (val / maxVal) * (h - pad * 2); }
-
-  const segLine = data.map((d, i) => `${pad + i * stepX},${yPos(d.seg)}`).join(' ');
-  const alcLine = data.map((d, i) => `${pad + i * stepX},${yPos(d.alc)}`).join(' ');
-
-  let s = `<polyline points="${segLine}" fill="none" stroke="#4f9" stroke-width="2"/>`;
-  s += `<polyline points="${alcLine}" fill="none" stroke="#6cf" stroke-width="2"/>`;
-  data.forEach((d, i) => {
-    const x = pad + i * stepX;
-    s += `<circle cx="${x}" cy="${yPos(d.seg)}" r="3" fill="#4f9"/>`;
-    s += `<circle cx="${x}" cy="${yPos(d.alc)}" r="3" fill="#6cf"/>`;
-    s += `<text x="${x}" y="${h - 5}" text-anchor="middle" fill="#888" font-size="10" font-family="sans-serif">${d.month.split('-')[1]}/${d.month.split('-')[0].slice(2)}</text>`;
-  });
-  s += `<text x="${w - 10}" y="20" text-anchor="end" fill="#4f9" font-size="10" font-family="sans-serif">● Seguidores</text>`;
-  s += `<text x="${w - 10}" y="34" text-anchor="end" fill="#6cf" font-size="10" font-family="sans-serif">● Alcance</text>`;
-  svg.innerHTML = s;
-}
-
-function gerarRelatorioMensal() {
-  const client = document.getElementById('met-client').value;
-  const cl = CLIENTS[client];
-  const met = getMetricas(client, metMonth);
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const [y, m] = metMonth.split('-');
-  const mesNome = `${meses[parseInt(m)-1]} ${y}`;
-
-  const [py, pm] = [parseInt(y), parseInt(m) - 1];
-  const prevMonth = pm < 1 ? `${py - 1}-12` : `${py}-${String(pm).padStart(2, '0')}`;
-  const prev = getMetricas(client, prevMonth);
-
-  const videos = load('videos') || [];
-  const mesVids = videos.filter(v => v.client === client && v.date && v.date.startsWith(metMonth));
-  const postados = mesVids.filter(v => v.status === 'postado');
-
-  function diff(curr, prevVal) {
-    if (!prevVal) return '';
-    const d = curr - prevVal;
-    const pct = Math.round((d / prevVal) * 100);
-    const color = d > 0 ? '#4f9' : d < 0 ? '#f66' : '#888';
-    return `<span style="color:${color};font-size:11px;"> ${d > 0 ? '↑+' : '↓'}${typeof curr === 'number' && curr % 1 !== 0 ? d.toFixed(1) : d} (${pct > 0 ? '+' : ''}${pct}%)</span>`;
-  }
-
-  const el = document.getElementById('met-relatorio');
-  el.style.display = 'block';
-  el.innerHTML = `
-    <div class="card" id="relatorio-pdf" style="background:#0f0f14;padding:24px;">
-      <div style="text-align:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #2a2a3a;">
-        <div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:2px;">Relatório Mensal</div>
-        <h2 style="color:#4f9;margin:6px 0;font-size:22px;">${cl.name}</h2>
-        <div style="font-size:14px;color:#aaa;">${mesNome}</div>
-        <div style="font-size:11px;color:#555;margin-top:4px;">Gerenciado por Lucas SM</div>
-      </div>
-
-      <div class="fin-grid" style="margin-bottom:20px;">
-        <div class="fin-box"><div class="lbl">Seguidores</div><div class="val green">${(met.seguidores || 0).toLocaleString('pt-BR')}</div>${diff(met.seguidores, prev.seguidores)}</div>
-        <div class="fin-box"><div class="lbl">Alcance</div><div class="val green">${(met.alcance || 0).toLocaleString('pt-BR')}</div>${diff(met.alcance, prev.alcance)}</div>
-        <div class="fin-box"><div class="lbl">Views Reels</div><div class="val green">${(met.views || 0).toLocaleString('pt-BR')}</div>${diff(met.views, prev.views)}</div>
-      </div>
-
-      <div class="fin-grid" style="margin-bottom:20px;">
-        <div class="fin-box"><div class="lbl">Interações</div><div class="val green">${(met.interacoes || 0).toLocaleString('pt-BR')}</div>${diff(met.interacoes, prev.interacoes)}</div>
-        <div class="fin-box"><div class="lbl">Contas Engajadas</div><div class="val green">${(met.engajados || 0).toLocaleString('pt-BR')}</div>${diff(met.engajados, prev.engajados)}</div>
-        <div class="fin-box"><div class="lbl">Engajamento</div><div class="val" style="color:#fc6;">${(met.engajamento || 0).toFixed(1)}%</div>${diff(met.engajamento, prev.engajamento)}</div>
-      </div>
-
-      <div class="fin-grid" style="margin-bottom:20px;">
-        <div class="fin-box"><div class="lbl">Visitas ao Perfil</div><div class="val green">${(met.visitas || 0).toLocaleString('pt-BR')}</div>${diff(met.visitas, prev.visitas)}</div>
-        <div class="fin-box"><div class="lbl">Toques no Link da Bio</div><div class="val" style="color:#fc6;">${(met.linkbio || 0).toLocaleString('pt-BR')}</div>${diff(met.linkbio, prev.linkbio)}</div>
-        ${met.novos ? `<div class="fin-box"><div class="lbl">Novos Seguidores</div><div class="val green">${(met.novos).toLocaleString('pt-BR')}</div>${diff(met.novos, prev.novos)}</div>` : ''}
-      </div>
-
-      ${(met.curtidas || met.compartilhamentos || met.salvamentos) ? `<div class="fin-grid" style="margin-bottom:20px;">
-        ${met.curtidas ? `<div class="fin-box"><div class="lbl">Curtidas</div><div class="val green">${met.curtidas.toLocaleString('pt-BR')}</div>${diff(met.curtidas, prev.curtidas)}</div>` : ''}
-        ${met.compartilhamentos ? `<div class="fin-box"><div class="lbl">Compartilhamentos</div><div class="val green">${met.compartilhamentos.toLocaleString('pt-BR')}</div>${diff(met.compartilhamentos, prev.compartilhamentos)}</div>` : ''}
-        ${met.salvamentos ? `<div class="fin-box"><div class="lbl">Salvamentos</div><div class="val green">${met.salvamentos.toLocaleString('pt-BR')}</div>${diff(met.salvamentos, prev.salvamentos)}</div>` : ''}
-      </div>` : ''}
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;">
-        <div class="fin-box"><div class="lbl">Vídeos Postados</div><div class="val green">${postados.length}</div></div>
-        <div class="fin-box"><div class="lbl">Total Planejado</div><div class="val" style="color:#6cf;">${mesVids.length}</div></div>
-      </div>
-
-      ${met.melhor ? `<div style="margin-bottom:16px;padding:12px;background:#1a2a1a;border:1px solid #2a4a3a;border-radius:10px;">
-        <div style="font-size:11px;color:#888;">🏆 Melhor vídeo do mês</div>
-        <div style="font-size:14px;color:#4f9;font-weight:600;margin-top:4px;">${met.melhor}</div>
-      </div>` : ''}
-
-      ${postados.length > 0 ? `<div style="margin-bottom:16px;">
-        <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Vídeos Entregues</div>
-        ${postados.sort((a,b) => a.date.localeCompare(b.date)).map(v => `
-          <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #1f1f2f;font-size:12px;">
-            <span style="color:#ccc;">${v.title}</span>
-            <span style="color:#555;">${v.date.split('-').reverse().slice(0,2).join('/')}</span>
-          </div>`).join('')}
-      </div>` : ''}
-
-      ${met.obs ? `<div style="padding:12px;background:#1a1a24;border:1px solid #2a2a3a;border-radius:10px;">
-        <div style="font-size:11px;color:#888;">📝 Observações</div>
-        <p style="font-size:13px;color:#ccc;margin-top:6px;line-height:1.5;">${met.obs}</p>
-      </div>` : ''}
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn-primary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('relatorio-pdf').innerText).then(()=>alert('Texto copiado!'))">📋 Copiar texto</button>
-      <button class="btn-sm" onclick="window.print()">🖨 Imprimir / PDF</button>
-    </div>`;
-}
 
 // ============ THEME ============
 // ============ OCULTAR VALORES ============
@@ -3650,247 +3478,6 @@ function renderProcessos() {
       </div>
     </div>
   `).join('');
-}
-
-// ============ FERRAMENTAS ============
-
-// -- Relatório Mensal --
-function populateRelatorioMeses() {
-  const sel = document.getElementById('relatorio-mes');
-  if (!sel || sel.options.length > 1) return;
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const now = new Date();
-  for (let i = 0; i < 12; i++) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const val = d.toISOString().slice(0, 7);
-    const label = `${meses[d.getMonth()]} ${d.getFullYear()}`;
-    sel.innerHTML += `<option value="${val}" ${i === 0 ? 'selected' : ''}>${label}</option>`;
-  }
-}
-
-function gerarRelatorio() {
-  const fc = document.getElementById('relatorio-client').value;
-  const mesSel = document.getElementById('relatorio-mes').value;
-  const videos = load('videos') || [];
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const [y, m] = mesSel.split('-');
-  const mesNome = `${meses[parseInt(m)-1]} ${y}`;
-
-  const mesVideos = videos.filter(v => v.date && v.date.startsWith(mesSel) && (fc === 'all' || v.client === fc));
-  const postados = mesVideos.filter(v => v.status === 'postado').length;
-  const emProducao = mesVideos.filter(v => v.status !== 'postado').length;
-  const total = mesVideos.length;
-
-  const porPilar = {};
-  mesVideos.forEach(v => { porPilar[v.pillar] = (porPilar[v.pillar] || 0) + 1; });
-
-  const porTipo = { pendente: 0, gravado: 0, editado: 0, postado: 0 };
-  mesVideos.forEach(v => { porTipo[v.status] = (porTipo[v.status] || 0) + 1; });
-
-  // Mes anterior pra comparar
-  const [py, pm] = [parseInt(y), parseInt(m) - 1];
-  const mesAnt = pm < 1 ? `${py - 1}-12` : `${py}-${String(pm).padStart(2, '0')}`;
-  const videosAnt = videos.filter(v => v.date && v.date.startsWith(mesAnt) && (fc === 'all' || v.client === fc));
-  const postadosAnt = videosAnt.filter(v => v.status === 'postado').length;
-  const diff = postados - postadosAnt;
-  const diffLabel = diff > 0 ? `↑ +${diff} vs mês anterior` : diff < 0 ? `↓ ${diff} vs mês anterior` : '= igual ao mês anterior';
-  const diffColor = diff > 0 ? '#4f9' : diff < 0 ? '#f66' : '#888';
-
-  // Horas do timer
-  const timerHist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
-  const horasMes = timerHist.filter(h => h.data && h.data.startsWith(mesSel) && (fc === 'all' || h.client === fc))
-    .reduce((s, h) => s + h.segundos, 0);
-  const horasLabel = (horasMes / 3600).toFixed(1);
-
-  // Lista de vídeos postados
-  const listaPostados = mesVideos.filter(v => v.status === 'postado').sort((a, b) => a.date.localeCompare(b.date));
-
-  const clienteNome = fc === 'all' ? 'Visão Geral' : (CLIENTS[fc]?.name || fc);
-
-  const el = document.getElementById('relatorio-resultado');
-  el.style.display = 'block';
-  el.innerHTML = `
-    <div style="text-align:center;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #2a2a3a;">
-      <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;">Relatório</div>
-      <h3 style="color:#4f9;margin:4px 0;font-size:18px;">${clienteNome}</h3>
-      <div style="font-size:13px;color:#aaa;">${mesNome}</div>
-    </div>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">
-      <div style="text-align:center;padding:14px 8px;background:#252530;border-radius:10px;">
-        <div style="font-size:24px;font-weight:700;color:#4f9;">${postados}</div>
-        <div style="font-size:10px;color:#888;">Postados</div>
-      </div>
-      <div style="text-align:center;padding:14px 8px;background:#252530;border-radius:10px;">
-        <div style="font-size:24px;font-weight:700;color:#fc6;">${emProducao}</div>
-        <div style="font-size:10px;color:#888;">Em produção</div>
-      </div>
-      <div style="text-align:center;padding:14px 8px;background:#252530;border-radius:10px;">
-        <div style="font-size:24px;font-weight:700;color:#6cf;">${horasLabel}h</div>
-        <div style="font-size:10px;color:#888;">Horas</div>
-      </div>
-    </div>
-
-    <div style="text-align:center;font-size:12px;color:${diffColor};margin-bottom:16px;">${diffLabel}</div>
-
-    ${Object.keys(porPilar).length > 0 ? `
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Por pilar</div>
-      ${Object.entries(porPilar).map(([p, c]) => {
-        const pct = Math.round((c / total) * 100);
-        return `<div style="margin-bottom:6px;">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:#aaa;margin-bottom:2px;"><span>${p}</span><span>${c} (${pct}%)</span></div>
-          <div style="background:#252530;border-radius:4px;height:6px;overflow:hidden;"><div style="height:100%;width:${pct}%;background:#4f9;border-radius:4px;"></div></div>
-        </div>`;
-      }).join('')}
-    </div>` : ''}
-
-    ${listaPostados.length > 0 ? `
-    <div style="margin-bottom:16px;">
-      <div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Vídeos entregues</div>
-      ${listaPostados.map(v => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #1f1f2f;font-size:12px;">
-          <span style="color:#ccc;">${v.title}</span>
-          <span style="color:#555;">${v.date.split('-').reverse().slice(0,2).join('/')}</span>
-        </div>
-      `).join('')}
-    </div>` : ''}
-
-    <div style="display:flex;gap:8px;flex-wrap:wrap;">
-      <button class="btn-sm btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('relatorio-resultado').innerText).then(() => alert('Texto copiado!'))">📋 Copiar texto</button>
-    </div>
-  `;
-}
-
-// -- Timer --
-var timerInterval = null;
-var timerSeconds = 0;
-var timerRunning = false;
-
-function saveTimerState() {
-  localStorage.setItem('smm_timer_state', JSON.stringify({
-    startedAt: Date.now() - (timerSeconds * 1000),
-    client: document.getElementById('timer-client').value,
-    atividade: document.getElementById('timer-atividade').value,
-    running: timerRunning
-  }));
-}
-
-function restoreTimer() {
-  const state = JSON.parse(localStorage.getItem('smm_timer_state') || 'null');
-  if (!state || !state.running) return;
-  timerSeconds = Math.floor((Date.now() - state.startedAt) / 1000);
-  if (document.getElementById('timer-client')) document.getElementById('timer-client').value = state.client;
-  if (document.getElementById('timer-atividade')) document.getElementById('timer-atividade').value = state.atividade;
-  timerRunning = true;
-  if (document.getElementById('timer-btn')) document.getElementById('timer-btn').textContent = '⏸ Pausar';
-  updateTimerDisplay();
-  timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
-}
-
-function updateTimerDisplay() {
-  const h = Math.floor(timerSeconds / 3600);
-  const m = Math.floor((timerSeconds % 3600) / 60);
-  const s = timerSeconds % 60;
-  const el = document.getElementById('timer-display');
-  if (el) el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
-
-function toggleTimer() {
-  if (timerRunning) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-    timerRunning = false;
-    document.getElementById('timer-btn').textContent = '▶ Continuar';
-    saveTimerState();
-  } else {
-    if (!document.getElementById('timer-client').value) { alert('Selecione o cliente'); return; }
-    timerRunning = true;
-    document.getElementById('timer-btn').textContent = '⏸ Pausar';
-    saveTimerState();
-    timerInterval = setInterval(() => { timerSeconds++; updateTimerDisplay(); saveTimerState(); }, 1000);
-  }
-}
-
-function stopTimer() {
-  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-  timerRunning = false;
-  const client = document.getElementById('timer-client').value;
-  const atividade = document.getElementById('timer-atividade').value;
-  if (client && timerSeconds > 10) {
-    const hist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
-    hist.unshift({ client, atividade, segundos: timerSeconds, data: new Date().toISOString().slice(0, 10) });
-    localStorage.setItem('smm_timer_hist', JSON.stringify(hist.slice(0, 50)));
-    renderTimerHist();
-  }
-  localStorage.removeItem('smm_timer_state');
-  timerSeconds = 0;
-  updateTimerDisplay();
-  document.getElementById('timer-btn').textContent = '▶ Iniciar';
-}
-
-function renderTimerHist() {
-  const hist = JSON.parse(localStorage.getItem('smm_timer_hist') || '[]');
-  const el = document.getElementById('timer-historico');
-  if (hist.length === 0) { el.innerHTML = '<p style="color:#555;font-size:12px;">Nenhum registro ainda.</p>'; return; }
-  const porCliente = {};
-  hist.forEach(h => {
-    if (!porCliente[h.client]) porCliente[h.client] = 0;
-    porCliente[h.client] += h.segundos;
-  });
-  el.innerHTML = `
-    <div style="margin-top:12px;">
-      <strong style="color:#888;font-size:11px;">Horas por cliente:</strong>
-      ${Object.entries(porCliente).map(([k, s]) => {
-        const nome = CLIENTS[k]?.name || k;
-        const horas = (s / 3600).toFixed(1);
-        return `<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1f1f2f;font-size:12px;"><span style="color:#aaa;">${nome}</span><span style="color:#4f9;">${horas}h</span></div>`;
-      }).join('')}
-    </div>
-    <details style="margin-top:8px;"><summary style="font-size:11px;color:#555;cursor:pointer;">Ver últimos registros</summary>
-      ${hist.slice(0, 10).map(h => {
-        const nome = CLIENTS[h.client]?.name || h.client;
-        const min = Math.round(h.segundos / 60);
-        return `<div style="font-size:11px;color:#666;padding:2px 0;">${h.data} — ${nome} — ${h.atividade} — ${min}min</div>`;
-      }).join('')}
-    </details>`;
-}
-
-// -- Templates de Roteiro --
-function renderTemplates() {
-  const templates = [
-    { nome: '🔥 Gancho + Desenvolvimento + CTA', tipo: 'Padrão', conteudo: 'GANCHO (0-3s):\n[Frase forte que prende a atenção]\n\nDESENVOLVIMENTO (3-25s):\n[Desenvolve o tema, mostra o processo/resultado]\n\nCTA (25-30s):\n[Chamada pra ação: seguir, comentar, salvar]' },
-    { nome: '🎭 POV / Trend', tipo: 'Trend', conteudo: 'SETUP:\nPOV: [situação engraçada/relatable]\n\nAÇÃO:\n[O que acontece — timing com a música/áudio]\n\nREVELAÇÃO:\n[Plot twist ou momento de humor]' },
-    { nome: '📚 Educativo / Análise', tipo: 'Autoridade', conteudo: 'GANCHO:\n"Você sabia que [fato surpreendente]?"\n\nPONTO 1:\n[Explica o problema]\n\nPONTO 2:\n[Mostra a solução/análise]\n\nPONTO 3:\n[Resultado/benefício]\n\nCTA:\n"Salva pra não esquecer"' },
-    { nome: '🛒 Produto / Conversão', tipo: 'Venda', conteudo: 'GANCHO:\n[Problema que o produto resolve]\n\nPRODUTO:\n[Mostra o produto em uso — close, detalhes]\n\nBENEFÍCIO:\n[O que muda na vida de quem compra]\n\nPREÇO + CTA:\n[Valor + onde comprar/link na bio]' },
-    { nome: '🏗 Antes e Depois', tipo: 'Bastidores', conteudo: 'ANTES:\n[Mostra o estado inicial — problema visível]\n\nPROCESSO:\n[Timelapse ou cortes do trabalho sendo feito]\n\nDEPOIS:\n[Resultado final — impactante]\n\nCTA:\n"Quer ver mais transformações? Segue!"' },
-  ];
-  const el = document.getElementById('templates-container');
-  el.innerHTML = templates.map(t => `
-    <div style="margin-bottom:8px;padding:12px;background:#16161e;border:1px solid #2a2a3a;border-radius:10px;cursor:pointer;" onclick="this.querySelector('.tpl-body').style.display = this.querySelector('.tpl-body').style.display === 'none' ? 'block' : 'none'">
-      <div style="display:flex;justify-content:space-between;align-items:center;">
-        <strong style="color:#ccc;font-size:13px;">${t.nome}</strong>
-        <span style="font-size:10px;color:#555;background:#252530;padding:2px 8px;border-radius:6px;">${t.tipo}</span>
-      </div>
-      <div class="tpl-body" style="display:none;margin-top:10px;">
-        <pre style="white-space:pre-wrap;font-size:12px;color:#aaa;line-height:1.6;font-family:inherit;">${t.conteudo}</pre>
-        <button class="btn-sm btn-primary" onclick="event.stopPropagation(); navigator.clipboard.writeText(this.previousElementSibling.textContent).then(function(){ alert('Template copiado!') })" style="margin-top:8px;">📋 Copiar</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-// -- Calculadora de Proposta --
-function calcularProposta() {}
-
-// -- Checklist de Entrega --
-
-function renderFerramentas() {
-  populateRelatorioMeses();
-  renderTemplates();
-  renderTimerHist();
-  calcularProposta();
-  restoreTimer();
 }
 
 // ============ BANCO DE IDEIAS ============
@@ -4219,7 +3806,6 @@ function renderAll() {
   function startApp() {
     currentWeekStart = getMonday(new Date());
     renderAll();
-    restoreTimer();
     doAutoBackup();
   }
 
